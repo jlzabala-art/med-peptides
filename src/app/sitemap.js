@@ -20,6 +20,7 @@ const STATIC_PUBLIC_ROUTES = [
   { path: '/proto', changeFrequency: 'daily', priority: 0.9 },
   { path: '/protocol-finder', changeFrequency: 'weekly', priority: 0.85 },
   { path: '/guides/hormone-pellets-implantation', changeFrequency: 'monthly', priority: 0.8 },
+  { path: '/import-partner', changeFrequency: 'monthly', priority: 0.8 },
 ];
 
 const BLOCKED_SLUG_RE = /(pharmapolis|nplab|dnlab|bulgaria)/i;
