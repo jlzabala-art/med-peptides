@@ -105,7 +105,7 @@ const COMPOUND_INDEX = {
   'slu-pp-332':            'SLU_PP-332-50mg-vial',
 
   // ── Longevity / Other ────────────────────────────────────────────────────
-  glutathione:             'glutathione',
+  glutathione:             'glutathione-600mg-pen',
   '5-amino-1mq':           '5-AMINO_1_MQ-2mg-vial',
   'pnc-27':                'PNC-27-5mg-vial',
 
