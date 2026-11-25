@@ -255,6 +255,7 @@ export default function PelletsPriceListClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedProfile, setSelectedProfile] = useState('all'); // 'all' | 'female' | 'male' | 'trocar'
+  const [copiedPelletUrl, setCopiedPelletUrl] = useState(false);
 
   // Hydrate initial search/category/profile from URL query params (?q=..., ?category=..., ?profile=...)
   useEffect(() => {
@@ -1188,7 +1189,15 @@ export default function PelletsPriceListClient({
                     <button
                       key={prof.id}
                       type="button"
-                      onClick={() => setSelectedProfile(prof.id)}
+                      onClick={() => {
+                        setSelectedProfile(prof.id);
+                        if (typeof window !== 'undefined') {
+                          const url = new URL(window.location.href);
+                          if (prof.id === 'all') url.searchParams.delete('profile');
+                          else url.searchParams.set('profile', prof.id);
+                          window.history.replaceState({}, '', url.toString());
+                        }
+                      }}
                       style={{
                         padding: '5px 11px',
                         minHeight: '34px',
@@ -1207,12 +1216,37 @@ export default function PelletsPriceListClient({
                 })}
               </div>
 
-              <div style={{ fontSize: '0.73rem', color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 600 }}>
-                {selectedProfile === 'female'
-                  ? (isEs ? 'Trócar 3.2 mm · Ventana T: 150–350 ng/dL · E2: 40–110 pg/mL' : '3.2 mm Trocar · Target T: 150–350 ng/dL · E2: 40–110 pg/mL')
-                  : selectedProfile === 'male'
-                    ? (isEs ? 'Trócar 4.5 mm (>50 mg) · Ventana T: 400–800 ng/dL' : '4.5 mm Trocar (>50 mg) · Target T: 400–800 ng/dL')
-                    : (isEs ? '≥99.5% USP · Liberación orden cero 3.5–6 meses · Sin primer paso hepático' : '≥99.5% USP · Zero-order release 3.5–6 mo · Zero hepatic first-pass')}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '0.73rem', color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 600 }}>
+                  {selectedProfile === 'female'
+                    ? (isEs ? 'Trócar 3.2 mm · Ventana T: 150–350 ng/dL · E2: 40–110 pg/mL' : '3.2 mm Trocar · Target T: 150–350 ng/dL · E2: 40–110 pg/mL')
+                    : selectedProfile === 'male'
+                      ? (isEs ? 'Trócar 4.5 mm (>50 mg) · Ventana T: 400–800 ng/dL' : '4.5 mm Trocar (>50 mg) · Target T: 400–800 ng/dL')
+                      : (isEs ? '≥99.5% USP · Liberación orden cero 3.5–6 meses · Sin primer paso hepático' : '≥99.5% USP · Zero-order release 3.5–6 mo · Zero hepatic first-pass')}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window === 'undefined') return;
+                    navigator.clipboard?.writeText(window.location.href);
+                    setCopiedPelletUrl(true);
+                    setTimeout(() => setCopiedPelletUrl(false), 2000);
+                  }}
+                  style={{
+                    padding: '5px 10px',
+                    minHeight: '30px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: copiedPelletUrl ? '#f0fdf4' : '#ffffff',
+                    color: copiedPelletUrl ? '#15803d' : '#334155',
+                    fontSize: '0.72rem',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {copiedPelletUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar enlace filtrado' : 'Copy Filtered Link')}
+                </button>
               </div>
             </div>
 

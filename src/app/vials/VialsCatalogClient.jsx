@@ -38,6 +38,34 @@ const SPECIALTY_FILTERS = {
       'bpc-157', 'tb-500', 'ghk-cu', 'epitalon', 'nad',
       'tirzepatide', 'semaglutide', 'retatrutide', 'aod-9604', 'glutathione'
     ]
+  },
+  dermatology: {
+    label: 'Dermatology & Trichology',
+    keywords: [
+      'ghk-cu', 'bpc-157', 'tb-500', 'epitalon', 'glutathione',
+      'melanotan', 'nad', 'thymulin', 'ahku'
+    ]
+  },
+  longevity: {
+    label: 'Longevity & Cellular Medicine',
+    keywords: [
+      'epitalon', 'nad', 'ss-31', 'mots-c', 'foxo4',
+      'thymosin', 'ghk-cu', 'bpc-157', 'glutathione', 'selank', 'semax'
+    ]
+  },
+  metabolic: {
+    label: 'Metabolic & Endocrinology',
+    keywords: [
+      'tirzepatide', 'semaglutide', 'retatrutide', 'aod-9604',
+      'tesamorelin', 'cjc-1295', 'ipamorelin', 'mots-c', '5-amino'
+    ]
+  },
+  urology: {
+    label: 'Urology & Andrology',
+    keywords: [
+      'pt-141', 'kisspeptin', 'oxytocin', 'gonadorelin',
+      'bpc-157', 'nad'
+    ]
   }
 };
 
@@ -56,6 +84,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGoal, setSelectedGoal] = useState('all');
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
+  const [copiedSpecialtyUrl, setCopiedSpecialtyUrl] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -540,60 +569,118 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
             )}
           </div>
 
-          {/* Goal Filter Chips */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-            {selectedSpecialty && SPECIALTY_FILTERS[selectedSpecialty] && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedSpecialty(null);
-                  if (typeof window !== 'undefined') {
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('specialty');
-                    window.history.replaceState({}, '', url.toString());
-                  }
-                }}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '9999px',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  border: '1px solid #0d9488',
-                  backgroundColor: '#f0fdfa',
-                  color: '#0f766e',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-                title="Clear specialty filter"
-              >
-                <span>Specialty: {SPECIALTY_FILTERS[selectedSpecialty].label}</span>
-                <X size={13} />
-              </button>
-            )}
-            {GOAL_OPTIONS.map(opt => {
-              const isActive = selectedGoal === opt.id;
-              return (
+          {/* Goal Filter Chips + Specialty Selector */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              {selectedSpecialty && SPECIALTY_FILTERS[selectedSpecialty] && (
                 <button
-                  key={opt.id}
-                  onClick={() => setSelectedGoal(opt.id)}
+                  type="button"
+                  onClick={() => {
+                    setSelectedSpecialty(null);
+                    if (typeof window !== 'undefined') {
+                      const url = new URL(window.location.href);
+                      url.searchParams.delete('specialty');
+                      window.history.replaceState({}, '', url.toString());
+                    }
+                  }}
                   style={{
-                    padding: '6px 14px',
+                    padding: '6px 12px',
                     borderRadius: '9999px',
                     fontSize: '0.8rem',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    border: isActive ? '1px solid #003666' : '1px solid #e2e8f0',
-                    backgroundColor: isActive ? '#003666' : '#ffffff',
-                    color: isActive ? '#ffffff' : '#475569',
-                    transition: 'all 0.15s ease'
+                    border: '1px solid #0d9488',
+                    backgroundColor: '#f0fdfa',
+                    color: '#0f766e',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                  title="Clear specialty filter"
+                >
+                  <span>Specialty: {SPECIALTY_FILTERS[selectedSpecialty].label}</span>
+                  <X size={13} />
+                </button>
+              )}
+              {GOAL_OPTIONS.map(opt => {
+                const isActive = selectedGoal === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => setSelectedGoal(opt.id)}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: '9999px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      border: isActive ? '1px solid #003666' : '1px solid #e2e8f0',
+                      backgroundColor: isActive ? '#003666' : '#ffffff',
+                      color: isActive ? '#ffffff' : '#475569',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {!isPatientView && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <select
+                  aria-label="Filter by clinical specialty"
+                  value={selectedSpecialty || ''}
+                  onChange={(e) => {
+                    const val = e.target.value || null;
+                    setSelectedSpecialty(val);
+                    if (typeof window !== 'undefined') {
+                      const url = new URL(window.location.href);
+                      if (val) url.searchParams.set('specialty', val);
+                      else url.searchParams.delete('specialty');
+                      window.history.replaceState({}, '', url.toString());
+                    }
+                  }}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#334155',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
                   }}
                 >
-                  {opt.label}
+                  <option value="">All Specialties</option>
+                  {Object.entries(SPECIALTY_FILTERS).map(([key, cfg]) => (
+                    <option key={key} value={key}>{cfg.label}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window === 'undefined') return;
+                    navigator.clipboard?.writeText(window.location.href);
+                    setCopiedSpecialtyUrl(true);
+                    setTimeout(() => setCopiedSpecialtyUrl(false), 2000);
+                  }}
+                  style={{
+                    padding: '6px 11px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: copiedSpecialtyUrl ? '#f0fdf4' : '#ffffff',
+                    color: copiedSpecialtyUrl ? '#15803d' : '#334155',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {copiedSpecialtyUrl ? 'Copied ✓' : 'Copy Filtered Link'}
                 </button>
-              );
-            })}
+              </div>
+            )}
           </div>
         </div>
 

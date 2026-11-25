@@ -528,11 +528,15 @@ export default function PublicLabelsAppClient({
     const count = printCountsMap[pCode] ?? printCountsMap[String(item.code).toUpperCase()] ?? item.a4PrintCount ?? 0;
     const isPendingApproval = (item.status && item.status !== 'approved' && !item.isSigned);
     const isRefill = Number(item.refillCycle || 1) > 1 || /-R\d+$/i.test(String(item.code || '')) || Boolean(item.refillOf || item.refillAlertDate);
+    const isDeliveredPendingGuide =
+      String(item.shippingStatus || item.fulfillmentStatus || item.status || '').toLowerCase() === 'delivered' &&
+      !item.patientGuideSharedAt;
     if (activeTab === 'unprinted') return count === 0;
     if (activeTab === 'pending_approval') return isPendingApproval;
     if (activeTab === 'refills') return isRefill;
     if (activeTab === 'printed') return count === 1;
     if (activeTab === 'reprint') return count > 1;
+    if (activeTab === 'delivered_pending_guide') return isDeliveredPendingGuide;
     return true;
   };
 
@@ -541,17 +545,21 @@ export default function PublicLabelsAppClient({
   }, [worklistSource, matchesDateRange]);
 
   const worklistTabCounts = useMemo(() => {
-    const counts = { unprinted: 0, pending_approval: 0, refills: 0, printed: 0, reprint: 0, all: baseWorklistItems.length };
+    const counts = { unprinted: 0, pending_approval: 0, refills: 0, printed: 0, reprint: 0, delivered_pending_guide: 0, all: baseWorklistItems.length };
     for (const item of baseWorklistItems) {
       const pCode = sanitizeRecentCode(item.code).toUpperCase();
       const count = printCountsMap[pCode] ?? printCountsMap[String(item.code).toUpperCase()] ?? item.a4PrintCount ?? 0;
       const isPendingApproval = (item.status && item.status !== 'approved' && !item.isSigned);
       const isRefill = Number(item.refillCycle || 1) > 1 || /-R\d+$/i.test(String(item.code || '')) || Boolean(item.refillOf || item.refillAlertDate);
+      const isDeliveredPendingGuide =
+        String(item.shippingStatus || item.fulfillmentStatus || item.status || '').toLowerCase() === 'delivered' &&
+        !item.patientGuideSharedAt;
       if (count === 0) counts.unprinted++;
       if (isPendingApproval) counts.pending_approval++;
       if (isRefill) counts.refills++;
       if (count === 1) counts.printed++;
       if (count > 1) counts.reprint++;
+      if (isDeliveredPendingGuide) counts.delivered_pending_guide++;
     }
     return counts;
   }, [baseWorklistItems, printCountsMap]);

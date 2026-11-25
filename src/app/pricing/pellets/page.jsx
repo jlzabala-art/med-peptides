@@ -13,16 +13,28 @@ export async function generateMetadata({ searchParams }) {
   const lang = normalizeMetaLang(resolvedSearch);
   const currency = String(resolvedSearch?.cur || resolvedSearch?.currency || 'USD').toUpperCase();
   const validCurrency = ['EUR', 'USD', 'AED'].includes(currency) ? currency : 'USD';
+  const profile = String(resolvedSearch?.profile || '').toLowerCase();
+  const isFemaleProfile = profile === 'female';
+  const isMaleProfile = profile === 'male';
 
   return buildBilingualMetadata({
     lang,
-    path: '/pricing/pellets',
+    path: profile ? `/pricing/pellets?profile=${encodeURIComponent(profile)}` : '/pricing/pellets',
     siteName: 'Atlas Health Services',
-    en: {
+    en: isFemaleProfile ? {
+      title: `Female Bioidentical Hormone Pellets • Gynecology & Menopause Formulary (${validCurrency})`,
+      description: `Pre-filtered EU GMP sterile hormone pellets for gynecology & female BHRT (17β-Estradiol, Bi-Est, Progesterone, female-dosed Testosterone) and 3.2 mm trocar kits in ${validCurrency}.`,
+    } : isMaleProfile ? {
+      title: `Male TRT Bioidentical Hormone Pellets • Andrology & Urology Formulary (${validCurrency})`,
+      description: `Pre-filtered EU GMP sterile Testosterone and Testosterone + Anastrozole pellets for male TRT and 4.5 mm trocar kits in ${validCurrency}.`,
+    } : {
       title: `Pharmapolis Bulgaria Subcutaneous Hormone Pellets & Trocar Kits • Official B2B Price Schedule (${validCurrency})`,
       description: `Official EU GMP subcutaneous bioidentical hormone pellets (17β-Estradiol, Testosterone) and surgical trocar implantation kits from Pharmapolis Compounding Pharmacy in ${validCurrency}. Zero-order sustained release kinetics, single-dose sterile blisters, and Pack ×10 institutional volume pricing.`,
     },
-    es: {
+    es: isFemaleProfile ? {
+      title: `Pellets Hormonales Bioidénticos Femeninos • Ginecología y Menopausia (${validCurrency})`,
+      description: `Tarifa EU GMP prefiltrada para ginecología y THS femenina (17β-Estradiol, Bi-Est, Progesterona, Testosterona dosis femenina) y kits trócar 3.2 mm en ${validCurrency}.`,
+    } : {
       title: `Pellets Hormonales Subcutáneos y Kits Trócar Pharmapolis • Tarifa Oficial B2B (${validCurrency})`,
       description: `Tarifa oficial EU GMP de pellets hormonales subcutáneos bioidénticos (17β-Estradiol, Testosterona) y kits quirúrgicos de trócar de Pharmapolis Compounding Pharmacy en ${validCurrency}. Liberación continua de orden cero, blísters estériles monodosis y ahorro institucional en Pack ×10.`,
     },

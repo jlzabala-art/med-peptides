@@ -16,6 +16,30 @@ export async function generateMetadata({ searchParams }) {
   const collectionKey = rawCollection === 'ultraperson' ? 'ultraman' : (SUPPORTED_COLLECTIONS[rawCollection] ? rawCollection : 'vials');
   const colMeta = SUPPORTED_COLLECTIONS[collectionKey] || SUPPORTED_COLLECTIONS.vials;
   const isPatientView = String(resolvedSearch?.view || '').toLowerCase() === 'patient';
+  const specialtyKey = String(resolvedSearch?.specialty || '').toLowerCase();
+  const SPECIALTY_META = {
+    gynecology: {
+      title: "Gynecology & Women's Health Peptide Formulary",
+      description: 'Pre-filtered clinical peptide vials for gynecology, reproductive endocrinology, sexual wellness, and post-surgical tissue repair.',
+    },
+    dermatology: {
+      title: 'Dermatology & Trichology Peptide Formulary',
+      description: 'Pre-filtered clinical peptide vials for dermal regeneration, collagen synthesis, and follicular restoration.',
+    },
+    longevity: {
+      title: 'Longevity & Cellular Medicine Peptide Formulary',
+      description: 'Pre-filtered clinical peptide vials for mitochondrial support, telomere health, and cellular longevity.',
+    },
+    metabolic: {
+      title: 'Metabolic & Endocrinology Peptide Formulary',
+      description: 'Pre-filtered clinical peptide vials for GLP-1/GIP metabolic care, insulin sensitivity, and body composition.',
+    },
+    urology: {
+      title: 'Urology & Andrology Peptide Formulary',
+      description: 'Pre-filtered clinical peptide vials for neuroendocrine reproductive signaling, vascularity, and tissue recovery.',
+    },
+  };
+  const specMeta = SPECIALTY_META[specialtyKey] || null;
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
@@ -48,30 +72,40 @@ export async function generateMetadata({ searchParams }) {
     };
   }
 
+  const resolvedTitle = specMeta
+    ? `${specMeta.title} • Physician & Clinic Direct Supply`
+    : `${colMeta.title} • Physician & Clinic Direct Supply`;
+  const resolvedDesc = specMeta
+    ? specMeta.description
+    : `${colMeta.description} Direct institutional terms, verified batch quality & expedited dispatch.`;
+  const resolvedUrl = specMeta
+    ? `${appUrl}/vials?specialty=${encodeURIComponent(specialtyKey)}`
+    : `${appUrl}/vials?collection=${collectionKey}`;
+
   return {
-    title: `${colMeta.title} • Physician & Clinic Direct Supply`,
-    description: `${colMeta.description} Direct institutional terms, verified batch quality & expedited dispatch.`,
+    title: resolvedTitle,
+    description: resolvedDesc,
     openGraph: {
-      title: `${colMeta.title} • Physician & Clinic Direct Supply`,
-      description: `${colMeta.description} Direct institutional terms, verified batch quality & expedited dispatch.`,
+      title: resolvedTitle,
+      description: resolvedDesc,
       type: 'website',
       siteName: 'Atlas Physician Clinical Formulations',
-      url: `${appUrl}/vials?collection=${collectionKey}`,
+      url: resolvedUrl,
       locale: 'en_US',
       images: [
         {
           url: `${appUrl}/og-catalog.png`,
           width: 1200,
           height: 630,
-          alt: colMeta.name,
+          alt: specMeta ? specMeta.title : colMeta.name,
           type: 'image/png'
         }
       ]
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${colMeta.title} • Physician & Clinic Direct Supply`,
-      description: colMeta.description
+      title: resolvedTitle,
+      description: resolvedDesc
     }
   };
 }

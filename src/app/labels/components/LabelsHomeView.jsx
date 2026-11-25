@@ -498,6 +498,7 @@ export default function LabelsHomeView({
                 { id: 'refills', labelEs: '🔄 Refills', labelEn: '🔄 Refills' },
                 { id: 'printed', labelEs: '🖨️ Impresas (1×)', labelEn: '🖨️ Printed (1×)' },
                 { id: 'reprint', labelEs: '🔁 Reimpresiones', labelEn: '🔁 Reprints' },
+                { id: 'delivered_pending_guide', labelEs: '📲 Entregados (Sin guía)', labelEn: '📲 Delivered (Guide Pending)' },
                 { id: 'all', labelEs: 'Todas', labelEn: 'All' },
               ].map((tab) => {
                 const isTabActive = worklistTab === tab.id;
@@ -996,7 +997,10 @@ export default function LabelsHomeView({
                     render: (_val, p) => {
                       const cleanCode = sanitizeRecentCode(p.code);
                       const isMenuOpen = openRowMenuCode === p.code;
-                      const wasShared = Boolean(sharedRowCodes[cleanCode] || sharedRowCodes[p.code]);
+                      const wasShared = Boolean(sharedRowCodes[cleanCode] || sharedRowCodes[p.code] || p.patientGuideSharedAt);
+                      const isDeliveredPendingGuide =
+                        String(p.shippingStatus || p.fulfillmentStatus || p.status || '').toLowerCase() === 'delivered' &&
+                        !wasShared;
                       const patientUrl = buildPatientShareUrl(p);
                       const pName = p.name || p.patientName || '';
                       const rawPhone = String(p.patientPhone || p.phone || p.patient?.phone || '').replace(/[^\d]/g, '');
@@ -1068,8 +1072,8 @@ export default function LabelsHomeView({
                                   border: 'none',
                                   borderRight: '1px solid #e2e8f0',
                                   borderRadius: '5px 0 0 5px',
-                                  background: isMenuOpen ? '#e8f0fe' : wasShared ? '#f0fdf4' : 'transparent',
-                                  color: isMenuOpen ? '#1a73e8' : wasShared ? '#15803d' : '#3c4043',
+                                  background: isMenuOpen ? '#e8f0fe' : wasShared ? '#f0fdf4' : isDeliveredPendingGuide ? '#fffbeb' : 'transparent',
+                                  color: isMenuOpen ? '#1a73e8' : wasShared ? '#15803d' : isDeliveredPendingGuide ? '#b45309' : '#3c4043',
                                   fontSize: '0.69rem',
                                   fontWeight: 650,
                                   cursor: 'pointer',
@@ -1079,7 +1083,7 @@ export default function LabelsHomeView({
                                   whiteSpace: 'nowrap',
                                 }}
                               >
-                                <span>{wasShared ? (isEs ? 'Enviado ✓ ▾' : 'Sent ✓ ▾') : (isEs ? 'Enviar ▾' : 'Share ▾')}</span>
+                                <span>{wasShared ? (isEs ? 'Enviado ✓ ▾' : 'Sent ✓ ▾') : isDeliveredPendingGuide ? (isEs ? 'Enviar Guía ▾' : 'Send Guide ▾') : (isEs ? 'Enviar ▾' : 'Share ▾')}</span>
                               </button>
 
                               {isMenuOpen && (
