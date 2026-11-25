@@ -1217,6 +1217,13 @@ export default function PelletsPriceListClient({
                 lang={lang}
                 value={searchQuery}
                 onChange={setSearchQuery}
+                resultCount={filteredProducts.length}
+                filters={[
+                  { id: 'all', label: isEs ? 'Todos' : 'All', active: selectedProfile === 'all', onClick: () => setSelectedProfile('all') },
+                  { id: 'female', label: isEs ? 'Mujer' : 'Female', active: selectedProfile === 'female', onClick: () => setSelectedProfile('female') },
+                  { id: 'male', label: isEs ? 'Hombre' : 'Male', active: selectedProfile === 'male', onClick: () => setSelectedProfile('male') },
+                  { id: 'trocar', label: isEs ? 'Kits Trócar' : 'Trocar Kits', active: selectedProfile === 'trocar', onClick: () => setSelectedProfile('trocar') },
+                ]}
                 size="lg"
               />
 

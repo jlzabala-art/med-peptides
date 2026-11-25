@@ -1,13 +1,10 @@
 import React from 'react';
 import { fetchCollectionProductsAction, trackReferralVisitAction } from '@/actions/vialsCatalogActions';
+import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import PeptidesPriceListClient from './PeptidesPriceListClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-function normalizeLang(rawLang) {
-  return String(rawLang || '').toLowerCase() === 'es' ? 'es' : 'en';
-}
 
 function normalizeCurrency(rawCurrency) {
   const upper = String(rawCurrency || '').toUpperCase();
@@ -16,57 +13,37 @@ function normalizeCurrency(rawCurrency) {
 
 export async function generateMetadata({ searchParams }) {
   const resolvedSearch = await searchParams;
-  const rawRef = resolvedSearch?.ref || resolvedSearch?.code || '';
-  const lang = normalizeLang(resolvedSearch?.lang);
+  const lang = normalizeMetaLang(resolvedSearch);
   const currency = normalizeCurrency(resolvedSearch?.currency);
-  const isEs = lang === 'es';
-  const appUrl = 'https://www.atlashealth-services.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
-  const title = isEs
-    ? `Péptidos Clínicos Liofilizados • Tarifa Oficial B2B (${currency})`
-    : `Clinical Lyophilized Peptides • Official B2B Price Schedule (${currency})`;
-
-  const description = isEs
-    ? `Tarifa oficial institucional y mayorista en ${currency} para viales de péptidos bioactivos liofilizados estériles (10R). Pureza analítica ≥99.0% HPLC, certificación cGMP y ahorro por volumen en Pack ×10.`
-    : `Official institutional and wholesale price schedule in ${currency} for sterile lyophilized bioactive peptide vials (10R). ≥99.0% HPLC purity, cGMP certified, with Pack ×10 volume savings.`;
-
-  const params = new URLSearchParams();
-  if (rawRef) params.set('ref', rawRef);
-  if (lang === 'es') params.set('lang', 'es');
-  if (currency !== 'USD') params.set('currency', currency);
-  const qs = params.toString();
-  const canonicalUrl = `${appUrl}/pricing/peptides${qs ? `?${qs}` : ''}`;
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      locale: isEs ? 'es_ES' : 'en_US',
-      url: canonicalUrl,
-      images: [
-        {
-          url: `${appUrl}/og-catalog.png`,
-          width: 1200,
-          height: 630,
-          alt: isEs ? `Tarifa Oficial de Péptidos Clínicos (${currency})` : `Clinical Peptides Price Schedule (${currency})`
-        }
-      ]
+  return buildBilingualMetadata({
+    lang,
+    path: '/pricing/peptides',
+    siteName: 'Atlas Health Services',
+    images: [
+      {
+        url: `${appUrl}/og-catalog.png`,
+        width: 1200,
+        height: 630,
+        alt: `Clinical Peptides Price Schedule (${currency})`,
+      },
+    ],
+    en: {
+      title: `Clinical Lyophilized Peptides • Official B2B Price Schedule (${currency})`,
+      description: `Official institutional and wholesale price schedule in ${currency} for sterile lyophilized bioactive peptide vials (10R). ≥99.0% HPLC purity, cGMP certified, with Pack ×10 volume savings.`,
     },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description
-    }
-  };
+    es: {
+      title: `Péptidos Clínicos Liofilizados • Tarifa Oficial B2B (${currency})`,
+      description: `Tarifa oficial institucional y mayorista en ${currency} para viales de péptidos bioactivos liofilizados estériles (10R). Pureza analítica ≥99.0% HPLC, certificación cGMP y ahorro por volumen en Pack ×10.`,
+    },
+  });
 }
 
 export default async function PeptidesPricingPage({ searchParams }) {
   const resolvedSearch = await searchParams;
   const rawRef = resolvedSearch?.ref || resolvedSearch?.referral || resolvedSearch?.tier || null;
-  const initialLang = normalizeLang(resolvedSearch?.lang);
+  const initialLang = normalizeMetaLang(resolvedSearch);
   const initialCurrency = normalizeCurrency(resolvedSearch?.currency);
   const rawDest = String(resolvedSearch?.dest || resolvedSearch?.region || '').toUpperCase();
   const initialDest = ['EU', 'US', 'AE'].includes(rawDest) ? rawDest : 'EU';
