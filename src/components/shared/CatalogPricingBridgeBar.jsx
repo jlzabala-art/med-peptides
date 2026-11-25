@@ -10,11 +10,13 @@ const UNIFIED_CATALOG_TRACKS = [
   { id: 'pellets', labelEn: 'Pellets HRT', labelEs: 'Pellets HRT', collectionHref: '/collection/hormones', pricingHref: '/pricing/pellets' },
   { id: '24genomics', labelEn: '24Genetics', labelEs: '24Genetics', collectionHref: '/collection/24genomics', pricingHref: '/pricing/24genetics' },
   { id: 'colway', labelEn: 'Colway', labelEs: 'Colway', collectionHref: '/collection/colway', pricingHref: '/pricing/colway' },
+  { id: 'bloodo', labelEn: 'Bloodo™ DBS', labelEs: 'Bloodo™ DBS', collectionHref: '/collection/bloodo', pricingHref: '/pricing/bloodo' },
   { id: 'hormones', labelEn: 'Hormones', labelEs: 'Hormonas', collectionHref: '/collection/hormones', pricingHref: '/pricing/pharmapolis-hrt' }
 ];
 
 function normalizeTrackId(slug = '') {
   const s = String(slug || '').toLowerCase();
+  if (s.includes('bloodo')) return 'bloodo';
   if (s.includes('filler') || s.includes('injectable') || s.includes('booster')) return 'fillers';
   if (s.includes('pellet')) return 'pellets';
   if (s.includes('24gen')) return '24genomics';
