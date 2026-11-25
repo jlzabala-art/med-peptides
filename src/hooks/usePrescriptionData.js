@@ -1095,7 +1095,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
   const tocSections = useMemo(() => {
     const list = [];
     if (compoundedFormulations.length > 1) {
-      compoundedFormulations.forEach((form, idx) => {
+      const subItems = compoundedFormulations.map((form, idx) => {
         const phaseNum = form.index || (idx + 1);
         const formTypeDesc = form.isOral 
           ? (isEs ? 'Cápsulas Orales' : 'Oral Capsules')
@@ -1111,20 +1111,32 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
             : (isEs ? `Fase ${phaseNum}: ${formTypeDesc}` : `Phase ${phaseNum}: ${formTypeDesc}`)
         );
 
-        list.push({
+        return {
           id: form.id,
           label: cleanLabel,
           category: 'formula',
           badge: form.volume || (form.apis ? `${form.apis.length} APIs` : null),
           accentColor: form.accentColor,
           icon: form.id.includes('oral') ? 'box' : (form.id.includes('oil') ? 'droplets' : 'flask')
-        });
+        };
       });
+
+      if (isPatientView) {
+        list.push({
+          id: subItems[0]?.id || 'formula-card',
+          label: isEs ? '1. Mi Tratamiento' : '1. My Treatment',
+          category: 'formula',
+          icon: 'flask',
+          subItems,
+        });
+      } else {
+        list.push(...subItems);
+      }
     } else {
       list.push({ 
         id: 'formula-card', 
         label: isPatientView
-          ? (isEs ? 'Mi Dosis y Registro' : 'My Dose & Log')
+          ? (isEs ? '1. Mi Dosis y Registro' : '1. My Dose & Log')
           : (isEs ? 'Fórmula Magistral & Posología' : 'Compounded Formula & Posology'), 
         category: 'formula',
         badge: isPatientView ? null : (isEs ? 'Fórmula Única' : 'Single Compound'),
@@ -1133,10 +1145,10 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       });
     }
 
-    if (genomicsData) {
+    if (!isPatientView && genomicsData) {
       list.push({ 
         id: 'genomics-card', 
-        label: isEs ? 'Guía Fagron Genomics' : 'Fagron Genomics Guidance',
+        label: isEs ? 'Formulación Guiada por Fagron Genomics' : 'Formulation Guided by Fagron Genomics',
         category: 'genomics',
         icon: 'dna'
       });
@@ -1145,7 +1157,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     list.push({ 
       id: 'milestones-card', 
       label: isPatientView
-        ? (isEs ? 'Plan de Tratamiento' : 'Treatment Plan')
+        ? (isEs ? '2. Plan de Tratamiento' : '2. Treatment Plan')
         : (isEs ? 'Roadmap & Hitos Clínicos' : 'Roadmap & Milestones'),
       category: 'milestones',
       icon: 'calendar'
@@ -1154,26 +1166,23 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     if (isPatientView) {
       list.push({
         id: 'refill-card',
-        label: isEs ? 'Solicitar Refill' : 'Request Refill',
+        label: isEs ? '3. Solicitar Refill' : '3. Request Refill',
         category: 'refill',
         icon: 'rotate'
       });
       list.push({
         id: 'atlas-ai-card',
-        label: isEs ? 'Preguntar a Atlas AI' : 'Ask Atlas AI',
+        label: isEs ? '4. Preguntar a Atlas AI' : '4. Ask Atlas AI',
         category: 'ai',
         icon: 'sparkles'
       });
       list.push({
         id: 'contact-atlas-card',
-        label: isEs ? 'Contactar con Atlas' : 'Contact Atlas',
+        label: isEs ? '5. Contactar con Atlas' : '5. Contact Atlas',
         category: 'contact',
         icon: 'message'
       });
-      return list.map((item, idx) => ({
-        ...item,
-        label: `${idx + 1}. ${String(item.label || '').replace(/^\d+\.\s*/, '')}`,
-      }));
+      return list;
     }
 
     if (!isPatientView) {

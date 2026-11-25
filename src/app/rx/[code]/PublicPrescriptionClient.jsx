@@ -927,8 +927,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               )}
 
-              {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics, Expanded) ───────────── */}
-              {genomicsData && (
+              {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics, Doctor View only) ───────────── */}
+              {!isPatientView && genomicsData && (
                 <div id="genomics-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
                   <GenomicsPrescriptionGuidanceCard
                     genomicsData={genomicsData}

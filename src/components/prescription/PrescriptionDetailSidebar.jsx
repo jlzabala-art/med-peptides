@@ -80,6 +80,7 @@ export default function PrescriptionDetailSidebar({
   const isEs = lang === 'es';
   const prescriptionCode = rxId || 'RX';
   const [activeId, setActiveId] = useState(sections[0]?.id || '');
+  const [isTreatmentGroupOpen, setIsTreatmentGroupOpen] = useState(true);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
 
@@ -920,48 +921,117 @@ export default function PrescriptionDetailSidebar({
 
           {isPatientView ? (
             <div style={{ display: 'flex', flexDirection: 'column', borderLeft: '2px solid #e2e8f0', marginLeft: '4px', gap: '2px' }}>
-              {availableSections.map((sec, sIdx) => {
+              {availableSections.map((sec) => {
+                const hasSubItems = Array.isArray(sec.subItems) && sec.subItems.length > 0;
                 const mappedTab = SECTION_TO_TAB[sec.id] || (sec.category === 'formula' ? 'treatment' : null);
-                const multiFormulaInPatient = sec.category === 'formula' && formulaSections.length > 1;
-                const isActive = multiFormulaInPatient
-                  ? activeGcpTab === 'treatment' && (activeId ? activeId === sec.id : sIdx === 0)
+                const isActive = hasSubItems
+                  ? activeGcpTab === 'treatment' && !sec.subItems.some((sub) => activeId === sub.id)
                   : (mappedTab ? activeGcpTab === mappedTab : activeId === sec.id);
+                const isParentTreatmentActive = hasSubItems && activeGcpTab === 'treatment';
                 const IconComp = getSectionIcon(sec.id, sec.icon);
                 return (
-                  <button
-                    key={sec.id}
-                    type="button"
-                    onClick={() => scrollTo(sec.id)}
-                    title={sec.label}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '9px',
-                      width: '100%',
-                      minHeight: '42px',
-                      padding: '8px 10px 8px 12px',
-                      marginLeft: '-2px',
-                      border: 'none',
-                      borderLeft: isActive ? '2px solid #0284c7' : '2px solid transparent',
-                      background: isActive ? 'rgba(2, 132, 199, 0.08)' : 'transparent',
-                      color: isActive ? '#0284c7' : '#3c4043',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      borderRadius: '0 8px 8px 0'
-                    }}
-                  >
-                    <IconComp size={15} color={isActive ? '#0284c7' : '#64748b'} style={{ flexShrink: 0 }} />
-                    <span style={{
-                      fontSize: '0.80rem',
-                      fontWeight: isActive ? 700 : 500,
-                      color: isActive ? '#0284c7' : '#3c4043',
-                      lineHeight: 1.3,
-                      wordBreak: 'break-word'
-                    }}>
-                      {sec.label}
-                    </span>
-                  </button>
+                  <div key={sec.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (hasSubItems) {
+                          setIsTreatmentGroupOpen((prev) => !prev);
+                          scrollTo(sec.subItems[0].id);
+                        } else {
+                          scrollTo(sec.id);
+                        }
+                      }}
+                      title={sec.label}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '6px',
+                        width: '100%',
+                        minHeight: '42px',
+                        padding: '8px 10px 8px 12px',
+                        marginLeft: '-2px',
+                        border: 'none',
+                        borderLeft: (isActive || isParentTreatmentActive) ? '2px solid #0284c7' : '2px solid transparent',
+                        background: isActive ? 'rgba(2, 132, 199, 0.08)' : 'transparent',
+                        color: (isActive || isParentTreatmentActive) ? '#0284c7' : '#3c4043',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        borderRadius: '0 8px 8px 0'
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0 }}>
+                        <IconComp size={15} color={(isActive || isParentTreatmentActive) ? '#0284c7' : '#64748b'} style={{ flexShrink: 0 }} />
+                        <span style={{
+                          fontSize: '0.80rem',
+                          fontWeight: (isActive || isParentTreatmentActive) ? 700 : 500,
+                          color: (isActive || isParentTreatmentActive) ? '#0284c7' : '#3c4043',
+                          lineHeight: 1.3,
+                          wordBreak: 'break-word'
+                        }}>
+                          {sec.label}
+                        </span>
+                      </span>
+                      {hasSubItems && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                          <span style={{
+                            fontSize: '0.66rem',
+                            fontWeight: 700,
+                            padding: '1px 6px',
+                            borderRadius: '999px',
+                            background: '#f1f5f9',
+                            color: '#475569',
+                          }}>
+                            {sec.subItems.length}
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                            {isTreatmentGroupOpen ? '▾' : '▸'}
+                          </span>
+                        </span>
+                      )}
+                    </button>
+
+                    {hasSubItems && isTreatmentGroupOpen && (
+                      <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '18px', borderLeft: '1px solid #cbd5e1', paddingLeft: '6px', gap: '2px', marginBottom: '4px' }}>
+                        {sec.subItems.map((sub, subIdx) => {
+                          const isSubActive = activeGcpTab === 'treatment' && (activeId ? activeId === sub.id : subIdx === 0);
+                          return (
+                            <button
+                              key={sub.id}
+                              type="button"
+                              onClick={() => scrollTo(sub.id)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '7px',
+                                width: '100%',
+                                minHeight: '34px',
+                                padding: '5px 8px',
+                                border: 'none',
+                                borderRadius: '6px',
+                                background: isSubActive ? 'rgba(2, 132, 199, 0.08)' : 'transparent',
+                                color: isSubActive ? '#0284c7' : '#475569',
+                                fontSize: '0.75rem',
+                                fontWeight: isSubActive ? 700 : 500,
+                                textAlign: 'left',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <span style={{
+                                width: '5px',
+                                height: '5px',
+                                borderRadius: '999px',
+                                background: isSubActive ? '#0284c7' : '#94a3b8',
+                                flexShrink: 0,
+                              }} />
+                              <span style={{ lineHeight: 1.25 }}>{sub.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
