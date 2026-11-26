@@ -105,7 +105,7 @@ import { usePrescriptionData, getPosologyText } from '@/hooks/usePrescriptionDat
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { fetchAuthorizedPrescriptionAction } from '@/actions/prescriptionsActions';
 
-export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake: _onBackToIntake = null, initialView = null }) {
+export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake: _onBackToIntake = null, initialView = null, initialLang = 'en' }) {
   const { user } = useAuth();
   const { can, is } = useRoleAccess();
   const isAdmin = Boolean(is('admin') || user?.role === 'admin' || user?.isAdmin);
@@ -147,7 +147,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [overrideView, setOverrideView] = useState(null); // 'patient' | 'doctor' | null
   const isPatientView = overrideView ? overrideView === 'patient' : defaultIsPatientView;
 
-  const [lang, setLang] = useState(() => (String(searchParams?.get('lang') || '').toLowerCase() === 'es' ? 'es' : 'en'));
+  const [lang, setLang] = useState(() => (initialLang === 'es' || String(searchParams?.get('lang') || '').toLowerCase() === 'es' ? 'es' : 'en'));
   const [copied, setCopied] = useState(false);
   const [previewDoc, setPreviewDoc] = useState(null);
   const [showQrModal, setShowQrModal] = useState(false);
@@ -1600,12 +1600,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           clinicalInquiries={clinicalInquiries}
                         />
 
-                        <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                          gap: '16px',
-                          marginTop: '8px'
-                        }}>
+                        <div className="rx-responsive-two-col" style={{ marginTop: '8px' }}>
                           {/* Physician & Licensed Practice Credentials */}
                           <div style={{
                             background: '#f8fafc',
@@ -1786,12 +1781,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           clinicalInquiries={clinicalInquiries}
                         />
 
-                        <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                          gap: '16px',
-                          marginTop: '8px'
-                        }}>
+                        <div className="rx-responsive-two-col" style={{ marginTop: '8px' }}>
                           {/* Column 1: QR & In-Clinic Scan */}
                           <div style={{
                             background: '#f8fafc',

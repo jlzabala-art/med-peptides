@@ -144,13 +144,15 @@ export async function generateMetadata({ params, searchParams }) {
     description = description.slice(0, 197).trim() + '...';
   }
 
-  const ogLogoUrl = (isPatientView && patientOgImage) ? patientOgImage : `${BASE_URL}/atlas-health-logo-wa.png`;
+  const ogLogoUrl = (isPatientView && patientOgImage)
+    ? patientOgImage
+    : `${BASE_URL}/api/og?topic=rx&lang=${isEs ? 'es' : 'en'}`;
   const ogImageType = ogLogoUrl.endsWith('.jpg') ? 'image/jpeg' : 'image/png';
-  const ogImageWidth = ogLogoUrl.endsWith('.jpg') ? 1200 : 400;
-  const ogImageHeight = ogLogoUrl.endsWith('.jpg') ? 630 : 400;
+  const ogImageWidth = 1200;
+  const ogImageHeight = 630;
   const ogUrl = isPatientView
-    ? `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}?view=patient`
-    : `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}`;
+    ? `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}?view=patient${isEs ? '&lang=es' : ''}`
+    : `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}${isEs ? '?lang=es' : ''}`;
 
   return {
     title,
@@ -175,21 +177,10 @@ export async function generateMetadata({ params, searchParams }) {
       ]
     },
     twitter: {
-      card: isPatientView ? 'summary_large_image' : 'summary',
+      card: 'summary_large_image',
       title,
       description,
       images: [ogLogoUrl]
-    },
-    other: {
-      'og:image': ogLogoUrl,
-      'og:image:secure_url': ogLogoUrl,
-      'og:image:type': ogImageType,
-      'og:image:width': String(ogImageWidth),
-      'og:image:height': String(ogImageHeight),
-      'og:image:alt': title,
-      'whatsapp:title': title,
-      'whatsapp:description': description,
-      'whatsapp:image': ogLogoUrl
     },
     robots: { index: false, follow: false, noarchive: true, nocache: true }
   };
@@ -200,6 +191,7 @@ export default async function PublicPrescriptionPage({ params, searchParams }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const rawCode = resolvedParams?.code;
   const initialView = resolvedSearchParams?.view || resolvedSearchParams?.mode || null;
+  const initialLang = String(resolvedSearchParams?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
 
   if (rawCode?.toLowerCase() === 'intake') {
     redirect('/rx/intake');
@@ -246,5 +238,5 @@ export default async function PublicPrescriptionPage({ params, searchParams }) {
   // 3. Zero-Trust Server Sanitization: Strip nominal PII from SSR payload ONLY for unauthenticated public viewers
   const sanitizedRx = sanitizePrescriptionPayload(rx, { isAuthorized });
 
-  return <PublicPrescriptionClient rx={sanitizedRx} initialView={initialView} />;
+  return <PublicPrescriptionClient rx={sanitizedRx} initialView={initialView} initialLang={initialLang} />;
 }

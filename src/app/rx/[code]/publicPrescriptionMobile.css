@@ -926,6 +926,25 @@
   }
 }
 
+.rx-responsive-two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .rx-responsive-two-col {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+  .pds-main-column,
+  .rx-card {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+}
+
 /* ══════════════════════════════════════════════════════════════════════════════
    CLINICAL PRINT STYLESHEET (@media print)
    Standards for High-Fidelity A4 Clinical Dossier Printing & PDF Archiving

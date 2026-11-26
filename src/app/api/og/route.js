@@ -522,6 +522,38 @@ const TOPIC_CONFIG = {
       ],
     },
   },
+  rx: {
+    accent: '#003666',
+    accentSoft: '#38bdf8',
+    en: {
+      badge: 'CLINICAL PRESCRIPTION DOSSIER',
+      title1: 'Verified Formulation',
+      title2: '& Posology Monograph',
+      subtitle: 'Exact Dosing Protocol · Storage & Stability · Private Patient QR Ready',
+      pills: ['Exact Dose Card', 'Storage & BUD', 'EU GMP Compounding', 'Zero PII Preview'],
+      cardTitle: 'Clinical Verification',
+      cardLines: [
+        { k: 'Format', v: 'Verified Clinical Monograph' },
+        { k: 'Privacy', v: 'HIPAA / DHA De-Identified' },
+        { k: 'Patient UX', v: '1-Click Private QR Guide' },
+        { k: 'Compliance', v: 'Batch & Stability Tracked' },
+      ],
+    },
+    es: {
+      badge: 'EXPEDIENTE DE PRESCRIPCIÓN CLÍNICA',
+      title1: 'Formulación Verificada',
+      title2: 'y Monografía Posológica',
+      subtitle: 'Protocolo de Dosis Exacta · Conservación y BUD · Guía QR Privada',
+      pills: ['Guía Dosis Exacta', 'Conservación y BUD', 'Formulación EU GMP', 'Sin PII en Preview'],
+      cardTitle: 'Verificación Clínica',
+      cardLines: [
+        { k: 'Formato', v: 'Monografía Clínica Verificada' },
+        { k: 'Privacidad', v: 'Sin Datos Personales (PII)' },
+        { k: 'Paciente', v: 'Guía QR Privada en 1 Clic' },
+        { k: 'Calidad', v: 'Trazabilidad de Lote y BUD' },
+      ],
+    },
+  },
 };
 
 export async function GET(request) {
