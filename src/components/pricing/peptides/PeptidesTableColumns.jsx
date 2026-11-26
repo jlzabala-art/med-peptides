@@ -454,149 +454,120 @@ export function renderPeptideClinicalDetail(row, {
   const pelletHref = `/pricing/pellets${pelletParams.toString() ? `?${pelletParams.toString()}` : ''}`;
 
   return (
-    <div style={{
-      backgroundColor: '#f8fafc',
-      borderLeft: '3px solid #1a73e8',
-      borderBottom: '1px solid #e2e8f0',
-      padding: '0.9rem 1.1rem',
-      margin: '0'
-    }}>
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        alignItems: 'stretch'
-      }}>
-        {/* Left Column (60%): Clinical Science, Target Pathway, MoA & Synergies */}
-        <div style={{
-          flex: '1 1 440px',
-          minWidth: '280px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.65rem'
-        }}>
-          {/* Primary Indication & Molecular MoA Card */}
-          <div style={{
+    <div
+      className="pep-expanded-gcp-panel"
+      style={{
+        backgroundColor: '#f8fafc',
+        borderLeft: '3px solid #1a73e8',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '0.85rem 1rem',
+        margin: '0',
+      }}
+    >
+      <style>{`
+        .pep-expanded-gcp-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+          gap: 12px;
+          align-items: stretch;
+        }
+        .pep-expanded-kv-strip {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          padding-top: 8px;
+          border-top: 1px solid #e8eaed;
+        }
+        @media (max-width: 768px) {
+          .pep-expanded-gcp-grid {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 10px;
+          }
+          .pep-expanded-kv-strip {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 6px;
+          }
+        }
+      `}</style>
+
+      <div className="pep-expanded-gcp-grid">
+        {/* Left Column: Clinical Indication, MoA, Key-Value Specs & Synergies */}
+        <div
+          style={{
             background: '#ffffff',
             border: '1px solid #dadce0',
-            borderRadius: '6px',
-            padding: '10px 14px',
+            borderRadius: '8px',
+            padding: '12px 14px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
-          }}>
+            justifyContent: 'space-between',
+            gap: '10px',
+            minWidth: 0,
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
-              <div style={{
-                fontSize: '0.66rem',
-                fontWeight: 750,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#1a73e8',
-                marginBottom: '3px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <Sparkles size={12} color="#1a73e8" />
+              <div style={{ fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5f6368', marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Sparkles size={12} color="#5f6368" />
                 <span>{isEs ? 'Indicación Clínica Primaria' : 'Primary Clinical Indication'}</span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.80rem', color: '#1e293b', lineHeight: 1.48 }}>
+              <p style={{ margin: 0, fontSize: '0.80rem', color: '#202124', lineHeight: 1.45 }}>
                 {clinical.indication}
               </p>
             </div>
 
-            <div style={{ borderTop: '1px solid #f1f3f4', paddingTop: '8px' }}>
-              <div style={{
-                fontSize: '0.66rem',
-                fontWeight: 750,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#059669',
-                marginBottom: '3px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <Activity size={12} color="#059669" />
+            <div style={{ borderTop: '1px solid #e8eaed', paddingTop: '8px' }}>
+              <div style={{ fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5f6368', marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Activity size={12} color="#5f6368" />
                 <span>{isEs ? 'Mecanismo de Acción (MoA)' : 'Mechanism of Action (MoA)'}</span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>
+              <p style={{ margin: 0, fontSize: '0.77rem', color: '#3c4043', lineHeight: 1.42 }}>
                 {clinical.moa}
               </p>
             </div>
           </div>
 
-          {/* Target Pathway & Pharmacokinetics Metric Row */}
-          <div style={{
-            background: '#ffffff',
-            border: '1px solid #dadce0',
-            borderRadius: '6px',
-            padding: '8px 12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '8px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
-          }}>
-            <div style={{ minWidth: '130px' }}>
-              <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.04em' }}>
-                {isEs ? 'Sistema / Vía Diana' : 'Target System / Pathway'}
+          {/* Compact GCP Key-Value Strip */}
+          <div className="pep-expanded-kv-strip">
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '0.63rem', fontWeight: 700, textTransform: 'uppercase', color: '#5f6368', letterSpacing: '0.04em' }}>
+                {isEs ? 'Vía Diana' : 'Target Pathway'}
               </div>
-              <div style={{ fontSize: '0.76rem', color: '#334155', fontWeight: 650, marginTop: '2px' }}>
+              <div style={{ fontSize: '0.74rem', color: '#202124', fontWeight: 600, marginTop: '2px', lineHeight: 1.3 }}>
                 {clinical.targetSystem}
               </div>
             </div>
 
-            {clinical.casNumber && (
-              <div style={{ borderLeft: '1px solid #f1f3f4', paddingLeft: '8px' }}>
-                <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.04em' }}>
-                  {isEs ? 'Nº CAS' : 'CAS Registry'}
-                </div>
-                <div style={{ marginTop: '2px' }}>
-                  <CopyableId value={clinical.casNumber} />
-                </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '0.63rem', fontWeight: 700, textTransform: 'uppercase', color: '#5f6368', letterSpacing: '0.04em' }}>
+                {isEs ? 'Nº CAS' : 'CAS Registry'}
               </div>
-            )}
+              <div style={{ marginTop: '2px' }}>
+                {clinical.casNumber ? <CopyableId value={clinical.casNumber} /> : <span style={{ fontSize: '0.74rem', color: '#5f6368' }}>—</span>}
+              </div>
+            </div>
 
-            <div style={{ borderLeft: '1px solid #f1f3f4', paddingLeft: '8px' }}>
-              <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                <Clock size={10} color="#d97706" />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '0.63rem', fontWeight: 700, textTransform: 'uppercase', color: '#5f6368', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <Clock size={10} color="#5f6368" />
                 <span>{isEs ? 'Vida Media' : 'Half-life'}</span>
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#0f172a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.74rem', color: '#202124', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
                 <span>{clinical.halfLife}</span>
-                <span style={{ fontSize: '0.64rem', background: '#e8f0fe', color: '#1a73e8', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                <span style={{ fontSize: '0.63rem', background: '#f1f3f4', color: '#3c4043', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
                   {clinical.route || 'SubQ'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Synergies & Stacks Card */}
-          <div style={{
-            background: '#ffffff',
-            border: '1px solid #dadce0',
-            borderRadius: '6px',
-            padding: '8px 12px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
-          }}>
-            <div style={{
-              fontSize: '0.66rem',
-              fontWeight: 750,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: '#7c3aed',
-              marginBottom: '3px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}>
-              <Layers size={12} color="#7c3aed" />
-              <span>{isEs ? 'Sinergias & Protocolos Clínicos' : 'Clinical Synergies & Protocol Stacks'}</span>
+          {/* Compact Monochrome Synergies */}
+          <div style={{ borderTop: '1px solid #e8eaed', paddingTop: '8px' }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5f6368', marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Layers size={12} color="#5f6368" />
+              <span>{isEs ? 'Sinergias Clínicas' : 'Clinical Synergies'}</span>
             </div>
-            <div style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
+            <div style={{ fontSize: '0.75rem', color: '#3c4043', lineHeight: 1.4 }}>
               {clinical.synergy}
             </div>
             {(clinical.crossSellName || isPelletSynergyCandidate) && (
@@ -604,6 +575,7 @@ export function renderPeptideClinicalDetail(row, {
                 {clinical.crossSellName && (
                   <button
                     type="button"
+                    className="gcp-btn-secondary"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (typeof onFilterByPeptide === 'function') {
@@ -614,14 +586,9 @@ export function renderPeptideClinicalDetail(row, {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px',
-                      background: '#f3e8ff',
-                      border: '1px solid #d8b4fe',
-                      color: '#6b21a8',
-                      borderRadius: '4px',
-                      padding: '3px 8px',
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
+                      padding: '3px 9px',
+                      fontSize: '0.70rem',
+                      fontWeight: 600,
                     }}
                   >
                     <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
@@ -630,19 +597,16 @@ export function renderPeptideClinicalDetail(row, {
                 {isPelletSynergyCandidate && (
                   <Link
                     href={pelletHref}
+                    className="gcp-btn-secondary"
                     onClick={(e) => e.stopPropagation()}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px',
-                      background: '#f0fdfa',
-                      border: '1px solid #99f6e4',
-                      color: '#0f766e',
-                      borderRadius: '4px',
-                      padding: '3px 8px',
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      textDecoration: 'none'
+                      padding: '3px 9px',
+                      fontSize: '0.70rem',
+                      fontWeight: 600,
+                      textDecoration: 'none',
                     }}
                   >
                     <span>+ {isEs ? 'Ver Pellets Hormonales BHRT' : 'Explore BHRT Hormone Pellets'} →</span>
@@ -653,112 +617,99 @@ export function renderPeptideClinicalDetail(row, {
           </div>
         </div>
 
-        {/* Right Column (44%): Reconstitution, Dosage & Integrated Action Bar */}
-        <div style={{
-          flex: '1 1 380px',
-          minWidth: '280px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.65rem'
-        }}>
-          {/* Reconstitution & Syringe Math Box */}
-          <div style={{
+        {/* Right Column: Reconstitution & Syringe Math (U-100) */}
+        <div
+          style={{
             background: '#ffffff',
             border: '1px solid #dadce0',
-            borderRadius: '6px',
-            overflow: 'hidden',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+            borderRadius: '8px',
+            padding: '12px 14px',
             display: 'flex',
             flexDirection: 'column',
-            height: '100%',
-            justifyContent: 'space-between'
-          }}>
-            <div>
-              <div style={{
-                background: '#f8f9fa',
-                borderBottom: '1px solid #dadce0',
-                padding: '6px 10px',
-                fontSize: '0.66rem',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                color: '#1a73e8',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <Droplets size={12} color="#1a73e8" />
-                <span>{isEs ? 'Reconstitución & Regla Jeringa (U-100)' : 'Reconstitution & Syringe Math (U-100)'}</span>
-              </div>
-              <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{ fontSize: '0.74rem', color: '#202124', fontWeight: 700 }}>
-                  {clinical.recon}
-                </div>
-                <div style={{
-                  fontSize: '0.71rem',
-                  color: '#185abc',
-                  fontFamily: 'monospace',
-                  fontWeight: 650,
-                  background: '#e8f0fe',
-                  padding: '3px 6px',
-                  borderRadius: '4px',
-                  border: '1px solid #c2e7ff'
-                }}>
-                  {clinical.syringeCalc}
-                </div>
-                <div style={{ fontSize: '0.70rem', color: '#3c4043' }}>
-                  <strong style={{ color: '#202124' }}>{isEs ? 'Pauta estándar:' : 'Standard dose:'}</strong> {clinical.dose}
-                </div>
-                {clinical.vialYield && (
-                  <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px', borderTop: '1px solid #f1f3f4', paddingTop: '4px' }}>
-                    <span style={{ fontWeight: 700, color: '#3c4043' }}>⏱️ {isEs ? 'Rendimiento:' : 'Vial Yield:'}</span>
-                    <span>{clinical.vialYield}</span>
-                  </div>
-                )}
-                {clinical.stability && (
-                  <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ fontWeight: 700, color: '#3c4043' }}>❄️ {isEs ? 'Estabilidad:' : 'Storage:'}</span>
-                    <span>{clinical.stability}</span>
-                  </div>
-                )}
-                {clinical.hardware && (
-                  <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ fontWeight: 700, color: '#3c4043' }}>💉 {isEs ? 'Insumos:' : 'Hardware:'}</span>
-                    <span>{clinical.hardware}</span>
-                  </div>
-                )}
-              </div>
+            justifyContent: 'space-between',
+            gap: '8px',
+            minWidth: 0,
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '5px', paddingBottom: '6px', borderBottom: '1px solid #e8eaed' }}>
+              <Droplets size={12} color="#5f6368" />
+              <span>{isEs ? 'Reconstitución & Regla Jeringa (U-100)' : 'Reconstitution & Syringe Math (U-100)'}</span>
             </div>
 
-            {/* Unified Action Toolbar Footer */}
-            <div style={{ padding: '0 10px 10px' }}>
-              <PriceScheduleExpandedActions
-                item={{
-                  ...row,
-                  name: row.productName || row.name,
-                  packSize: row.dosage || 'Lyophilized Vial',
-                  sku: row.sku || row.id,
-                }}
-                currency={currency}
-                unitPrice={Number(row.clinicPrice ?? row.price_1x ?? row.price ?? 0)}
-                categoryLabel={row.therapeuticClass || row.category || 'Peptide Vials'}
-                onQuickView={typeof onOpenSpecs === 'function' ? () => onOpenSpecs(row) : null}
-                onOpenCalculator={() => {
-                  if (typeof window !== 'undefined') {
-                    const slug = String(row.productName || row.name || 'bpc-157')
-                      .split('(')[0]
-                      .trim()
-                      .toLowerCase()
-                      .replace(/[^a-z0-9]+/g, '-')
-                      .replace(/^-+|-+$/g, '');
-                    const strengthToken = String(row.dosage || '10mg').replace(/\s+/g, '');
-                    window.location.href = `/calculator?peptide=${encodeURIComponent(slug)}&format=vial&strength=${encodeURIComponent(strengthToken)}${isEs ? '&lang=es' : ''}`;
-                  }
-                }}
-              />
+            <div style={{ fontSize: '0.78rem', color: '#202124', fontWeight: 700 }}>
+              {clinical.recon}
+            </div>
+
+            <div
+              style={{
+                fontSize: '0.74rem',
+                color: '#1967d2',
+                fontFamily: 'monospace',
+                fontWeight: 700,
+                background: '#e8f0fe',
+                padding: '6px 9px',
+                borderRadius: '6px',
+                border: '1px solid #d2e3fc',
+              }}
+            >
+              {clinical.syringeCalc}
+            </div>
+
+            <div style={{ fontSize: '0.75rem', color: '#3c4043', lineHeight: 1.4 }}>
+              <strong style={{ color: '#202124' }}>{isEs ? 'Pauta estándar:' : 'Standard dose:'}</strong> {clinical.dose}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid #e8eaed', paddingTop: '6px', marginTop: '2px' }}>
+              {clinical.vialYield && (
+                <div style={{ fontSize: '0.72rem', color: '#5f6368', display: 'flex', gap: '6px' }}>
+                  <strong style={{ color: '#3c4043', minWidth: '72px' }}>{isEs ? 'Rendimiento:' : 'Vial Yield:'}</strong>
+                  <span>{clinical.vialYield}</span>
+                </div>
+              )}
+              {clinical.stability && (
+                <div style={{ fontSize: '0.72rem', color: '#5f6368', display: 'flex', gap: '6px' }}>
+                  <strong style={{ color: '#3c4043', minWidth: '72px' }}>{isEs ? 'Estabilidad:' : 'Storage:'}</strong>
+                  <span>{clinical.stability}</span>
+                </div>
+              )}
+              {clinical.hardware && (
+                <div style={{ fontSize: '0.72rem', color: '#5f6368', display: 'flex', gap: '6px' }}>
+                  <strong style={{ color: '#3c4043', minWidth: '72px' }}>{isEs ? 'Insumos:' : 'Hardware:'}</strong>
+                  <span>{clinical.hardware}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Unified GCP Action Bar Footer (Full Width) */}
+      <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #e2e8f0' }}>
+        <PriceScheduleExpandedActions
+          item={{
+            ...row,
+            name: row.productName || row.name,
+            packSize: row.dosage || 'Lyophilized Vial',
+            sku: row.sku || row.id,
+          }}
+          currency={currency}
+          unitPrice={Number(row.clinicPrice ?? row.price_1x ?? row.price ?? 0)}
+          categoryLabel={row.therapeuticClass || row.category || 'Peptide Vials'}
+          onQuickView={typeof onOpenSpecs === 'function' ? () => onOpenSpecs(row) : null}
+          onOpenCalculator={() => {
+            if (typeof window !== 'undefined') {
+              const slug = String(row.productName || row.name || 'bpc-157')
+                .split('(')[0]
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+              const strengthToken = String(row.dosage || '10mg').replace(/\s+/g, '');
+              window.location.href = `/calculator?peptide=${encodeURIComponent(slug)}&format=vial&strength=${encodeURIComponent(strengthToken)}${isEs ? '&lang=es' : ''}`;
+            }
+          }}
+        />
       </div>
     </div>
   );
