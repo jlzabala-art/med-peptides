@@ -50,7 +50,7 @@ import dynamic from 'next/dynamic';
 import ExpressQrRefillCard from '@/components/prescription/ExpressQrRefillCard';
 import PatientContactAtlasCard from '@/components/prescription/PatientContactAtlasCard';
 import PatientContactReminderCard from '@/components/prescription/PatientContactReminderCard';
-import { RotateCcw, RefreshCw, Home, Loader2, AlertTriangle, MessageCircle, Lock } from 'lucide-react';
+import { RotateCcw, RefreshCw, Home, Loader2, AlertTriangle, MessageCircle, Lock, ShoppingBag } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const DoctorAuthNoticeModal = dynamic(
@@ -3053,18 +3053,37 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               <Calendar size={18} />
               <span>{isEs ? 'Mi Plan' : 'Plan'}</span>
             </button>
-            <button
-              type="button"
-              className={`rx-patient-mobile-btn ${activeGcpTab === 'refill' ? 'is-active' : ''}`}
-              onClick={() => {
-                triggerHaptic('selection');
-                setActiveGcpTab('refill');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-            >
-              <RotateCcw size={18} />
-              <span>{isEs ? 'Refill' : 'Refill'}</span>
-            </button>
+            {!isDispensed ? (
+              <button
+                type="button"
+                className="rx-patient-mobile-btn"
+                style={{ background: '#eff6ff', color: '#003666' }}
+                onClick={() => {
+                  triggerHaptic('selection');
+                  if (!isPatientAuthenticated) {
+                    setShowPatientAuthModal(true);
+                  } else {
+                    setIsInquiryDrawerOpen(true);
+                  }
+                }}
+              >
+                <ShoppingBag size={18} color="#003666" />
+                <span>{isEs ? 'Pedir' : 'Order'}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={`rx-patient-mobile-btn ${activeGcpTab === 'refill' ? 'is-active' : ''}`}
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setActiveGcpTab('refill');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
+                <RotateCcw size={18} />
+                <span>{isEs ? 'Refill' : 'Refill'}</span>
+              </button>
+            )}
             <button
               type="button"
               aria-label={isEs ? `Preguntar a Atlas AI sobre #${rxId}` : `Ask Atlas AI about #${rxId}`}

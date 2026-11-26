@@ -315,11 +315,11 @@ export const TOTAL_SKUS = BASELINE_PRICE_SCHEDULES.reduce((s, g) => s + g.skuCou
 
 export const MACRO_CATEGORIES = [
   { id: 'all', label: 'All Catalogs (15)' },
-  { id: 'peptides', label: '🔬 Peptides & Hormones', groupIds: ['peptides', 'pellets', 'dnlab-pens', 'ultraperson', 'weight-management', 'hair-treatments'] },
-  { id: 'genomics', label: '🧬 Genomics CE-IVD', groupIds: ['24genetics', '24genomics-qatar', 'teletest', 'eterna'] },
-  { id: 'cosmetics', label: '✨ Cosmetics & Collagen', groupIds: ['colway', 'colway-hair', 'colway-qatar'] },
-  { id: 'injectables', label: '💉 Medical Injectables', groupIds: ['aesthetic-injectables'] },
-  { id: 'diagnostics', label: '🩸 DBS Diagnostics', groupIds: ['bloodo', 'teletest'] },
+  { id: 'peptides', label: 'Peptides & Hormones', groupIds: ['peptides', 'pellets', 'dnlab-pens', 'ultraperson', 'weight-management', 'hair-treatments'] },
+  { id: 'genomics', label: 'Genomics CE-IVD', groupIds: ['24genetics', '24genomics-qatar', 'teletest', 'eterna'] },
+  { id: 'cosmetics', label: 'Cosmetics & Collagen', groupIds: ['colway', 'colway-hair', 'colway-qatar'] },
+  { id: 'injectables', label: 'Medical Injectables', groupIds: ['aesthetic-injectables'] },
+  { id: 'diagnostics', label: 'DBS Diagnostics', groupIds: ['bloodo', 'teletest'] },
 ];
 
 // 4-Layer Caching (Golden Rule #2)

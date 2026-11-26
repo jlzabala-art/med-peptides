@@ -298,14 +298,19 @@ export default function GlobalBottomStickyBar() {
     }
   };
 
-  if (pathname?.startsWith('/labels') || resolvedConfig?.hidden) {
+  if (
+    pathname?.startsWith('/labels') ||
+    pathname?.startsWith('/rx') ||
+    pathname?.startsWith('/verify') ||
+    resolvedConfig?.hidden
+  ) {
     return null;
   }
 
   if (isMinimized) {
     return (
       <div
-        className="no-print"
+        className="no-print atlas-global-sticky-dock"
         style={{
           position: 'sticky',
           bottom: '0.75rem',
@@ -379,7 +384,7 @@ export default function GlobalBottomStickyBar() {
 
   return (
     <div
-      className="no-print"
+      className="no-print atlas-global-sticky-dock"
       style={{
         position: 'sticky',
         bottom: '0.75rem',

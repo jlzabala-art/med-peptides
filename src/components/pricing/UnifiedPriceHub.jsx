@@ -36,7 +36,6 @@ import GlobalSearchBar     from '@/components/ui/GlobalSearchBar';
 import MetricCard          from '@/components/ui/MetricCard';
 import KpiScopeBar         from '@/components/ui/KpiScopeBar';
 import Breadcrumb          from '@/components/ui/Breadcrumb';
-import GcpUserBadge        from '@/components/shared/GcpUserBadge';
 
 import { usePriceTier, TIER_COLORS, TIER_LABELS } from '@/hooks/pricing/usePriceTier';
 import {
@@ -234,11 +233,11 @@ export default function UnifiedPriceHub({
     return list.filter((g) =>
       g.label.toLowerCase().includes(q) ||
       g.description.toLowerCase().includes(q) ||
-      g.supplier.toLowerCase().includes(q) ||
+      (isAdmin && (g.supplier || '').toLowerCase().includes(q)) ||
       g.badge.toLowerCase().includes(q) ||
       g.currency.toLowerCase().includes(q)
     );
-  }, [schedules, searchQuery, selectedCurrencyFilter, selectedCategoryFilter]);
+  }, [schedules, searchQuery, selectedCurrencyFilter, selectedCategoryFilter, isAdmin]);
 
   // Contextual KPIs (Golden Rule #22)
   const kpis = useMemo(() => {
@@ -276,7 +275,9 @@ export default function UnifiedPriceHub({
         {
           title: `Price Range (${selectedGroup.currency})`,
           value: rangeText,
-          subtitle: effectiveTier === 'clinic' ? 'Clinic tier (+45%)' : 'Wholesale tier (×1.3225)',
+          subtitle: isAdmin
+            ? (effectiveTier === 'clinic' ? 'Clinic tier (+45%)' : 'Wholesale tier (×1.3225)')
+            : (effectiveTier === 'clinic' ? 'Clinic institutional tariff' : 'Authorized wholesale tariff'),
           icon: DollarSign,
           color: '#7c3aed',
         },
@@ -293,7 +294,13 @@ export default function UnifiedPriceHub({
       { title: 'Total SKUs', value: displaySkus, subtitle: `across ${displayLists} catalogs`, icon: Package, color: '#0284c7' },
       { title: 'Price Lists', value: displayLists, subtitle: `${activeLists} active schedules`, icon: List, color: '#0d9488' },
       { title: 'Your Tier', value: tierLabel.split(' ')[0], subtitle: tierLabel, icon: ShieldCheck, color: tierColor.text },
-      { title: 'Schedule Tier', value: effectiveTier === 'admin' ? 'Cost + 15% + 15%' : 'Wholeseller B2B', subtitle: effectiveTier === 'admin' ? 'Wholesale = Cost × 1.3225' : 'Authorized distributor tariff', icon: Tag, color: '#7c3aed' },
+      {
+        title: isAdmin && effectiveTier === 'admin' ? 'Schedule Tier' : 'Currencies',
+        value: isAdmin && effectiveTier === 'admin' ? 'Cost + 15% + 15%' : 'EUR · USD · AED',
+        subtitle: isAdmin && effectiveTier === 'admin' ? 'Wholesale = Cost × 1.3225' : 'Authorized B2B tariff',
+        icon: Tag,
+        color: '#7c3aed',
+      },
     ];
   }, [
     selectedGroup,
@@ -307,6 +314,7 @@ export default function UnifiedPriceHub({
     schedules,
     filteredGroups,
     tierLabel,
+    isAdmin,
   ]);
 
   const scopeCounts = selectedGroup
@@ -441,7 +449,6 @@ export default function UnifiedPriceHub({
           badges={[
             `${schedules.length} Schedules`,
             `${TOTAL_SKUS} SKUs`,
-            'Role-Based Tiering',
           ]}
           metaItems={[{ label: 'REF:', value: 'ATLAS-B2B-HUB-2026', mono: true }]}
           title="Unified B2B Price Hub"
@@ -464,7 +471,6 @@ export default function UnifiedPriceHub({
                 <Package size={14} />
                 <span>Peptide Vials</span>
               </Link>
-              <GcpUserBadge variant="light" />
             </>
           }
         />
@@ -474,11 +480,7 @@ export default function UnifiedPriceHub({
       <AuthBanner tier={tier} isAuthenticated={isAuthenticated} />
 
       {/* ── KPI Strip (Golden Rule #22) ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-        gap: 12, marginBottom: 14,
-      }}>
+      <div className="atlas-kpi-grid-2x2" style={{ marginBottom: 14 }}>
         {kpis.map((k) => (
           <MetricCard
             key={k.title}
@@ -508,7 +510,9 @@ export default function UnifiedPriceHub({
         placeholder={
           selectedGroup
             ? `Search ${selectedGroup.label} SKUs, brands, indications or technologies…`
-            : 'Search product lines, formulations, suppliers or categories…'
+            : isAdmin
+              ? 'Search product lines, formulations, suppliers or categories…'
+              : 'Search product lines, formulations or categories…'
         }
         namespace={selectedGroup ? `price-schedule-${selectedGroup.id}` : 'price-schedules-hub'}
         size="lg"
@@ -540,8 +544,11 @@ export default function UnifiedPriceHub({
           gap: '12px',
           width: '100%',
         }}>
-          {/* Catalog Direct Select Picker */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flex: 1, minWidth: '240px' }}>
+          {/* Catalog Direct Select Picker (hidden on mobile overview — direct cards are scannable below) */}
+          <div
+            className={activeGroupId === 'all' ? 'pricing-hub-catalog-picker pricing-hub-hide-mobile' : 'pricing-hub-catalog-picker'}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flex: 1, minWidth: '240px' }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
               <Layers size={15} color="var(--color-primary, #003666)" />
               <span>Catalog:</span>
@@ -567,7 +574,7 @@ export default function UnifiedPriceHub({
               <option value="all">All Catalogs ({schedules.length} B2B Schedules)</option>
               {schedules.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.label} ({g.badge}) — {g.currency} · {g.supplier}
+                  {g.label} ({g.badge}) — {g.currency}{isAdmin ? ` · ${g.supplier}` : ''}
                 </option>
               ))}
             </select>
@@ -644,8 +651,8 @@ export default function UnifiedPriceHub({
               )}
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>Currency:</span>
+            <div className="atlas-chip-rail" style={{ width: '100%', maxWidth: '100%' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', flexShrink: 0 }}>Currency:</span>
               {[
                 { id: 'all', label: 'All' },
                 { id: 'USD', label: 'USD ($)' },
@@ -657,11 +664,13 @@ export default function UnifiedPriceHub({
                   type="button"
                   onClick={() => setSelectedCurrencyFilter(f.id)}
                   style={{
-                    padding: '4px 10px',
+                    padding: '5px 11px',
                     borderRadius: '16px',
                     fontSize: '11px',
                     fontWeight: 600,
                     cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
                     border: selectedCurrencyFilter === f.id ? '1px solid var(--color-primary, #003666)' : '1px solid #cbd5e1',
                     backgroundColor: selectedCurrencyFilter === f.id ? 'var(--color-primary, #003666)' : '#ffffff',
                     color: selectedCurrencyFilter === f.id ? '#ffffff' : '#475569',
@@ -674,18 +683,19 @@ export default function UnifiedPriceHub({
           )}
         </div>
 
-        {/* Row 2: Category Filter Pills (Overview Mode) */}
+        {/* Row 2: Category Filter Pills (Overview Mode — 1-line scrollable rail) */}
         {activeGroupId === 'all' && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            flexWrap: 'wrap',
-            paddingTop: '8px',
-            borderTop: '1px solid #f1f5f9',
-          }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginRight: '4px' }}>
-              Filter by Category:
+          <div
+            className="atlas-chip-rail"
+            style={{
+              paddingTop: '8px',
+              borderTop: '1px solid #f1f5f9',
+              width: '100%',
+              maxWidth: '100%',
+            }}
+          >
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginRight: '2px', flexShrink: 0 }}>
+              Category:
             </span>
             {MACRO_CATEGORIES.map((cat) => {
               const isActive = selectedCategoryFilter === cat.id;
@@ -695,11 +705,13 @@ export default function UnifiedPriceHub({
                   type="button"
                   onClick={() => setSelectedCategoryFilter(cat.id)}
                   style={{
-                    padding: '4px 10px',
+                    padding: '5px 11px',
                     borderRadius: '6px',
                     fontSize: '11px',
                     fontWeight: isActive ? 700 : 500,
                     cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
                     border: isActive ? '1px solid #0284c7' : '1px solid #e2e8f0',
                     backgroundColor: isActive ? '#f0f9ff' : '#ffffff',
                     color: isActive ? '#0369a1' : '#475569',
@@ -727,6 +739,8 @@ export default function UnifiedPriceHub({
                   fontSize: '11px',
                   fontWeight: 600,
                   cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                 }}
               >
                 <X size={12} />
@@ -800,7 +814,10 @@ export default function UnifiedPriceHub({
                   </span>
                 </div>
                 <div style={{ fontSize: 12, color: '#64748b', marginTop: 3 }}>
-                  {selectedGroup.description} · Supplier: <strong>{selectedGroup.supplier}</strong>
+                  {selectedGroup.description}
+                  {isAdmin && selectedGroup.supplier ? (
+                    <> · Supplier: <strong>{selectedGroup.supplier}</strong></>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -809,18 +826,20 @@ export default function UnifiedPriceHub({
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <TierBadge tier={effectiveTier} tierLabel={effectiveTierLabel} />
 
-              <button
-                type="button"
-                onClick={() => setSimulatorGroup(selectedGroup)}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '5px',
-                  padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff', color: '#0284c7', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-                }}
-              >
-                <Calculator size={14} />
-                <span>Simulate Margins</span>
-              </button>
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setSimulatorGroup(selectedGroup)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '5px',
+                    padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff', color: '#0284c7', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  <Calculator size={14} />
+                  <span>Simulate Margins</span>
+                </button>
+              )}
 
               <button
                 type="button"
@@ -848,19 +867,21 @@ export default function UnifiedPriceHub({
                 <span>Share Link</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setSelectedShareGroup(selectedGroup)}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '4px',
-                  padding: '6px 10px', borderRadius: '6px', border: '1px solid #bbf7d0',
-                  backgroundColor: '#f0fdf4', color: '#166534', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-                }}
-              >
-                <Users size={13} />
-                <span>{selectedGroup.sharesCount || 0} shares</span>
-                <ChevronDown size={11} />
-              </button>
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedShareGroup(selectedGroup)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                    padding: '6px 10px', borderRadius: '6px', border: '1px solid #bbf7d0',
+                    backgroundColor: '#f0fdf4', color: '#166534', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  <Users size={13} />
+                  <span>{selectedGroup.sharesCount || 0} shares</span>
+                  <ChevronDown size={11} />
+                </button>
+              )}
 
               <Link
                 href={selectedGroup.route}
@@ -885,7 +906,11 @@ export default function UnifiedPriceHub({
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#475569' }}>
               <Tag size={14} className="text-sky-600" />
-              <span>Commercial Formula: <strong>{selectedGroup.pricingNote}</strong></span>
+              {isAdmin ? (
+                <span>Commercial Formula: <strong>{selectedGroup.pricingNote}</strong></span>
+              ) : (
+                <span><strong>Official B2B Schedule</strong> · Verified clinical pricing</span>
+              )}
             </div>
             <div style={{ color: '#64748b' }}>
               Native Currency: <strong>{selectedGroup.currency}</strong>
@@ -914,6 +939,7 @@ export default function UnifiedPriceHub({
       ) : (
         <PriceSchedulesOverviewTable
           schedules={filteredGroups}
+          isAdmin={isAdmin}
           onSelectGroup={handleSelectGroup}
           onOpenShareModal={(group) => setShareWebModalGroup(group)}
           onOpenRecipientsModal={(group) => setSelectedShareGroup(group)}
@@ -954,25 +980,35 @@ export default function UnifiedPriceHub({
           Authenticated Pricing Governance
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
-          {Object.entries(TIER_LABELS).map(([t, label]) => {
-            const c = TIER_COLORS[t];
-            const isCurrent = t === effectiveTier;
-            return (
-              <div key={t} style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '4px 10px', borderRadius: 20,
-                background: c.bg, border: `1px solid ${c.border}`,
-                color: c.text, fontWeight: isCurrent ? 700 : 500, fontSize: 11,
-              }}>
-                {isCurrent && '✓ '}
-                {label}
-              </div>
-            );
-          })}
+          {Object.entries(TIER_LABELS)
+            .filter(([t]) => isAdmin || t !== 'admin')
+            .map(([t, label]) => {
+              const c = TIER_COLORS[t];
+              const isCurrent = t === effectiveTier;
+              return (
+                <div key={t} style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '4px 10px', borderRadius: 20,
+                  background: c.bg, border: `1px solid ${c.border}`,
+                  color: c.text, fontWeight: isCurrent ? 700 : 500, fontSize: 11,
+                }}>
+                  {isCurrent && '✓ '}
+                  {label}
+                </div>
+              );
+            })}
         </div>
-        <div style={{ color: '#94a3b8', lineHeight: 1.5 }}>
-          <strong>Unregistered visitors:</strong> Wholesale price (Cost × 1.15 Atlas × 1.15 Wholesaler = Cost × 1.3225).
-          Raw laboratory supplier costs and margins remain strictly restricted.
+        <div style={{ color: '#64748b', lineHeight: 1.5 }}>
+          {isAdmin ? (
+            <>
+              <strong>Unregistered visitors:</strong> Wholesale price (Cost × 1.15 Atlas × 1.15 Wholesaler = Cost × 1.3225).
+              Raw laboratory supplier costs and margins remain strictly restricted.
+            </>
+          ) : (
+            <>
+              Published B2B wholesale tariffs apply by default. Log in with an authorized clinic or distributor account to access contracted institutional pricing.
+            </>
+          )}
         </div>
       </div>
     </div>

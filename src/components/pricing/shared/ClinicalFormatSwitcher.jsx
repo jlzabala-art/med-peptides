@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { FlaskConical, Syringe, Pill, Layers, Calculator, BookOpen, ShoppingBag, ChevronDown, Dna, Sparkles } from '@/lib/icons';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
@@ -24,16 +25,47 @@ export default function ClinicalFormatSwitcher({
   const isEs = lang === 'es';
   const rfqCount = Array.isArray(workspace?.rfqItems) ? workspace.rfqItems.length : 0;
   const [openGroupId, setOpenGroupId] = useState(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 12 });
   const switcherRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (!openGroupId || typeof window === 'undefined') return undefined;
     const onDocClick = (e) => {
-      if (switcherRef.current && !switcherRef.current.contains(e.target)) setOpenGroupId(null);
+      const inSwitcher = switcherRef.current && switcherRef.current.contains(e.target);
+      const inDropdown = dropdownRef.current && dropdownRef.current.contains(e.target);
+      if (!inSwitcher && !inDropdown) setOpenGroupId(null);
     };
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setOpenGroupId(null);
+    };
+    const onScrollOrResize = () => setOpenGroupId(null);
     window.addEventListener('mousedown', onDocClick);
-    return () => window.removeEventListener('mousedown', onDocClick);
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize);
+    return () => {
+      window.removeEventListener('mousedown', onDocClick);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
+    };
   }, [openGroupId]);
+
+  const handleToggleGroup = (groupId, event) => {
+    if (openGroupId === groupId) {
+      setOpenGroupId(null);
+      return;
+    }
+    const rect = event?.currentTarget?.getBoundingClientRect?.();
+    if (rect && typeof window !== 'undefined') {
+      setDropdownPos({
+        top: rect.bottom + 8,
+        left: Math.max(12, Math.min(rect.left, window.innerWidth - 308)),
+      });
+    }
+    setOpenGroupId(groupId);
+  };
 
   const buildHref = (basePath) => {
     if (typeof workspace?.buildWorkspaceHref === 'function') {
@@ -154,13 +186,16 @@ export default function ClinicalFormatSwitcher({
         }
         @media (max-width: 768px) {
           .atlas-format-switcher-inner {
-            padding: 6px 10px;
+            padding: 6px 16px 6px 10px;
             display: flex;
             align-items: center;
+            flex-wrap: nowrap;
             gap: 6px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
+            mask-image: linear-gradient(to right, black 92%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, black 92%, transparent 100%);
           }
           .atlas-format-switcher-tab {
             padding: 5px 10px;
@@ -181,7 +216,7 @@ export default function ClinicalFormatSwitcher({
           }
         }
       ` }} />
-      <div ref={switcherRef} className="atlas-format-switcher-inner" style={{ position: 'relative', overflow: 'visible', flexWrap: 'wrap' }}>
+      <div ref={switcherRef} className="atlas-format-switcher-inner">
         {tabs.map((t) => {
           const Icon = t.icon;
           const isGroupActive = t.isGroup && activeGroup?.id === t.id;
@@ -193,7 +228,7 @@ export default function ClinicalFormatSwitcher({
               <div key={t.id} style={{ position: 'relative', flexShrink: 0 }}>
                 <button
                   type="button"
-                  onClick={() => setOpenGroupId((prev) => (prev === t.id ? null : t.id))}
+                  onClick={(e) => handleToggleGroup(t.id, e)}
                   className="atlas-format-switcher-tab"
                   style={{
                     fontWeight: isActive ? 800 : 650,
@@ -222,13 +257,14 @@ export default function ClinicalFormatSwitcher({
                   </span>
                   <ChevronDown size={12} style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
                 </button>
-                {isDropdownOpen && (
+                {isDropdownOpen && typeof document !== 'undefined' && createPortal(
                   <div
+                    ref={dropdownRef}
                     role="menu"
                     style={{
-                      position: 'absolute',
-                      top: 'calc(100% + 8px)',
-                      left: 0,
+                      position: 'fixed',
+                      top: dropdownPos.top,
+                      left: dropdownPos.left,
                       minWidth: '295px',
                       width: 'max-content',
                       maxWidth: 'min(360px, calc(100vw - 24px))',
@@ -237,7 +273,7 @@ export default function ClinicalFormatSwitcher({
                       borderRadius: '12px',
                       boxShadow: '0 14px 34px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.06)',
                       padding: '8px',
-                      zIndex: 1200,
+                      zIndex: 10070,
                       display: 'flex',
                       flexDirection: 'column',
                       gap: '3px',
@@ -324,7 +360,8 @@ export default function ClinicalFormatSwitcher({
                       <span>{isEs ? 'Ver todo el grupo en Hub' : 'View all in Hub'}</span>
                       <span>→</span>
                     </Link>
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
             );

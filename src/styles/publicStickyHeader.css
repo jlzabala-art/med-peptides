@@ -1419,7 +1419,9 @@
     background: rgba(255, 255, 255, 0.14);
   }
 
-  .puh-hide-switcher-on-mobile-detail {
+  .puh-hide-switcher-on-mobile-detail,
+  .puh-desktop-only-switcher,
+  .puh-actions-group .puh-btn-search {
     display: none !important;
   }
 
@@ -1492,10 +1494,24 @@
 
 /* Rule #74: Prevent floating FABs/docks from peeking behind the 56px mobile bottom nav */
 @media (max-width: 1024px) {
+  .atlas-global-sticky-dock {
+    display: none !important;
+  }
   .atlas-chat-fab,
-  .public-sticky-action-bar,
   .workspace-floating-dock {
     bottom: calc(var(--bottom-bar-h, 56px) + 12px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .public-sticky-action-bar {
+    bottom: calc(var(--bottom-bar-h, 56px) + env(safe-area-inset-bottom, 0px)) !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e2e8f0 !important;
+    box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.06) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  body:has(.rx-patient-mobile-bar) .public-sticky-action-bar {
+    display: none !important;
   }
 }
 
@@ -1543,5 +1559,9 @@
     mask-image: linear-gradient(to right, black 92%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, black 92%, transparent 100%);
     padding-right: 14px;
+  }
+
+  .pricing-hub-hide-mobile {
+    display: none !important;
   }
 }

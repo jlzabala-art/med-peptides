@@ -233,7 +233,7 @@ export default function LabelsHomeView({
               </p>
             </div>
 
-            <div className="pls-worklist-tabs-scroll" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="atlas-chip-rail" style={{ maxWidth: '100%' }}>
               {onOpenImport && (
                 <button
                   type="button"
@@ -250,6 +250,8 @@ export default function LabelsHomeView({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <Upload size={14} color="#1a73e8" />
@@ -272,13 +274,15 @@ export default function LabelsHomeView({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <FilePlus2 size={14} color="#1a73e8" />
                   <span>{isEs ? 'Crear Rx' : 'Create Rx'}</span>
                 </button>
               )}
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative', flexShrink: 0 }}>
                 <button
                   type="button"
                   onClick={() => setManualsMenuOpen((v) => !v)}
@@ -295,6 +299,7 @@ export default function LabelsHomeView({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '5px',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <BookOpen size={14} color="#5f6368" />
@@ -389,6 +394,8 @@ export default function LabelsHomeView({
                     fontSize: '0.73rem',
                     fontWeight: 700,
                     cursor: 'pointer',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <Layers size={13} />
@@ -505,14 +512,14 @@ export default function LabelsHomeView({
               flexWrap: 'wrap',
             }}
           >
-            <div className="pls-worklist-tabs-scroll" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="atlas-chip-rail" style={{ maxWidth: '100%' }}>
               {[
-                { id: 'unprinted', labelEs: '○ Pendientes', labelEn: '○ Unprinted' },
-                { id: 'pending_approval', labelEs: '⏳ Por aprobar', labelEn: '⏳ Pending Approval' },
-                { id: 'refills', labelEs: '🔄 Refills', labelEn: '🔄 Refills' },
-                { id: 'printed', labelEs: '🖨️ Impresas (1×)', labelEn: '🖨️ Printed (1×)' },
-                { id: 'reprint', labelEs: '🔁 Reimpresiones', labelEn: '🔁 Reprints' },
-                { id: 'delivered_pending_guide', labelEs: '📲 Entregados (Sin guía)', labelEn: '📲 Delivered (Guide Pending)' },
+                { id: 'unprinted', labelEs: 'Pendientes', labelEn: 'Unprinted' },
+                { id: 'pending_approval', labelEs: 'Por aprobar', labelEn: 'Pending Approval' },
+                { id: 'refills', labelEs: 'Refills', labelEn: 'Refills' },
+                { id: 'printed', labelEs: 'Impresas (1×)', labelEn: 'Printed (1×)' },
+                { id: 'reprint', labelEs: 'Reimpresiones', labelEn: 'Reprints' },
+                { id: 'delivered_pending_guide', labelEs: 'Entregados (Sin guía)', labelEn: 'Delivered (Guide Pending)' },
                 { id: 'all', labelEs: 'Todas', labelEn: 'All' },
               ].map((tab) => {
                 const isTabActive = worklistTab === tab.id;
@@ -531,12 +538,14 @@ export default function LabelsHomeView({
                       color: isTabActive ? '#1a73e8' : '#475569',
                       fontSize: '0.72rem',
                       fontWeight: isTabActive ? 750 : 600,
-                      padding: '3px 10px',
+                      padding: '4px 10px',
                       borderRadius: '16px',
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '5px',
+                      flexShrink: 0,
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     <span>{isEs ? tab.labelEs : tab.labelEn}</span>
@@ -616,17 +625,15 @@ export default function LabelsHomeView({
 
           {/* Test kind filter sub-bar */}
           <div
+            className="atlas-chip-rail"
             style={{
-              padding: '6px 20px',
+              padding: '7px 20px',
               background: '#ffffff',
               borderBottom: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              flexWrap: 'wrap',
+              maxWidth: '100%',
             }}
           >
-            <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', marginRight: '4px' }}>
+            <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', marginRight: '4px', flexShrink: 0, whiteSpace: 'nowrap' }}>
               {isEs ? 'Tipo de test:' : 'Test type:'}
             </span>
             {[
@@ -652,7 +659,7 @@ export default function LabelsHomeView({
                   style={{
                     fontSize: '0.68rem',
                     fontWeight: active ? 700 : 500,
-                    padding: '3px 8px',
+                    padding: '4px 9px',
                     borderRadius: '6px',
                     border: active ? '1px solid #1a73e8' : '1px solid #e2e8f0',
                     background: active ? '#e8f0fe' : '#ffffff',
@@ -662,6 +669,8 @@ export default function LabelsHomeView({
                     alignItems: 'center',
                     gap: '4px',
                     transition: 'all 0.15s ease',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <span>{kind.label}</span>

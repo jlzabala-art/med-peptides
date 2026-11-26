@@ -501,7 +501,7 @@ export default function PublicUnifiedHeader({
                 </Link>
               )}
               {!whiteLabel && !hideAppSwitcher && (
-                <div className={resolvedMobileBackHref ? 'puh-hide-switcher-on-mobile-detail' : ''}>
+                <div className="puh-desktop-only-switcher">
                   <AtlasAppSwitcher
                   isSpanish={isSpanish}
                   portalHref={getDashboardPath()}

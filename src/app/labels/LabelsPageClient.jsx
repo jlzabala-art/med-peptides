@@ -767,7 +767,9 @@ export default function PublicLabelsAppClient({
           lang={lang}
           onLangChange={(nextLang) => setLang(nextLang)}
           hideCurrencySelector={true}
-          breadcrumbs={[
+          mobileTitle={activeCode ? `#${activeCode}` : (isEs ? 'Etiquetas y Recetas' : 'Prescriptions & Labels')}
+          mobileSubtitle={isEs ? 'Estudio EU GMP' : 'EU GMP Studio'}
+          breadcrumb={[
             { label: isEs ? 'Inicio' : 'Home', href: '/' },
             { label: isEs ? 'Prescripciones y Etiquetas' : 'Prescriptions & Labels', href: '/labels' },
             ...(activeCode

@@ -134,16 +134,13 @@ export default function PharmacyOpsWorkspaceBar({ lang = 'en' }) {
           flexWrap: 'wrap',
         }}
       >
-        {/* Left: 4 Pharmacy & Rx Tool Tabs (Horizontal scroll on mobile) */}
+        {/* Left: 4 Pharmacy & Rx Tool Tabs (Horizontal scroll on mobile with fade) */}
         <div
+          className="atlas-chip-rail"
           style={{
-            display: 'flex',
-            alignItems: 'center',
             gap: '4px',
-            overflowX: 'auto',
             maxWidth: '100%',
-            padding: '4px 0',
-            scrollbarWidth: 'none',
+            padding: '4px 12px 4px 0',
           }}
         >
           {PHARMACY_OPS_TOOLS.map((tool) => {
