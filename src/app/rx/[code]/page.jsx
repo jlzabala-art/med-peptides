@@ -204,6 +204,20 @@ export default async function PublicPrescriptionPage({ params, searchParams }) {
     redirect(`/rx/${encodeURIComponent(cleanCode)}${qs}`);
   }
 
+  // 1b. Strip commercial currency params from ?view=patient URLs (Patient Rx Privacy)
+  if (
+    String(initialView || '').toLowerCase() === 'patient' &&
+    (resolvedSearchParams?.currency || resolvedSearchParams?.cur)
+  ) {
+    const cleanParams = new URLSearchParams();
+    Object.entries(resolvedSearchParams || {}).forEach(([k, v]) => {
+      if (k === 'currency' || k === 'cur' || v == null || v === '') return;
+      cleanParams.set(k, Array.isArray(v) ? String(v[0]) : String(v));
+    });
+    const qs = cleanParams.toString();
+    redirect(qs ? `/rx/${encodeURIComponent(cleanCode || rawCode)}?${qs}` : `/rx/${encodeURIComponent(cleanCode || rawCode)}`);
+  }
+
   const rx = await getPrescriptionData(cleanCode || rawCode);
 
   if (!rx) {

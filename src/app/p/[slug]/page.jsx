@@ -491,20 +491,22 @@ export async function generateMetadata({ params, searchParams }) {
   const explicitProductImage = rawExplicitImage
     ? (rawExplicitImage.startsWith('http') ? rawExplicitImage : `${BASE_URL}${rawExplicitImage.startsWith('/') ? '' : '/'}${rawExplicitImage}`)
     : null;
-  const previewImageUrl = isTeletest
+  const rawResolvedImage = isTeletest
     ? (explicitProductImage || `${BASE_URL}/images/products/teletest/mineralograma-cabello.svg`)
     : isEterna
     ? `${BASE_URL}/images/products/eterna/eterna-kit-box.png`
     : ((isCosmetic && explicitProductImage)
       ? explicitProductImage
       : resolveSocialImage(product, formatParam));
-  const isPng = previewImageUrl.toLowerCase().endsWith('.png');
+  const isPenFormat = String(formatParam || '').toLowerCase().includes('pen');
+  const previewImageUrl = !rawResolvedImage || rawResolvedImage.endsWith('/og-catalog.png')
+    ? `${BASE_URL}/api/og?topic=${isPellet ? 'pellets' : isPenFormat ? 'pens' : 'peptides'}&lang=${isEs ? 'es' : 'en'}`
+    : rawResolvedImage;
+  const isPng = previewImageUrl.toLowerCase().endsWith('.png') || previewImageUrl.includes('/api/og?');
   const imageType = isPng ? 'image/png' : 'image/jpeg';
   const canonicalUrl = viewMode === 'patient'
     ? `${BASE_URL}/p/${slug}?view=patient${isEs ? '&lang=es' : ''}`
-    : (isCosmetic || isAesthetic || isEterna || isTeletest || product.isSingleSupplierLocked
-        ? `${BASE_URL}/p/${slug}${isEs ? '?lang=es' : ''}`
-        : `${BASE_URL}/p/${slug}${supplierFilter ? `?supplier=${encodeURIComponent(supplierFilter)}` : ''}`);
+    : `${BASE_URL}/p/${slug}${isEs ? '?lang=es' : ''}`;
 
   return {
     title: pageTitle,
@@ -544,12 +546,6 @@ export async function generateMetadata({ params, searchParams }) {
       images: [previewImageUrl],
     },
     other: {
-      'og:image': previewImageUrl,
-      'og:image:secure_url': previewImageUrl,
-      'og:image:type': imageType,
-      'og:image:width': '1200',
-      'og:image:height': '630',
-      'og:image:alt': pageTitle,
       'article:section': isTeletest
         ? 'Clinical Genomics & Laboratory Diagnostics'
         : isEterna
@@ -703,7 +699,19 @@ export default async function PublicProductRoute({ params, searchParams }) {
     redirect('/c/CAT-MU9L9GBN');
   }
 
-  const supplierFilter = resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || null;
+  const isAdmin = await isAdminServerSession();
+  const hasSupplierQuery = Boolean(resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId);
+  if (!isAdmin && hasSupplierQuery) {
+    const cleanParams = new URLSearchParams();
+    Object.entries(resolvedSearchParams || {}).forEach(([k, v]) => {
+      if (k === 'supplier' || k === 'supplierId' || v == null || v === '') return;
+      cleanParams.set(k, Array.isArray(v) ? String(v[0]) : String(v));
+    });
+    const qs = cleanParams.toString();
+    redirect(qs ? `/p/${encodeURIComponent(slug)}?${qs}` : `/p/${encodeURIComponent(slug)}`);
+  }
+
+  const supplierFilter = isAdmin ? (resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || null) : null;
   const initialFormat = resolvedSearchParams?.format || resolvedSearchParams?.presentation || null;
   const initialStrength = resolvedSearchParams?.dose || resolvedSearchParams?.strength || null;
   const initialLang = String(resolvedSearchParams?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
@@ -717,7 +725,6 @@ export default async function PublicProductRoute({ params, searchParams }) {
   }
 
   const rawSafeProduct = sanitizeForClient(product);
-  const isAdmin = await isAdminServerSession();
   const safeProduct = sanitizePublicProductForViewer(rawSafeProduct, { isAdmin });
   const associatedProtocols = await getAssociatedProtocols(safeProduct.id, slug, safeProduct.canonicalName || safeProduct.name);
   const jsonLd = generateProductJsonLd(safeProduct, BASE_URL);

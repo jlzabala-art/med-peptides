@@ -1279,6 +1279,84 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
           </div>
         </section>
 
+        {/* ── BLOCK 4B: PHYSICIAN PRE-IMPLANT SCREENING TRAFFIC LIGHT (GO / CAUTION / NO-GO) ── */}
+        <section
+          className="pellet-guide-section"
+          style={{
+            background: '#ffffff',
+            border: '1px solid #dadce0',
+            borderRadius: '12px',
+            padding: '1.25rem 1.35rem',
+            marginBottom: '1.5rem',
+            boxShadow: '0 1px 3px rgba(60, 64, 67, 0.06)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 800, color: '#003666' }}>
+                {isEs ? 'Cribado Rápido Pre-Implante (Semáforo Clínico)' : 'Chair-Side Pre-Implant Screening (Go / Caution / No-Go)'}
+              </h2>
+              <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: '#475569' }}>
+                {isEs
+                  ? 'Resumen ejecutivo basado en guías Endocrine Society, TMS/NAMS, AUA e ISSWSH para verificación en 15 segundos antes de implantar.'
+                  : '15-second chair-side decision matrix aligned with Endocrine Society, TMS/NAMS, AUA & ISSWSH clinical practice standards.'}
+              </p>
+            </div>
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(
+                isEs
+                  ? `Instrucciones Post-Implante de Pellets (${selectedProfileId === 'male_trt' ? 'Hombre 4.5 mm' : 'Mujer 3.2 mm'}):\n• Mantener apósito seco 48h.\n• Evitar sentadillas, ciclismo, piscina/sauna/inmersión durante ${selectedProfileId === 'male_trt' ? '5–7 días' : '3–5 días'}.\n• Retirar Steri-Strips a los 5–7 días si no se desprenden solos.\n• Analítica de control pico: semana 4–6 post-implante.\n• Ante enrojecimiento creciente, fiebre o secreción, contactar a la clínica.`
+                  : `Post-Implant Hormone Pellet Care (${selectedProfileId === 'male_trt' ? 'Male 4.5 mm' : 'Female 3.2 mm'}):\n• Keep dressing dry for 48 hours.\n• Avoid squats, cycling, swimming, hot tubs/saunas for ${selectedProfileId === 'male_trt' ? '5–7 days' : '3–5 days'}.\n• Remove Steri-Strips after 5–7 days if still attached.\n• Peak follow-up serum labs: Week 4–6 post-implant.\n• Contact clinic for spreading redness, fever, or drainage.`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gcp-btn-secondary no-print"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.76rem', fontWeight: 700, textDecoration: 'none' }}
+            >
+              <Share2 size={13} />
+              <span>{isEs ? 'Enviar Alta Post-Implante (WhatsApp)' : 'Send Post-Implant Care (WhatsApp)'}</span>
+            </a>
+          </div>
+
+          <div className="pellet-pubmed-grid">
+            <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+              <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
+                🟢 {isEs ? 'GO · Analítica Basal Requerida' : 'GO · Required Baseline Workup'}
+              </div>
+              <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.77rem', color: '#14532d', lineHeight: 1.5 }}>
+                <li>{isEs ? 'E2, T Total/Libre, SHBG, FSH/LH y perfil tiroideo.' : 'E2, Total/Free T, SHBG, FSH/LH & thyroid panel.'}</li>
+                <li>{isEs ? 'Hemograma completo (Hto < 49%) y perfil hepático/lipídico.' : 'CBC (Hct < 49%) & hepatic/lipid panel.'}</li>
+                <li>{isEs ? 'PSA basal en varones >40 años; mamografía/citología vigente en mujeres.' : 'Baseline PSA in men >40y; up-to-date mammogram/Pap in women.'}</li>
+                <li>{isEs ? 'Útero intacto: confirmar pauta de progesterona micronizada oral (100–200 mg/noche).' : 'Intact uterus: confirm oral micronized progesterone (100–200 mg nightly).'}</li>
+              </ul>
+            </div>
+
+            <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#fffbeb', border: '1px solid #fde68a' }}>
+              <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
+                🟡 {isEs ? 'CAUTION · Valoración Individual' : 'CAUTION · Individualized Risk Review'}
+              </div>
+              <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.77rem', color: '#78350f', lineHeight: 1.5 }}>
+                <li>{isEs ? 'Hematocrito 49–52%: iniciar con carga conservadora y reevaluar en 6 sem.' : 'Hematocrit 49–52%: start conservatively and recheck at 6 wks.'}</li>
+                <li>{isEs ? 'Anticoagulantes/antiagregantes: hemostasia firme 90s + compresión fría.' : 'Anticoagulants/antiplatelets: 90s firm hemostasis + cold compression.'}</li>
+                <li>{isEs ? 'Apnea del sueño (SAOS) no tratada: estudiar/tratar antes de TRT.' : 'Untreated OSA: evaluate/treat prior to escalating TRT.'}</li>
+                <li>{isEs ? 'Deseo gestacional en varón: advertir supresión de espermatogénesis.' : 'Male fertility plans: counsel on spermatogenesis suppression.'}</li>
+              </ul>
+            </div>
+
+            <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#fef2f2', border: '1px solid #fecaca' }}>
+              <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#b91c1c', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
+                🔴 {isEs ? 'NO-GO · Contraindicación Absoluta' : 'NO-GO · Absolute Contraindications'}
+              </div>
+              <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.77rem', color: '#7f1d1d', lineHeight: 1.5 }}>
+                <li>{isEs ? 'Cáncer hormonodependiente activo (mama o próstata).' : 'Active hormone-sensitive malignancy (breast or prostate).'}</li>
+                <li>{isEs ? 'Hematocrito > 54% o PSA elevado/nódulo prostático sin estudio.' : 'Hematocrit > 54% or unevaluated elevated PSA / prostate nodule.'}</li>
+                <li>{isEs ? 'Sangrado uterino anormal no diagnosticado o embarazo.' : 'Undiagnosed abnormal uterine bleeding or pregnancy.'}</li>
+                <li>{isEs ? 'Tromboembolismo venoso activo o insuficiencia cardíaca descompensada.' : 'Active VTE or uncontrolled/decompensated heart failure.'}</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         {/* ── BLOCK 5: CLINICAL OPS SUITE (CHECKLIST · COMPLICATIONS · PATIENT HANDOUT) ── */}
         <section
           id="clinical-ops"
