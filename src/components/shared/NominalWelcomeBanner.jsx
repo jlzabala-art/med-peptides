@@ -39,9 +39,9 @@ export default function NominalWelcomeBanner({
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Check if dismissed in this session
+    // Rule #74: Remember dismissal in localStorage (once per device, not repeatedly)
     try {
-      const isDismissed = sessionStorage.getItem(storageKey);
+      const isDismissed = localStorage.getItem(storageKey) || sessionStorage.getItem(storageKey);
       if (!isDismissed && recipientName) {
         setDismissed(false);
       }
@@ -67,6 +67,7 @@ export default function NominalWelcomeBanner({
   const handleDismiss = () => {
     setDismissed(true);
     try {
+      localStorage.setItem(storageKey, 'true');
       sessionStorage.setItem(storageKey, 'true');
     } catch {
       /* ignore */

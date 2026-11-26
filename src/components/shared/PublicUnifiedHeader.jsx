@@ -116,6 +116,9 @@ export default function PublicUnifiedHeader({
   clinicName = null,
   // Sticky sub-banner (e.g. Doctor View / Patient View Mode indicator)
   banner = null,
+  // Mobile Atlas App Bar contextual title & subtitle (Rule #74; auto-derived from breadcrumb if omitted)
+  mobileTitle = null,
+  mobileSubtitle = null,
   // 100% pure public mode: hides internal user/admin portal badge for clean shareable clinical guides
   purePublic = false
 }) {
@@ -137,6 +140,8 @@ export default function PublicUnifiedHeader({
   const effectiveHideAiButton = true;
 
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const lastScrollYRef = useRef(0);
   const [internalInquiryOpen, setInternalInquiryOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isLocaleModalOpen, setIsLocaleModalOpen] = useState(false);
@@ -256,6 +261,17 @@ export default function PublicUnifiedHeader({
         window.requestAnimationFrame(() => {
           const scrollY = window.scrollY || window.pageYOffset || 0;
           setIsScrolled(scrollY > 40);
+
+          // Rule #74: Smart hide-on-scroll down / reveal-on-scroll up for mobile App Bar
+          const delta = scrollY - (lastScrollYRef.current || 0);
+          if (scrollY <= 64) {
+            setIsHeaderHidden(false);
+          } else if (delta > 8 && scrollY > 110) {
+            setIsHeaderHidden(true);
+          } else if (delta < -6) {
+            setIsHeaderHidden(false);
+          }
+          lastScrollYRef.current = scrollY;
 
           // Auto-highlight active anchor based on viewport visibility
           if (anchorTabs && anchorTabs.length > 0 && !controlledActiveAnchorId) {
@@ -451,16 +467,42 @@ export default function PublicUnifiedHeader({
     return '/patient';
   };
 
+  // Rule #74: Derive contextual mobile App Bar title, subtitle, and back link automatically
+  const lastCrumb = Array.isArray(effectiveBreadcrumb) && effectiveBreadcrumb.length > 0
+    ? effectiveBreadcrumb[effectiveBreadcrumb.length - 1]
+    : null;
+  const parentCrumb = Array.isArray(effectiveBreadcrumb) && effectiveBreadcrumb.length > 1
+    ? effectiveBreadcrumb[effectiveBreadcrumb.length - 2]
+    : null;
+  const resolvedMobileBackHref = doctorHomeHref || parentCrumb?.href || null;
+  const resolvedMobileTitle = mobileTitle || lastCrumb?.label || clinicName || partnerName || 'Atlas Health';
+  const resolvedMobileSubtitle =
+    mobileSubtitle ||
+    (doctorName
+      ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`)
+      : (parentCrumb?.label || (isSpanish ? 'Atlas Health Services' : 'Atlas Health Services')));
+
   return (
     <>
-      <header className={`public-unified-header ${isScrolled ? 'is-scrolled' : ''}`}>
-        {/* ── Executive TopBar (Google Cloud Console Standard) ── */}
+      <header className={`public-unified-header ${isScrolled ? 'is-scrolled' : ''} ${isHeaderHidden ? 'is-hidden-mobile' : ''}`}>
+        {/* ── Executive TopBar (Google Cloud Console Standard / Rule #74 Atlas Mobile App Bar) ── */}
         <div className="puh-brand-row">
           <div className="puh-brand-row-inner">
-            {/* Left: App Switcher + Brand Logo / Title or White-Label Clinic Logo */}
-            <div className="puh-brand-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Left: Back (mobile detail) or App Switcher + Brand Logo + Contextual Mobile Title */}
+            <div className="puh-brand-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              {resolvedMobileBackHref && (
+                <Link
+                  href={resolvedMobileBackHref}
+                  className="puh-mobile-back-btn"
+                  aria-label={isSpanish ? 'Volver' : 'Back'}
+                  title={isSpanish ? 'Volver' : 'Back'}
+                >
+                  <ArrowLeft size={19} color="#ffffff" strokeWidth={2.2} />
+                </Link>
+              )}
               {!whiteLabel && !hideAppSwitcher && (
-                <AtlasAppSwitcher
+                <div className={resolvedMobileBackHref ? 'puh-hide-switcher-on-mobile-detail' : ''}>
+                  <AtlasAppSwitcher
                   isSpanish={isSpanish}
                   portalHref={getDashboardPath()}
                   variant="dark"
@@ -496,6 +538,7 @@ export default function PublicUnifiedHeader({
                     ) : null
                   }
                 />
+                </div>
               )}
 
               {!purePublic && !whiteLabel && (
@@ -538,6 +581,14 @@ export default function PublicUnifiedHeader({
                   <BrandLogo variant="light" size="compact" />
                 </Link>
               )}
+
+              {/* Rule #74: Single-row Mobile Contextual Title + 1-line Subtitle (replaces 2nd-row breadcrumb on ≤768px) */}
+              <div className="puh-mobile-context-title">
+                <span className="puh-mobile-title-main">{resolvedMobileTitle}</span>
+                {resolvedMobileSubtitle && resolvedMobileSubtitle !== resolvedMobileTitle && (
+                  <span className="puh-mobile-title-sub">{resolvedMobileSubtitle}</span>
+                )}
+              </div>
 
               {doctorHomeHref && (
                 <Link
@@ -818,11 +869,15 @@ export default function PublicUnifiedHeader({
                 <HelpCircle size={15} />
               </button>
 
-              {/* Google Cloud Console UX Standard User Badge & Quick Logout (hidden in 100% purePublic mode) */}
+              {/* Google Cloud Console UX Standard User Badge (with Language & Currency inside Avatar menu per Rule #74) */}
               {!purePublic && (
                 <GcpUserBadge
                   variant="dark"
-                  lang={lang}
+                  lang={effectiveLang}
+                  onLangChange={handleLanguageChange}
+                  currency={effectiveCurrency}
+                  onCurrencyChange={handleCurrencyChange}
+                  hideCurrencySelector={effectiveHideCurrencySelector}
                   loginRedirect={resolvedRedirect}
                 />
               )}
@@ -922,14 +977,14 @@ export default function PublicUnifiedHeader({
             </div>
           </div>
         )}
-
-        {/* View-mode / announcement sticky sub-banner (Doctor View / Patient View) */}
-        {banner && (
-          <div className="puh-sticky-banner-slot" style={{ width: '100%' }}>
-            {banner}
-          </div>
-        )}
       </header>
+
+      {/* Rule #74: Non-sticky banner slot below header so banners never steal viewport height on scroll */}
+      {banner && (
+        <div className="puh-nonsticky-banner-slot" style={{ width: '100%' }}>
+          {banner}
+        </div>
+      )}
 
       {/* Institutional Inquiry Drawer (Internal instance if not controlled externally) */}
       {!onOpenInquiry && (

@@ -14,7 +14,7 @@ import {
   Clock, 
   Info 
 } from '@/lib/icons';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Snowflake, Target } from 'lucide-react';
 import { resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
 import ReconstitutionGuideCard from './ReconstitutionGuideCard';
 
@@ -512,7 +512,7 @@ export default function CompoundedFormulationsSection({
                                 flexShrink: 0,
                                 marginTop: '1px'
                               }}>
-                                <span>🎯</span> {isEs ? 'Diana Celular:' : 'Cellular Target:'}
+                                <Target size={13} color="#5f6368" style={{ flexShrink: 0 }} /> {isEs ? 'Diana Celular:' : 'Cellular Target:'}
                               </span>
                               <span style={{ fontSize: '0.79rem', color: '#1e293b', fontWeight: 600, lineHeight: 1.45 }}>
                                 {api.cellularTarget}
@@ -785,7 +785,7 @@ export default function CompoundedFormulationsSection({
                       gap: '12px'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '1.35rem' }}>💧</span>
+                        <Droplets size={18} color="#0284c7" style={{ flexShrink: 0 }} />
                         <div>
                           <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0369a1' }}>
                             {isEs ? 'Spray Nasal Dosificado · Listo para Usar' : 'Metered Intranasal Spray Bottle · Ready to Use'}
@@ -806,7 +806,7 @@ export default function CompoundedFormulationsSection({
                         padding: '4px 10px',
                         borderRadius: '6px'
                       }}>
-                        ❄️ 2°C – 8°C {isEs ? 'Nevera' : 'Refrigerated'}
+                        <Snowflake size={12} color="#0284c7" style={{ display: 'inline', verticalAlign: '-2px', marginRight: '4px' }} />2°C – 8°C {isEs ? 'Nevera' : 'Refrigerated'}
                       </span>
                     </div>
                   ) : (formulation.isPen || formulation.type === 'prefilled_pen' || /\bpen\b/i.test(formulation.dosageForm || '') || /\bpen\b/i.test(formulation.container || '')) ? (
@@ -845,7 +845,7 @@ export default function CompoundedFormulationsSection({
                           padding: '4px 10px',
                           borderRadius: '6px'
                         }}>
-                          ❄️ 2°C – 8°C Nevera
+                          <Snowflake size={12} color="#0284c7" style={{ display: 'inline', verticalAlign: '-2px', marginRight: '4px' }} />2°C – 8°C Nevera
                         </span>
                         <span style={{
                           fontSize: '0.70rem',

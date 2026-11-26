@@ -195,56 +195,80 @@ export default function B2BUniversalMenu({
         </button>
       )}
 
-      {/* ── Mobile Fixed Bottom Navigation Bar (< 1024px) — Page-Aware, Zero Labels Leak ── */}
-      {!hideMobileBar && (
-        <nav className="b2b-mobile-bottom-bar no-print" aria-label={isSpanish ? 'Navegación B2B móvil' : 'Mobile B2B navigation'}>
-          <button
-            type="button"
-            className={`b2b-mobile-tab-btn ${isOpen && mobileSheetMode === 'related' ? 'is-active' : ''}`}
-            onClick={() => {
-              setMobileSheetMode('related');
-              setOpen(true);
-            }}
-          >
-            <SlidersHorizontal size={17} />
-            <span>{isSpanish ? 'Filtros' : 'Filters'}</span>
-          </button>
+      {/* ── Mobile Fixed Bottom Navigation Bar (< 1024px) — Rule #74 Page-Aware Bar ── */}
+      {!hideMobileBar && (() => {
+        const isRx = pathname.startsWith('/rx/');
+        const isGuideOrProto = pathname.startsWith('/proto') || pathname.startsWith('/guides');
+        const isMonograph = pathname.startsWith('/p/');
 
-          <button
-            type="button"
-            className="b2b-mobile-tab-btn"
-            onClick={triggerGlobalSearch}
-          >
-            <Search size={17} />
-            <span>{isSpanish ? 'Buscar' : 'Search'}</span>
-          </button>
+        const firstBtnLabel = isRx
+          ? (isSpanish ? 'Inicio Rx' : 'Rx Top')
+          : isGuideOrProto
+            ? (isSpanish ? 'Índice' : 'Contents')
+            : isMonograph
+              ? (isSpanish ? 'Secciones' : 'Sections')
+              : (isSpanish ? 'Filtros' : 'Filters');
 
-          <button
-            type="button"
-            className="b2b-mobile-tab-btn"
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
-              }
-            }}
-          >
-            <Sparkles size={17} color="#7c3aed" />
-            <span>Atlas AI</span>
-          </button>
+        const handleFirstBtnClick = () => {
+          if (isRx && typeof window !== 'undefined') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+          setMobileSheetMode('related');
+          setOpen(true);
+        };
 
-          <button
-            type="button"
-            className={`b2b-mobile-tab-btn ${isOpen && mobileSheetMode === 'all' ? 'is-active' : ''}`}
-            onClick={() => {
-              setMobileSheetMode('all');
-              setOpen(true);
-            }}
+        return (
+          <nav
+            className="b2b-mobile-bottom-bar no-print"
+            style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+            aria-label={isSpanish ? 'Navegación B2B móvil' : 'Mobile B2B navigation'}
           >
-            <Menu size={17} />
-            <span>{isSpanish ? 'Menú' : 'Menu'}</span>
-          </button>
-        </nav>
-      )}
+            <button
+              type="button"
+              className={`b2b-mobile-tab-btn ${!isRx && isOpen && mobileSheetMode === 'related' ? 'is-active' : ''}`}
+              onClick={handleFirstBtnClick}
+            >
+              {isRx ? <FileText size={17} /> : isGuideOrProto || isMonograph ? <Compass size={17} /> : <SlidersHorizontal size={17} />}
+              <span>{firstBtnLabel}</span>
+            </button>
+
+            <button
+              type="button"
+              className="b2b-mobile-tab-btn"
+              onClick={triggerGlobalSearch}
+            >
+              <Search size={17} />
+              <span>{isSpanish ? 'Buscar' : 'Search'}</span>
+            </button>
+
+            <button
+              type="button"
+              className="b2b-mobile-tab-btn"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+                }
+              }}
+            >
+              <Sparkles size={17} color="#7c3aed" />
+              <span>Atlas AI</span>
+            </button>
+
+            <button
+              type="button"
+              className={`b2b-mobile-tab-btn ${isOpen && mobileSheetMode === 'all' ? 'is-active' : ''}`}
+              onClick={() => {
+                setMobileSheetMode('all');
+                setOpen(true);
+              }}
+            >
+              <Menu size={17} />
+              <span>{isSpanish ? 'Menú' : 'Menu'}</span>
+            </button>
+          </nav>
+        );
+      })()}
 
       {/* ── Unified Responsive Drawer (Left Rail on Laptop / Bottom Sheet on Mobile) ── */}
       {isOpen && (

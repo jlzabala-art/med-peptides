@@ -713,3 +713,8 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 
 
 
+## 74. Atlas Mobile App Bar (Google Cloud Console UX Standard — Golden Rule)
+- **Cabecera móvil única de 56 px (`≤ 768px`)**: Todas las pantallas que usen `PublicUnifiedHeader` renderizan en móvil una única fila de `56px` (`--app-bar-h: 56px`): botón `←` (en detalle) o App Switcher plano (en raíz), símbolo `[A]`, título contextual + subtítulo de 1 línea (reemplazando el breadcrumb de 2.ª fila y botones píldora redundantes), y el avatar circular limpio (`32px`, React Portal `z-index: 10080`).
+- **Hide-on-scroll y banners no fijos**: La cabecera móvil se oculta suavemente al hacer scroll hacia abajo (`is-hidden-mobile`) y reaparece al subir. Los banners informativos (`NominalWelcomeBanner` / `VERIFIED ACCESS`) NUNCA son `position: sticky` dentro del `<header>` y recuerdan su descarte en `localStorage`.
+- **Idioma y Divisa en el menú del Avatar**: En móvil, los controles de idioma (`EN | ES`), divisa (`EUR | USD | AED`) y cambio de portal viven dentro del popover de `GcpUserBadge` para mantener el App Bar despejado.
+- **Barra inferior contextual por pantalla y cero emojis clínicos**: `B2BUniversalMenu` adapta su primer botón al contexto (`Inicio Rx`, `Índice`, `Secciones`, `Filtros`) respetando `env(safe-area-inset-bottom)`. En tarjetas clínicas y cabeceras se usan iconos `lucide` monocromáticos (`Droplets`, `Snowflake`, `Target`) en lugar de emojis de sistema.

@@ -37,6 +37,10 @@ import { triggerHaptic } from '@/utils/haptics';
 export default function GcpUserBadge({
   variant = 'dark',
   lang = 'en',
+  onLangChange = null,
+  currency = null,
+  onCurrencyChange = null,
+  hideCurrencySelector = false,
   loginRedirect,
   onLogout,
   showQuickLogout = false,
@@ -492,6 +496,77 @@ export default function GcpUserBadge({
 
           {/* Navigation links based on role */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {/* Rule #74: Language & Currency controls inside Avatar Menu (GCP standard) */}
+            {(onLangChange || (onCurrencyChange && !hideCurrencySelector)) && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px',
+                  padding: '6px 8px 8px',
+                  borderBottom: '1px solid #f1f5f9',
+                  marginBottom: '2px',
+                }}
+              >
+                {onLangChange && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                      {isEs ? 'Idioma' : 'Language'}
+                    </span>
+                    <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '2px', gap: '2px' }}>
+                      {['en', 'es'].map((code) => (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => onLangChange(code)}
+                          style={{
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '3px 8px',
+                            fontSize: '0.70rem',
+                            fontWeight: 750,
+                            cursor: 'pointer',
+                            background: lang === code ? '#003666' : 'transparent',
+                            color: lang === code ? '#ffffff' : '#475569',
+                          }}
+                        >
+                          {code.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {onCurrencyChange && !hideCurrencySelector && currency && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                      {isEs ? 'Divisa' : 'Currency'}
+                    </span>
+                    <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '2px', gap: '2px' }}>
+                      {['EUR', 'USD', 'AED'].map((cur) => (
+                        <button
+                          key={cur}
+                          type="button"
+                          onClick={() => onCurrencyChange(cur)}
+                          style={{
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '3px 7px',
+                            fontSize: '0.70rem',
+                            fontWeight: 750,
+                            cursor: 'pointer',
+                            background: currency === cur ? '#003666' : 'transparent',
+                            color: currency === cur ? '#ffffff' : '#475569',
+                          }}
+                        >
+                          {cur}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Primary Console Dashboard */}
             <Link
               href={primaryDashboardPath}

@@ -1356,3 +1356,136 @@
   to { opacity: 1; transform: scale(1); }
 }
 
+
+/* ══════════════════════════════════════════════════════════════════
+   RULE #74 — ATLAS MOBILE APP BAR (GOOGLE CLOUD CONSOLE UX STANDARD)
+   Applies across all screens (≤ 768px): single-row 56px App Bar,
+   hide-on-scroll down, contextual title + subtitle, clean circular avatar.
+   Desktop (≥ 769px) remains unchanged.
+   ══════════════════════════════════════════════════════════════════ */
+:root {
+  --app-bar-h: 56px;
+  --tab-bar-h: 44px;
+  --bottom-bar-h: 56px;
+}
+
+.puh-mobile-back-btn,
+.puh-mobile-context-title {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .public-unified-header {
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+
+  .public-unified-header.is-hidden-mobile {
+    transform: translateY(-100%);
+  }
+
+  .puh-brand-row-inner {
+    height: var(--app-bar-h);
+    min-height: var(--app-bar-h);
+    padding: 0 10px !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    overflow: visible !important;
+  }
+
+  .puh-brand-group {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    gap: 6px !important;
+    overflow: hidden;
+  }
+
+  .puh-mobile-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    color: #ffffff;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+
+  .puh-mobile-back-btn:active {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .puh-hide-switcher-on-mobile-detail {
+    display: none !important;
+  }
+
+  /* Keep only the [A] logo mark on mobile; full text stays on desktop */
+  .puh-brand-link {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .puh-brand-link .brand-logo-text,
+  .puh-brand-link span {
+    display: none !important;
+  }
+
+  .puh-mobile-context-title {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1 1 auto;
+    line-height: 1.18;
+    overflow: hidden;
+  }
+
+  .puh-mobile-title-main {
+    font-size: 0.94rem;
+    font-weight: 650;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .puh-mobile-title-sub {
+    font-size: 0.69rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.72);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Remove mobile 2-row clutter: doctor pill & breadcrumb are replaced by App Bar back + title */
+  .puh-doctor-home-btn,
+  .puh-tier2 .puh-breadcrumb,
+  .puh-btn-rx-switcher,
+  .puh-actions-group .puh-locale-trigger {
+    display: none !important;
+  }
+
+  /* Keep Tier 2 ONLY if it has anchor/filter tabs; hide empty breadcrumb-only bar */
+  .puh-tier2:not(:has(.puh-tabs-list)):not(:has(.puh-callout-strip)) {
+    display: none !important;
+  }
+
+  .puh-actions-group {
+    flex-shrink: 0;
+    gap: 6px !important;
+    overflow: visible !important;
+  }
+
+  /* Section tab row with subtle edge fade */
+  .puh-tabs-list {
+    height: var(--tab-bar-h);
+    align-items: center;
+    mask-image: linear-gradient(to right, black 86%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 86%, transparent 100%);
+  }
+}
