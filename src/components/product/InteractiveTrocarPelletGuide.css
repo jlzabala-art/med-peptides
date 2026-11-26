@@ -64,7 +64,7 @@
   letter-spacing: 0.04em;
 }
 
-/* Step Progression Track */
+/* Step Progression Track (Desktop) */
 .trocar-step-track {
   display: flex;
   background: #f8fafc;
@@ -74,14 +74,109 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* Mobile-only GCP Connected Stepper */
+.trocar-mobile-stepper {
+  display: none;
+}
+
 @media (max-width: 768px) {
-  .trocar-step-track {
-    -webkit-mask-image: linear-gradient(to right, #000 90%, transparent 100%);
-    mask-image: linear-gradient(to right, #000 90%, transparent 100%);
-    padding-right: 20px;
+  .trocar-guide-header {
+    padding: 0.95rem 1rem;
   }
-  .trocar-step-btn {
-    min-height: 48px;
+  .trocar-guide-title {
+    font-size: 0.96rem;
+  }
+  .trocar-step-track {
+    display: none;
+  }
+  .trocar-mobile-stepper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .trocar-mobile-stepper-nodes {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .trocar-mobile-node {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    border: 1.5px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    font-size: 0.78rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+  .trocar-mobile-node.active {
+    background: #1a73e8;
+    border-color: #1a73e8;
+    color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.18);
+  }
+  .trocar-mobile-node.completed {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #ffffff;
+  }
+  .trocar-mobile-connector {
+    flex: 1;
+    height: 2px;
+    background: #cbd5e1;
+    margin: 0 4px;
+    transition: background-color 0.2s ease;
+  }
+  .trocar-mobile-connector.completed {
+    background: #16a34a;
+  }
+  .trocar-mobile-active-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+  .trocar-mobile-active-kicker {
+    font-size: 0.70rem;
+    font-weight: 800;
+    color: #1a73e8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .trocar-mobile-active-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #003666;
+    text-align: right;
+  }
+  .trocar-guide-footer {
+    padding: 0.75rem 1rem;
+  }
+  .trocar-nav-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .trocar-nav-controls button {
+    flex: 1;
+    min-height: 44px;
+    justify-content: center;
   }
 }
 

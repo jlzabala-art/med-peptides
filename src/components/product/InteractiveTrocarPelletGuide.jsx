@@ -187,7 +187,7 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
         </span>
       </div>
 
-      {/* ── STEP PROGRESSION TRACK ── */}
+      {/* ── STEP PROGRESSION TRACK (Desktop Tabs + Mobile GCP Connected Stepper) ── */}
       <div className="trocar-step-track" role="tablist">
         {STEPS_DATA.map((s, idx) => {
           const isActive = activeStepIndex === idx;
@@ -211,6 +211,40 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
             </button>
           );
         })}
+      </div>
+
+      {/* Mobile-Only GCP Connected Numbered Stepper (All 6 steps visible, zero truncation) */}
+      <div className="trocar-mobile-stepper" aria-label={isEs ? 'Progreso del protocolo quirúrgico' : 'Surgical protocol progress'}>
+        <div className="trocar-mobile-stepper-nodes">
+          {STEPS_DATA.map((s, idx) => {
+            const isActive = activeStepIndex === idx;
+            const isCompleted = idx < activeStepIndex;
+            return (
+              <React.Fragment key={s.id}>
+                <button
+                  type="button"
+                  onClick={() => setActiveStepIndex(idx)}
+                  aria-label={`${isEs ? 'Paso' : 'Step'} ${s.step}: ${isEs ? (s.shortEs || s.titleEs) : (s.shortEn || s.titleEn)}`}
+                  aria-current={isActive ? 'step' : undefined}
+                  className={`trocar-mobile-node ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                >
+                  {isCompleted ? '✓' : s.step}
+                </button>
+                {idx < STEPS_DATA.length - 1 && (
+                  <div className={`trocar-mobile-connector ${idx < activeStepIndex ? 'completed' : ''}`} />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+        <div className="trocar-mobile-active-label">
+          <span className="trocar-mobile-active-kicker">
+            {isEs ? `Paso ${currentStep.step} de ${STEPS_DATA.length}` : `Step ${currentStep.step} of ${STEPS_DATA.length}`}
+          </span>
+          <span className="trocar-mobile-active-name">
+            {isEs ? (currentStep.shortEs || currentStep.titleEs) : (currentStep.shortEn || currentStep.titleEn)}
+          </span>
+        </div>
       </div>
 
       {/* ── INTERACTIVE BODY (HIGH-CLARITY MEDICAL SVG + CLINICAL DIRECTIVES) ── */}

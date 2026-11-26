@@ -17,6 +17,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import TabSkeleton from '@/components/ui/TabSkeleton';
 import InlineEditableCell from '@/components/ui/InlineEditableCell';
 import EmptyState from '@/components/ui/EmptyState';
+import CopyableId from '@/components/ui/CopyableId';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import ProductDetailInline from './ProductDetailInline';
 import PriceScheduleRowActions from '@/components/pricing/shared/PriceScheduleRowActions';
@@ -313,47 +314,61 @@ export default function PriceScheduleSkuTable({
         width: showAdminWaterfall ? '38%' : '58%',
         sortable: true,
         sortValue: (row) => (row.name || row.canonicalName || row.id || '').toLowerCase(),
-        render: (val, row) => (
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 13, color: '#0f172a', lineHeight: 1.3 }}>
-              {row.name || row.canonicalName || row.id}
+        render: (val, row) => {
+          const brandStr = (row.brand || '').trim();
+          const subStr = (row.subcategory || '').trim();
+          const metaParts = [];
+          if (brandStr) metaParts.push(brandStr);
+          if (subStr && !subStr.toLowerCase().startsWith(brandStr.toLowerCase())) {
+            metaParts.push(subStr);
+          }
+          const uniqueMeta = [...new Set(metaParts)].join(' · ');
+
+          return (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: 600, fontSize: 13, color: '#0f172a', lineHeight: 1.3 }}>
+                  {row.name || row.canonicalName || row.id}
+                </span>
+                {row.id && <CopyableId value={row.id} />}
+              </div>
+              {(row.packSize || row.dosage) && (
+                <div style={{ fontSize: 11, color: '#475569', marginTop: 2, fontWeight: 500 }}>
+                  {row.packSize || row.dosage}
+                </div>
+              )}
+              {(uniqueMeta || row.requiresColdChain) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+                  {uniqueMeta && (
+                    <span style={{ fontSize: 10, color: '#64748b' }}>
+                      {uniqueMeta}
+                    </span>
+                  )}
+                  {row.requiresColdChain && (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 3,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: '#0369a1',
+                        background: '#e0f2fe',
+                        border: '1px solid #bae6fd',
+                        padding: '0px 6px',
+                        borderRadius: 10,
+                      }}
+                      title="Cold Chain 2°C – 8°C Required"
+                    >
+                      <Snowflake size={10} />
+                      <span>2–8°C</span>
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
-            {(row.packSize || row.dosage) && (
-              <div style={{ fontSize: 11, color: '#475569', marginTop: 2, fontWeight: 500 }}>
-                {row.packSize || row.dosage}
-              </div>
-            )}
-            {(row.brand || row.subcategory || row.requiresColdChain) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
-                {(row.brand || row.subcategory) && (
-                  <span style={{ fontSize: 10, color: '#64748b' }}>
-                    {[row.brand, row.subcategory].filter(Boolean).join(' · ')}
-                  </span>
-                )}
-                {row.requiresColdChain && (
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 3,
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: '#0369a1',
-                      background: '#e0f2fe',
-                      border: '1px solid #bae6fd',
-                      padding: '0px 6px',
-                      borderRadius: 10,
-                    }}
-                    title="Cold Chain 2°C – 8°C Required"
-                  >
-                    <Snowflake size={10} />
-                    <span>2–8°C</span>
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        ),
+          );
+        },
       },
       {
         key: 'status',
@@ -480,8 +495,8 @@ export default function PriceScheduleSkuTable({
         key: 'price',
         label:
           effectiveTier === 'clinic'
-            ? 'Clinic / Doctor Price (+45%)'
-            : 'Wholesale Price (Cost × 1.3225)',
+            ? (isAdmin ? 'Clinic / Doctor Price (+45%)' : 'Clinic Price')
+            : (isAdmin ? 'Wholesale Price (Cost × 1.3225)' : 'Wholesale Price'),
         width: '26%',
         sortable: true,
         sortValue: (row) => {
@@ -572,18 +587,14 @@ export default function PriceScheduleSkuTable({
           <button
             type="button"
             onClick={() => loadProducts(true)}
+            className="gcp-btn-secondary"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 5,
               padding: '6px 10px',
-              borderRadius: 6,
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#ffffff',
-              color: '#475569',
               fontSize: 12,
               fontWeight: 600,
-              cursor: 'pointer',
             }}
             title="Force refresh from Firestore"
           >
@@ -594,44 +605,36 @@ export default function PriceScheduleSkuTable({
           <button
             type="button"
             onClick={handleExportCsv}
+            className="gcp-btn-secondary"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 5,
               padding: '6px 12px',
-              borderRadius: 6,
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#ffffff',
-              color: '#334155',
               fontSize: 12,
               fontWeight: 600,
-              cursor: 'pointer',
             }}
             title="Export filtered references to CSV"
           >
-            <FileDown size={13} color="#0284c7" />
+            <FileDown size={13} />
             <span>CSV</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleExportPdf(false)}
+            className="gcp-btn-secondary"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 5,
               padding: '6px 12px',
-              borderRadius: 6,
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#ffffff',
-              color: '#334155',
               fontSize: 12,
               fontWeight: 600,
-              cursor: 'pointer',
             }}
             title="Download filtered PDF price schedule"
           >
-            <FileText size={13} color="#d97706" />
+            <FileText size={13} />
             <span>PDF</span>
           </button>
         </div>

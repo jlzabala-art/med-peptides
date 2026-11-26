@@ -477,6 +477,50 @@ export default function PelletImplantationGuideClient() {
           -webkit-overflow-scrolling: touch;
         }
         .pellet-ops-tabs-scroll::-webkit-scrollbar { display: none; }
+        .pellet-ops-tab-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 12px 14px;
+          min-height: 44px;
+          background: transparent;
+          border: none;
+          border-bottom: 2.5px solid transparent;
+          color: #5f6368;
+          font-size: 0.80rem;
+          font-weight: 600;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+        .pellet-ops-tab-btn.active {
+          border-bottom-color: #1a73e8;
+          color: #1a73e8;
+          font-weight: 700;
+        }
+        .pellet-planner-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .pellet-planner-label {
+          font-size: 0.72rem;
+          font-weight: 800;
+          color: #475569;
+          text-transform: uppercase;
+          min-width: 115px;
+        }
+        .pellet-planner-pills {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .pellet-guide-main {
+          max-width: 1240px;
+          margin: 0 auto;
+          padding: 1.5rem 1.5rem 6.5rem;
+        }
         .pellet-guide-pill-btn {
           padding: 7px 12px;
           border-radius: 6px;
@@ -489,14 +533,63 @@ export default function PelletImplantationGuideClient() {
           transition: all 0.15s ease;
         }
         @media (max-width: 768px) {
+          .pellet-guide-main {
+            padding: 0.9rem 0.75rem 6.5rem;
+          }
+          .pellet-planner-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+          }
+          .pellet-planner-label {
+            min-width: 0;
+          }
+          .pellet-planner-pills {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+          }
+          .pellet-planner-pills--3 > :last-child {
+            grid-column: 1 / -1;
+          }
           .pellet-guide-pill-btn {
             min-height: 44px;
-            padding: 8px 12px;
+            padding: 8px 10px;
+            font-size: 0.75rem;
+            text-align: center;
+            line-height: 1.25;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
           .pellet-ops-tabs-scroll {
-            -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%);
-            mask-image: linear-gradient(to right, #000 88%, transparent 100%);
-            padding-right: 22px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px;
+            padding: 10px 0;
+            width: 100%;
+            overflow-x: visible;
+          }
+          .pellet-ops-tab-btn {
+            border: 1px solid #dadce0;
+            border-bottom: 1px solid #dadce0;
+            border-radius: 8px;
+            background: #ffffff;
+            padding: 8px 10px;
+            font-size: 0.73rem;
+            white-space: normal;
+            text-align: left;
+            line-height: 1.25;
+            justify-content: flex-start;
+          }
+          .pellet-ops-tab-btn.active {
+            background: #e8f0fe;
+            border-color: #1a73e8;
+            border-bottom-color: #1a73e8;
+            color: #1a73e8;
+          }
+          .pellet-ops-tabs-scroll > :last-child {
+            grid-column: 1 / -1;
           }
         }
         .pellet-guide-pill-btn:hover {
@@ -673,7 +766,7 @@ export default function PelletImplantationGuideClient() {
       </div>
 
       {/* ── MAIN CONTENT CONTAINER (Generous bottom padding so floating dock never overlaps) ── */}
-      <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '1.5rem 1.5rem 6.5rem' }}>
+      <div className="pellet-guide-main">
 
         {/* ── BLOCK 1: 4 CLINICAL KPI METRIC CARDS (GCP Standard · Rule #22) ── */}
         <div className="pellet-guide-kpi-grid">
@@ -783,39 +876,43 @@ export default function PelletImplantationGuideClient() {
             </span>
           </div>
 
-          <div style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* Selectors Row */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', minWidth: '115px' }}>
+          <div style={{ padding: '1.15rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Selectors Row (GCP Stacked Form Groups on Mobile) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="pellet-planner-row">
+                <span className="pellet-planner-label">
                   {isEs ? '1. Perfil Clínico:' : '1. Clinical Profile:'}
                 </span>
-                {CLINICAL_PROFILES.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setSelectedProfileId(p.id)}
-                    className={`pellet-guide-pill-btn ${selectedProfileId === p.id ? 'active' : ''}`}
-                  >
-                    {isEs ? p.labelEs : p.labelEn}
-                  </button>
-                ))}
+                <div className="pellet-planner-pills">
+                  {CLINICAL_PROFILES.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setSelectedProfileId(p.id)}
+                      className={`pellet-guide-pill-btn ${selectedProfileId === p.id ? 'active' : ''}`}
+                    >
+                      {isEs ? p.labelEs : p.labelEn}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', minWidth: '115px' }}>
+              <div className="pellet-planner-row">
+                <span className="pellet-planner-label">
                   {isEs ? '2. Composición:' : '2. Body Habitus:'}
                 </span>
-                {BODY_HABITUS.map((h) => (
-                  <button
-                    key={h.id}
-                    type="button"
-                    onClick={() => setSelectedHabitusId(h.id)}
-                    className={`pellet-guide-pill-btn ${selectedHabitusId === h.id ? 'active' : ''}`}
-                  >
-                    {isEs ? h.labelEs : h.labelEn}
-                  </button>
-                ))}
+                <div className="pellet-planner-pills pellet-planner-pills--3">
+                  {BODY_HABITUS.map((h) => (
+                    <button
+                      key={h.id}
+                      type="button"
+                      onClick={() => setSelectedHabitusId(h.id)}
+                      className={`pellet-guide-pill-btn ${selectedHabitusId === h.id ? 'active' : ''}`}
+                    >
+                      {isEs ? h.labelEs : h.labelEn}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -1203,23 +1300,9 @@ export default function PelletImplantationGuideClient() {
                     role="tab"
                     aria-selected={active}
                     onClick={() => setOpsTab(t.id)}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '12px 14px',
-                      minHeight: '44px',
-                      background: 'transparent',
-                      border: 'none',
-                      borderBottom: active ? '2.5px solid #1a73e8' : '2.5px solid transparent',
-                      color: active ? '#1a73e8' : '#5f6368',
-                      fontSize: '0.80rem',
-                      fontWeight: active ? 700 : 600,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                    }}
+                    className={`pellet-ops-tab-btn ${active ? 'active' : ''}`}
                   >
-                    <Icon size={15} />
+                    <Icon size={15} style={{ flexShrink: 0 }} />
                     <span>{isEs ? t.es : t.en}</span>
                   </button>
                 );
