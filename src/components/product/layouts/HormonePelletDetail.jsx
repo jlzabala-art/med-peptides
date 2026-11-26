@@ -161,6 +161,12 @@ export default function HormonePelletDetail({
   const isEstrogen = p.hormoneType === 'estrogen' || (p.name || '').toLowerCase().includes('estradiol');
   const isTestosterone = p.hormoneType === 'androgen' || (p.name || '').toLowerCase().includes('testosterone');
 
+  // White-label: strip any supplier mention from commercialName for public display
+  const publicCommercialName = useMemo(() => {
+    const raw = p.commercialName || p.canonicalName || p.name || '';
+    return raw.replace(/\s*·\s*(Pharmapolis|NP Labs?|DN Lab|EU GMP Compounding Network)[^·]*/i, '').trim();
+  }, [p.commercialName, p.canonicalName, p.name]);
+
   const currentTabIndex = useMemo(() => {
     const idx = TABS.findIndex((t) => t.id === activeTab);
     return idx >= 0 ? idx : 0;
@@ -190,7 +196,7 @@ export default function HormonePelletDetail({
         brand: 'Atlas Health Services • EU GMP',
       },
       bottomBar: {
-        summaryTitle: p.commercialName || p.name || 'Bioidentical Hormone Pellet',
+        summaryTitle: publicCommercialName || p.name || 'Bioidentical Hormone Pellet',
         summarySubtitle: `${p.strength || ''} · Subcutaneous Trocar Implant · EU GMP`,
         badge: 'EU GMP Certified',
         atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
@@ -208,7 +214,7 @@ export default function HormonePelletDetail({
         },
       },
     },
-    [p.name, p.commercialName, p.strength, isEs]
+    [p.name, p.commercialName, p.strength, isEs, publicCommercialName]
   );
 
   return (
@@ -244,7 +250,7 @@ export default function HormonePelletDetail({
                   <FlaskConical size={18} />
                 </div>
                 <h1 className="gcp-resource-title">
-                  {p.commercialName || p.canonicalName || p.name}
+                  {publicCommercialName}
                 </h1>
                 
                 {/* GCP Status Badge Semántico */}
@@ -341,7 +347,7 @@ export default function HormonePelletDetail({
             </div>
 
             <h1 className="pellet-hero-title">
-              {p.commercialName || p.canonicalName || p.name}
+              {publicCommercialName}
             </h1>
 
             <p className="pellet-hero-subtitle">
@@ -1216,7 +1222,7 @@ export default function HormonePelletDetail({
         brandType="hormone_pellet"
         lang={lang}
         initialEntity={{
-          name: p.commercialName || p.canonicalName || p.name,
+          name: publicCommercialName || p.canonicalName || p.name,
           slug: slug,
           code: p.sku || 'SKU-PHARM-HORM',
           strength: p.strength,
@@ -1233,7 +1239,7 @@ export default function HormonePelletDetail({
         onClose={() => setIsShareDrawerOpen(false)}
         product={{
           id: p.id || slug,
-          name: p.commercialName || p.canonicalName || p.name,
+          name: publicCommercialName || p.canonicalName || p.name,
           slug: slug,
           strength: p.strength,
           category: p.category || 'Hormone Pellets',

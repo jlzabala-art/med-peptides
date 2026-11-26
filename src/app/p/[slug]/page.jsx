@@ -4,6 +4,8 @@ import { notFound, redirect } from 'next/navigation';
 import { adminDb } from '../../../lib/firebaseAdmin';
 import { processProductVariants } from '../../../utils/productVariantProcessing';
 import { sanitizePublicProduct } from '../../../repositories/publicDataSanitizer';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
+import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
 import { deriveCanonicalIdentity } from '../../../utils/canonicalProductRegistry';
 import PublicDatasheetView from '../../../components/product/PublicDatasheetView';
 import AestheticInjectableDetail from '../../../components/product/layouts/AestheticInjectableDetail';
@@ -94,8 +96,8 @@ async function getPublicProduct(slug, supplierFilter = null) {
         ...pelletProduct,
         ...sanitized,
         isSingleSupplierLocked: true,
-        availableSuppliers: [{ id: 'supplier-pharmapolis', name: 'Pharmapolis Compounding Pharmacy', isPen: false, isSpray: false }],
-        activeSupplierId: 'supplier-pharmapolis',
+        availableSuppliers: [{ id: 'supplier-atlas-eu-gmp', name: 'EU GMP Certified Network', isPen: false, isSpray: false }],
+        activeSupplierId: 'supplier-atlas-eu-gmp',
         processedHierarchy,
       };
       PUBLIC_PRODUCT_RAM_CACHE.set(cacheKey, {
@@ -132,8 +134,8 @@ async function getPublicProduct(slug, supplierFilter = null) {
         ...supplement,
         ...sanitized,
         isSingleSupplierLocked: true,
-        availableSuppliers: [{ id: 'supplier-pharmapolis', name: 'Pharmapolis Compounding Pharmacy', isPen: false, isSpray: false }],
-        activeSupplierId: 'supplier-pharmapolis',
+        availableSuppliers: [{ id: 'supplier-atlas-eu-gmp', name: 'EU GMP Certified Network', isPen: false, isSpray: false }],
+        activeSupplierId: 'supplier-atlas-eu-gmp',
         processedHierarchy,
       };
       PUBLIC_PRODUCT_RAM_CACHE.set(cacheKey, {
@@ -714,28 +716,30 @@ export default async function PublicProductRoute({ params, searchParams }) {
     notFound();
   }
 
-  const safeProduct = sanitizeForClient(product);
+  const rawSafeProduct = sanitizeForClient(product);
+  const isAdmin = await isAdminServerSession();
+  const safeProduct = sanitizePublicProductForViewer(rawSafeProduct, { isAdmin });
   const associatedProtocols = await getAssociatedProtocols(safeProduct.id, slug, safeProduct.canonicalName || safeProduct.name);
   const jsonLd = generateProductJsonLd(safeProduct, BASE_URL);
 
-  const catLower = (safeProduct.category || '').toLowerCase();
-  const typeLower = (safeProduct.type || safeProduct.productType || '').toLowerCase();
-  const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || catLower === 'dermal_filler' || catLower === 'skin_booster' || catLower === 'biostimulator' || catLower === 'hybrid_biostimulator' || catLower === 'polynucleotide' || catLower === 'body_contouring' || (safeProduct.category_taxonomy || '').toLowerCase() === 'aesthetic injectables' || (safeProduct.primaryType || '').toLowerCase() === 'aesthetic_injectable' || typeLower === 'aesthetic_injectable' || safeProduct.is_aesthetic_injectable === true || isKnownInjectableSlug(slug);
-  const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || catLower === 'trichology_hair_care' || catLower === 'nutricosmetics' || safeProduct.is_cosmetic === true || slug.toLowerCase().startsWith('colway-') || slug.toLowerCase().startsWith('mcg-');
-  const isRawApi = typeLower === 'raw_api' || typeLower === 'raw_material' || catLower === 'raw_material' || catLower === 'compounding_material' || safeProduct.is_raw_api === true;
+  const catLower = (rawSafeProduct.category || '').toLowerCase();
+  const typeLower = (rawSafeProduct.type || rawSafeProduct.productType || '').toLowerCase();
+  const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || catLower === 'dermal_filler' || catLower === 'skin_booster' || catLower === 'biostimulator' || catLower === 'hybrid_biostimulator' || catLower === 'polynucleotide' || catLower === 'body_contouring' || (rawSafeProduct.category_taxonomy || '').toLowerCase() === 'aesthetic injectables' || (rawSafeProduct.primaryType || '').toLowerCase() === 'aesthetic_injectable' || typeLower === 'aesthetic_injectable' || rawSafeProduct.is_aesthetic_injectable === true || isKnownInjectableSlug(slug);
+  const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || catLower === 'trichology_hair_care' || catLower === 'nutricosmetics' || rawSafeProduct.is_cosmetic === true || slug.toLowerCase().startsWith('colway-') || slug.toLowerCase().startsWith('mcg-');
+  const isRawApi = typeLower === 'raw_api' || typeLower === 'raw_material' || catLower === 'raw_material' || catLower === 'compounding_material' || rawSafeProduct.is_raw_api === true;
   const isEterna = slug.toLowerCase().includes('eterna') || 
-    (safeProduct.supplierId || '').toLowerCase().includes('eternadx') || 
-    (safeProduct.canonicalKey || '').toLowerCase().includes('eterna') || 
-    (safeProduct.name || '').toLowerCase().includes('eterna');
+    (rawSafeProduct.supplierId || '').toLowerCase().includes('eterna') || 
+    (rawSafeProduct.canonicalKey || '').toLowerCase().includes('eterna') || 
+    (rawSafeProduct.name || '').toLowerCase().includes('eterna');
   const isTeletest = slug.toLowerCase().startsWith('teletest-') ||
-    (safeProduct.supplierId || '').toLowerCase().includes('teletest') ||
-    (safeProduct.canonicalKey || '').toLowerCase().includes('teletest') ||
-    (safeProduct.name || '').toLowerCase().includes('teletest') ||
-    (safeProduct.brand || '').toLowerCase().includes('teletest');
+    (rawSafeProduct.supplierId || '').toLowerCase().includes('teletest') ||
+    (rawSafeProduct.canonicalKey || '').toLowerCase().includes('teletest') ||
+    (rawSafeProduct.name || '').toLowerCase().includes('teletest') ||
+    (rawSafeProduct.brand || '').toLowerCase().includes('teletest');
 
-  const isNorma = (safeProduct.brand || '').toLowerCase().includes('norma') ||
-    (safeProduct.supplierId || '').toLowerCase().includes('norma') ||
-    (safeProduct.canonicalKey || '').toLowerCase().includes('norma') ||
+  const isNorma = (rawSafeProduct.brand || '').toLowerCase().includes('norma') ||
+    (rawSafeProduct.supplierId || '').toLowerCase().includes('norma') ||
+    (rawSafeProduct.canonicalKey || '').toLowerCase().includes('norma') ||
     slug.toLowerCase().includes('norma') ||
     slug.toLowerCase() === 'testosterone-enanthate-norma-250mg' ||
     slug.toLowerCase() === 'testosterone-enanthate';

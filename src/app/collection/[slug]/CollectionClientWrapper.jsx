@@ -17,7 +17,7 @@ const BLOCK1_CATALOG_ITEMS = [
   { slug: '24genomics', label: '24Genomics', href: '/collection/24genomics' },
   { slug: 'colway', label: 'Colway', href: '/collection/colway' },
   { slug: 'bloodo', label: 'Bloodo', href: '/collection/bloodo' },
-  { slug: 'hormones', label: 'Hormones (Pharmapolis)', href: '/collection/hormones' },
+  { slug: 'hormones', label: 'Hormones', href: '/collection/hormones' },
   { slug: 'hair-treatments', label: 'Hair Treatments', href: '/collection/hair-treatments' },
   { slug: 'teletest', label: 'TeleTest', href: '/collection/teletest' },
   { slug: 'eterna', label: 'ETERNA', href: '/collection/eterna' },

@@ -53,7 +53,7 @@ const BRAND_METADATA = {
     description: 'Medical-grade personalization supplements with CoQ10, PQQ, Ashwagandha, Bacopa monnieri, and Apigenin in acid-resistant vegan HPMC capsules. 3-Month AAA Protocol synergy.',
     image: `${BASE_URL}/assets/vials/eterna-longevity.png`,
     section: 'Precision Personalization & Longevity Supplements',
-    keywords: ['UltraPerson', 'PharmaPolis', 'Mitochondrial CoQ10 PQQ', 'Cognitive Focus Bacopa', 'Stress Resilience Ashwagandha', 'Sleep Apigenin', 'Longevity Cellular Renewal']
+    keywords: ['UltraPerson', 'EU GMP', 'Mitochondrial CoQ10 PQQ', 'Cognitive Focus Bacopa', 'Stress Resilience Ashwagandha', 'Sleep Apigenin', 'Longevity Cellular Renewal']
   },
   eterna: {
     title: 'ETERNA® Multi-Omics Diagnostics & Organ Proteomics | Atlas Collection',
@@ -660,7 +660,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
         }
       }
     } catch (e) {
-      console.warn('[fetchTargetedBrandProducts] Hormones Firestore error, using Pharmapolis registry:', e.message);
+      console.warn('[fetchTargetedBrandProducts] Hormones Firestore error, using EU GMP registry:', e.message);
     }
     return pharmapolisList;
   }

@@ -207,8 +207,8 @@ function resolveContextualScreenHelp(pathname = '/', screenContext = null, isEs 
         ? 'Pellets Hormonales Subcutáneos y Kits Quirúrgicos (EU GMP)'
         : 'Subcutaneous Hormone Pellets & Surgical Trocar Kits (EU GMP)'),
       subtitle: isEs
-        ? 'Pharmapolis Compounding · Esterilización E-Beam SAL 10⁻⁶ · Liberación 3–6 meses'
-        : 'Pharmapolis Compounding · E-Beam Sterilized SAL 10⁻⁶ · 3–6 Month Zero-Order Release',
+        ? 'EU GMP Compounding · Esterilización E-Beam SAL 10⁻⁶ · Liberación 3–6 meses'
+        : 'EU GMP Compounding · E-Beam Sterilized SAL 10⁻⁶ · 3–6 Month Zero-Order Release',
       summaryGuide: isEs
         ? 'Filtra por tipo hormonal (Testosterona, Estradiol, Progesterona, Biest, DHEA o Kits de Trócar), verifica el calibre de trócar compatible (3.2 mm vs 4.5 mm) y añade unidades sueltas o cajas Pack ×10 (-10%).'
         : 'Filter by hormone line (Testosterone, Estradiol, Progesterone, Biest, DHEA, or Trocar Kits), verify compatible trocar gauge (3.2 mm vs 4.5 mm), and select Single Units or Pack ×10 boxes (-10%).',
@@ -216,13 +216,13 @@ function resolveContextualScreenHelp(pathname = '/', screenContext = null, isEs 
         ? [
             '¿Qué calibre de trócar (3.2 mm vs 4.5 mm) corresponde a cada concentración de pellet hormonal?',
             '¿Qué diferencia hay entre los pellets de Testosterona de 100 mg y 200 mg y cuánto dura su liberación?',
-            '¿Cómo funciona el descuento institucional del -10% en cajas Pack ×10 de Pharmapolis EU GMP?',
+            '¿Cómo funciona el descuento institucional del -10% en cajas Pack ×10 EU GMP?',
             '¿Dónde abro la Guía Quirúrgica Interactiva de Implante Subcutáneo con Trócar?',
           ]
         : [
             'Which surgical trocar gauge (3.2 mm vs 4.5 mm) matches each hormone pellet strength?',
             'How do the 100 mg and 200 mg Testosterone pellets compare in release duration and dimensions?',
-            'How does the -10% institutional discount work on Pack ×10 boxes of Pharmapolis EU GMP pellets?',
+            'How does the -10% institutional discount work on Pack ×10 boxes of EU GMP pellets?',
             'Where do I open the Interactive Subcutaneous Trocar Implantation Clinical Guide?',
           ]),
     };

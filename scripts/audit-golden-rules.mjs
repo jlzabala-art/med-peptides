@@ -46,12 +46,14 @@ const clientRootPages = [];
 const supplierLeaks = [];
 
 const PUBLIC_WHITE_LABEL_PATHS = [
-  'src/app/pricing/pellets/',
+  'src/app/p/',
+  'src/app/pricing/',
   'src/app/guides/',
-  'src/components/product/layouts/HormonePelletDetail.jsx',
-  'src/components/product/InteractiveTrocarPelletGuide.jsx',
-  'src/components/product/SupplementTechnicalSpecs.jsx',
-  'src/components/product/ProductRegulatoryWarningsSection.jsx',
+  'src/app/vials/',
+  'src/app/catalog/',
+  'src/app/collection/',
+  'src/components/product/',
+  'src/components/ui/HelpDrawer.jsx',
 ];
 
 for (const file of srcFiles) {
@@ -104,7 +106,8 @@ for (const file of srcFiles) {
       !trimmed.startsWith('//') &&
       !trimmed.startsWith('*') &&
       /['"`][^'"`]*pharmapolis[^'"`]*['"`]/i.test(line) &&
-      !/getAllPharmapolis|isPharmapolisPelletSlug|getPharmapolis/i.test(line)
+      !/getAllPharmapolis|isPharmapolisPelletSlug|getPharmapolis|enrichedPharmapolisProducts/i.test(line) &&
+      !/['"`](supplier-pharmapolis|pharmapolis|pharmapolis-hormone-|pharmapolis-hrt|pharmapolis_all|pharmapolis_bulk)['"`]/i.test(line)
     ) {
       supplierLeaks.push(`${rel}:${ln}`);
     }

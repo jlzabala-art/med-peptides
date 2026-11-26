@@ -3,6 +3,7 @@ const SUPPLIER_TEXT_REGEX = /\b(pharmapolis(\s+compounding\s+pharmacy)?(\s+bulga
 export function scrubSupplierText(val) {
   if (typeof val !== 'string') return val;
   return val
+    .replace(/\s*·\s*(Pharmapolis|NP\s*Labs?|DN\s*Labs?|Fagron|BioBlend)[^·]*/gi, '')
     .replace(SUPPLIER_TEXT_REGEX, 'EU GMP Facility')
     .replace(/\(\s*Bulgaria\s*\)/gi, '(EU)')
     .replace(/\bBulgaria\b/gi, 'EU')
@@ -47,6 +48,12 @@ export function sanitizePublicProductForViewer(product, { isAdmin = false } = {}
   delete sanitized.vendorName;
   delete sanitized.originCountry;
   delete sanitized.supplierOffers;
+  delete sanitized.availableSuppliers;
+  delete sanitized.activeSupplierId;
+  delete sanitized.activeSupplierName;
+  delete sanitized.dispensingPharmacy;
+  delete sanitized.supplierSku;
+  delete sanitized.supplierRef;
   delete sanitized.costPriceEur;
   delete sanitized.pharmapolisPrice;
   delete sanitized.nplabPrice;
@@ -55,9 +62,28 @@ export function sanitizePublicProductForViewer(product, { isAdmin = false } = {}
   if (sanitized.sku) sanitized.sku = scrubSku(sanitized.sku);
   if (sanitized.name) sanitized.name = scrubSupplierText(sanitized.name);
   if (sanitized.canonicalName) sanitized.canonicalName = scrubSupplierText(sanitized.canonicalName);
+  if (sanitized.commercialName) sanitized.commercialName = scrubSupplierText(sanitized.commercialName);
+  if (sanitized.displayName) sanitized.displayName = scrubSupplierText(sanitized.displayName);
+  if (sanitized.brand) sanitized.brand = scrubSupplierText(sanitized.brand);
+  if (sanitized.provenance) sanitized.provenance = scrubSupplierText(sanitized.provenance);
+  if (sanitized.laboratory) sanitized.laboratory = scrubSupplierText(sanitized.laboratory);
   if (sanitized.shortDescription) sanitized.shortDescription = scrubSupplierText(sanitized.shortDescription);
   if (sanitized.description) sanitized.description = scrubSupplierText(sanitized.description);
   if (sanitized.clinicalFocus) sanitized.clinicalFocus = scrubSupplierText(sanitized.clinicalFocus);
+
+  if (Array.isArray(sanitized.variants)) {
+    sanitized.variants = sanitized.variants.map((v) => {
+      if (!v || typeof v !== 'object') return v;
+      const cv = { ...v };
+      delete cv.supplier;
+      delete cv.supplierName;
+      delete cv.supplierId;
+      delete cv.supplierSku;
+      if (cv.sku) cv.sku = scrubSku(cv.sku);
+      if (cv.name) cv.name = scrubSupplierText(cv.name);
+      return cv;
+    });
+  }
 
   if (sanitized.pricing && typeof sanitized.pricing === 'object') {
     const cleanPricing = { ...sanitized.pricing };
