@@ -113,7 +113,7 @@ export default function PharmacyOpsWorkspaceBar({ lang = 'en' }) {
 
   return (
     <div
-      className="no-print"
+      className={canQuickSearchRx ? 'no-print' : 'no-print atlas-hide-when-footer-nav'}
       style={{
         background: '#ffffff',
         borderBottom: '1px solid #dadce0',
@@ -134,9 +134,9 @@ export default function PharmacyOpsWorkspaceBar({ lang = 'en' }) {
           flexWrap: 'wrap',
         }}
       >
-        {/* Left: 4 Pharmacy & Rx Tool Tabs (Horizontal scroll on mobile with fade) */}
+        {/* Left: 4 Pharmacy & Rx Tool Tabs (Desktop >=1024px; on mobile/tablet lives in B2BUniversalMenu footer) */}
         <div
-          className="atlas-chip-rail"
+          className="atlas-chip-rail atlas-hide-when-footer-nav"
           style={{
             gap: '4px',
             maxWidth: '100%',

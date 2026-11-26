@@ -136,7 +136,7 @@ export default function ClinicalFormatSwitcher({
   return (
     <nav
       aria-label={isEs ? 'Selector rápido de formato clínico' : 'Clinical format switcher'}
-      className="atlas-format-switcher-nav"
+      className="atlas-format-switcher-nav atlas-hide-when-footer-nav"
     >
       <style dangerouslySetInnerHTML={{ __html: `
         .atlas-format-switcher-nav {

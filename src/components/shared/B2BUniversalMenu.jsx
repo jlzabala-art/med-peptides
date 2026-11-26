@@ -140,6 +140,11 @@ export default function B2BUniversalMenu({
           .b2b-edge-trigger {
             display: none !important;
           }
+          ${!hideMobileBar ? `
+          .atlas-hide-when-footer-nav {
+            display: none !important;
+          }
+          ` : ''}
           .b2b-mobile-bottom-bar {
             position: fixed;
             bottom: 0;
