@@ -221,6 +221,10 @@ const nextConfig = {
         source: '/llms.txt',
         destination: '/api/llms',
       },
+      {
+        source: '/openapi-atlas-peptides.json',
+        destination: '/api/public/peptides-directory?format=openapi',
+      },
     ];
   },
 };

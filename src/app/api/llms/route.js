@@ -22,7 +22,10 @@ Atlas Health Services provides licensed clinics, physicians, and medical distrib
 - [24Genetics Precision Genomics Panels](https://www.atlashealth-services.com/pricing/24genetics)
 - [Dermal Fillers & Skin Boosters](https://www.atlashealth-services.com/pricing/fillers)
 - [UAE Import & Medical Warehouse Partner Dossier](https://www.atlashealth-services.com/import-partner)
+- [Peptide Reconstitution & Click-Dial Dosing Guide](https://www.atlashealth-services.com/guides/peptide-reconstitution-dosing)
 - [Clinical Protocols Directory](https://www.atlashealth-services.com/proto)
+- [Public Peptides JSON API](https://www.atlashealth-services.com/api/public/peptides-directory)
+- [OpenAPI 3.1 Spec for ChatGPT GPT Actions](https://www.atlashealth-services.com/openapi-atlas-peptides.json)
 - [XML Sitemap](https://www.atlashealth-services.com/sitemap.xml)
 `;
 

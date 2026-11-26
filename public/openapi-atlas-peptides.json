@@ -1,0 +1,76 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Atlas Health Services — Clinical Peptides & Formularies API",
+    "description": "Public read-only clinical peptide directory for ChatGPT GPT Actions and AI assistants. Returns sanitized cGMP peptide vial specifications, categories, B2B reference pricing, and official monograph URLs.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://www.atlashealth-services.com"
+    }
+  ],
+  "paths": {
+    "/api/public/peptides-directory": {
+      "get": {
+        "operationId": "searchClinicalPeptides",
+        "summary": "Search Atlas Health Services clinical peptide vials, dosages, and B2B schedules",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Peptide name, blend, or indication keyword (e.g., BPC-157, Tirzepatide, GHK-Cu, NAD+, MOTS-c)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "specialty",
+            "in": "query",
+            "required": false,
+            "description": "Optional clinical specialty filter (e.g., longevity, metabolic, gynecology, dermatology, urology)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return (1-60)",
+            "schema": { "type": "integer", "default": 20 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching clinical peptide specifications and monograph links",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "provider": { "type": "string" },
+                    "website": { "type": "string" },
+                    "count": { "type": "integer" },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "sku": { "type": "string" },
+                          "category": { "type": "string" },
+                          "dosage": { "type": "string" },
+                          "presentation": { "type": "string" },
+                          "wholesalePriceEur": { "type": "number" },
+                          "url": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
