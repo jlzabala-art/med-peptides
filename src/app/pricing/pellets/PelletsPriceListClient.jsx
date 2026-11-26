@@ -790,27 +790,6 @@ export default function PelletsPriceListClient({
             <ExternalLink size={12} />
           </Link>
 
-          {row.category !== 'Trocar Kits' && (
-            <Link
-              href={`/p/${row.slug}`}
-              target="_blank"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '0.74rem',
-                color: '#003666',
-                fontWeight: 700,
-                textDecoration: 'none',
-                marginTop: '4px'
-              }}
-            >
-              <FileText size={13} />
-              <span>{isEs ? 'Abrir Monografía Completa (7 Secciones)' : 'Open Full Clinical Monograph (7 Tabs)'}</span>
-              <ExternalLink size={12} />
-            </Link>
-          )}
-
           {/* Cross-Catalog Peptide Synergies (1-Click Navigation to /pricing/peptides) */}
           <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e2e8f0', width: '100%' }}>
             <div style={{ fontSize: '0.66rem', fontWeight: 750, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#7c3aed', marginBottom: '5px' }}>
@@ -1293,9 +1272,9 @@ export default function PelletsPriceListClient({
                 </span>
                 {[
                   { id: 'all', label: isEs ? 'Todos' : 'All Formulations' },
-                  { id: 'female', label: isEs ? '♀️ Mujer / Menopausia' : '♀️ Female BHRT' },
-                  { id: 'male', label: isEs ? '♂️ Hombre / TRT' : '♂️ Male TRT' },
-                  { id: 'trocar', label: isEs ? '🧰 Kits Trócar' : '🧰 Trocar Kits' },
+                  { id: 'female', label: isEs ? 'Mujer / BHRT' : 'Female BHRT' },
+                  { id: 'male', label: isEs ? 'Hombre / TRT' : 'Male TRT' },
+                  { id: 'trocar', label: isEs ? 'Kits Trócar' : 'Trocar Kits' },
                 ].map((prof) => {
                   const active = selectedProfile === prof.id;
                   return (
@@ -1437,26 +1416,6 @@ export default function PelletsPriceListClient({
                   </button>
                 </div>
               )}
-            </div>
-
-            {/* 3-Point Clinical Decision Strip for Gynecologists & Endocrinologists */}
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '8px',
-              marginBottom: '10px',
-              fontSize: '0.72rem',
-              color: '#334155',
-            }}>
-              <span style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 10px', fontWeight: 600 }}>
-                ✓ {isEs ? '0% Primer Paso Hepático (Sin SHBG/trombosis oral)' : '0% Hepatic First-Pass (No oral SHBG spike)'}
-              </span>
-              <span style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 10px', fontWeight: 600 }}>
-                ✓ {isEs ? 'Liberación Meseta 3.5–6 Meses (Orden cero)' : '3.5–6 Month Zero-Order Plateau'}
-              </span>
-              <span style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 10px', fontWeight: 600 }}>
-                ✓ {isEs ? 'Esterilidad E-Beam SAL 10⁻⁶ (Blíster monodosis)' : 'E-Beam SAL 10⁻⁶ Sterility (Single-dose blister)'}
-              </span>
             </div>
 
             {/* DataTable (Strict Rule #3 & Rule #4 + Symmetric Mobile Card UX) */}

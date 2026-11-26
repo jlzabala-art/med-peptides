@@ -294,7 +294,7 @@ export default function B2BUniversalMenu({
                 <span style={{ fontSize: '0.86rem', fontWeight: 800, letterSpacing: '0.02em' }}>
                   {isSpanish ? 'Navegación B2B' : 'B2B Navigation'}
                 </span>
-                <span style={{ fontSize: '0.65rem', opacity: 0.75, background: 'rgba(255,255,255,0.16)', padding: '1px 6px', borderRadius: '4px' }}>
+                <span className="hide-on-mobile-header" style={{ fontSize: '0.65rem', opacity: 0.75, background: 'rgba(255,255,255,0.16)', padding: '1px 6px', borderRadius: '4px' }}>
                   ⌘B
                 </span>
               </div>
@@ -321,9 +321,10 @@ export default function B2BUniversalMenu({
 
             {/* Scrollable Body (Rule #7: Search First) */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-              {/* 1. Quick Search (Rule #7: Search is ALWAYS first) */}
+              {/* 1. Quick Search (Desktop rail; on mobile Search lives in bottom bar) */}
               <button
                 type="button"
+                className="hide-on-mobile-header"
                 onClick={triggerGlobalSearch}
                 style={{
                   width: '100%',
@@ -359,8 +360,8 @@ export default function B2BUniversalMenu({
                       aiSub: isSpanish ? 'Pregunta sobre trócares (3.2 vs 4.5 mm), rangos séricos o cinética' : 'Ask about trocars (3.2 vs 4.5 mm), serum targets, or zero-order kinetics',
                       chips: [
                         { label: isSpanish ? 'Todos' : 'All Formulations', href: '/pricing/pellets' },
-                        { label: '♀️ Female BHRT', href: '/pricing/pellets?profile=female' },
-                        { label: '♂️ Male TRT', href: '/pricing/pellets?profile=male' },
+                        { label: isSpanish ? 'Mujer / BHRT' : 'Female BHRT', href: '/pricing/pellets?profile=female' },
+                        { label: isSpanish ? 'Hombre / TRT' : 'Male TRT', href: '/pricing/pellets?profile=male' },
                         { label: '17β-Estradiol & Bi-Est', href: '/pricing/pellets?category=estrogen' },
                         { label: 'Progesterone (P4)', href: '/pricing/pellets?category=progesterone' },
                         { label: 'Trocar Kits', href: '/pricing/pellets?profile=trocar' },
@@ -400,7 +401,7 @@ export default function B2BUniversalMenu({
                         : null;
 
                 return (
-                  <div style={{ marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div className="hide-on-mobile-header" style={{ marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <button
                       type="button"
                       onClick={() => {

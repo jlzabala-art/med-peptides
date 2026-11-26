@@ -385,6 +385,14 @@
   .puh-kbd-hint {
     display: none !important;
   }
+  .puh-btn-search {
+    display: none !important;
+  }
+  .puh-menu-btn {
+    background: transparent !important;
+    border-color: transparent !important;
+    border-radius: 50% !important;
+  }
 }
 
 .puh-btn-contact {
