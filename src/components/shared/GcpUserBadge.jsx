@@ -38,7 +38,7 @@ export default function GcpUserBadge({
   lang = 'en',
   loginRedirect,
   onLogout,
-  showQuickLogout = true,
+  showQuickLogout = false,
   align = 'right'
 }) {
   const pathname = usePathname();
@@ -197,12 +197,13 @@ export default function GcpUserBadge({
           display: 'inline-flex',
           alignItems: 'center',
           gap: '6px',
+          minHeight: '32px',
           background: isDark ? 'rgba(255, 255, 255, 0.12)' : '#ffffff',
           color: isDark ? '#ffffff' : '#1a73e8',
-          border: isDark ? '1px solid rgba(255, 255, 255, 0.25)' : '1px solid #1a73e8',
-          padding: '4px 12px',
-          borderRadius: '6px',
-          fontSize: '0.74rem',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.28)' : '1px solid #1a73e8',
+          padding: '0 12px',
+          borderRadius: '999px',
+          fontSize: '0.75rem',
           fontWeight: 700,
           textDecoration: 'none',
           whiteSpace: 'nowrap',
@@ -218,7 +219,7 @@ export default function GcpUserBadge({
       >
         <LogIn size={13} color={isDark ? '#38bdf8' : '#1a73e8'} />
         <span className="gcp-signin-text-desktop">{isEs ? 'Iniciar Sesión' : 'Sign In'}</span>
-        <span className="gcp-signin-text-mobile">{isEs ? 'Entrar' : 'Sign In'}</span>
+        <span className="gcp-signin-text-mobile">{isEs ? 'Acceder' : 'Sign In'}</span>
       </Link>
     );
   }
