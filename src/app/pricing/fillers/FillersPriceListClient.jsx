@@ -20,7 +20,10 @@ import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { trackSearchClick, trackConversion } from '@/services/algoliaInsights';
 import { getTrendingItems } from '@/services/algoliaRecommendService';
-import { Sparkles, Syringe, Layers, ShieldCheck, Download } from 'lucide-react';
+import { Sparkles, Syringe, Layers, ShieldCheck, Download, Share2, ShoppingCart, X } from 'lucide-react';
+import toast from 'react-hot-toast';
+import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import PricingScheduleMobileCard from '@/components/pricing/shared/PricingScheduleMobileCard';
 import '../colway/ColwayPriceList.css';
 
 function convertFromEur(amountEur, targetCurrency) {
@@ -48,6 +51,8 @@ export default function FillersPriceListClient({
   const [selectedType, setSelectedType] = useState('all'); // 'all' | 'boosters' | 'fillers' | 'biostimulators'
   const [quickProduct, setQuickProduct] = useState(null);
   const [trendingFillers, setTrendingFillers] = useState([]);
+  const [isInquiryOpen, setIsInquiryOpen] = useState(false);
+  const [scopeMode, setScopeMode] = useState('all'); // 'all' | 'filtered'
   const [pdfPreviewState, setPdfPreviewState] = useState({ open: false, blob: null, name: '' });
 
   useEffect(() => {
@@ -385,6 +390,8 @@ export default function FillersPriceListClient({
         loginRedirect="/pricing/fillers"
         hideAiButton={true}
         hideContactButton={true}
+        mobileTitle="Boosters & Fillers"
+        mobileSubtitle={isEs ? `Tarifa B2B · ${enrichedRows.length} SKUs` : `B2B Wholeseller · ${enrichedRows.length} SKUs`}
         breadcrumb={[
           { label: isEs ? 'Tarifas B2B' : 'B2B Pricing', href: '/pricing' },
           { label: isEs ? 'Boosters & Fillers' : 'Boosters & Fillers' }
@@ -408,82 +415,165 @@ export default function FillersPriceListClient({
               : 'Certified European portfolio of Dermal Fillers, Skin Boosters, Biostimulators & Polynucleotides with direct B2B clinic pricing.'
           }
           actions={
-            <button
-              type="button"
-              onClick={handleExportPdf}
-              className="gcp-btn-primary"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <Download size={14} />
-              <span>{isEs ? 'Descargar Tarifa PDF' : 'Download PDF Schedule'}</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={handleExportPdf}
+                className="gcp-btn-secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Download size={14} />
+                <span>{isEs ? 'Tarifa PDF' : 'Download PDF'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    toast.success(isEs ? 'Enlace de tarifa copiado' : 'Schedule link copied');
+                  } catch {
+                    toast.error('Copy failed');
+                  }
+                }}
+                className="gcp-btn-secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Share2 size={14} />
+                <span>{isEs ? 'Compartir' : 'Share'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsInquiryOpen(true)}
+                className="gcp-btn-primary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <ShoppingCart size={14} />
+                <span>
+                  {workspace?.rfqItems?.length > 0
+                    ? `${isEs ? 'Solicitar Presupuesto' : 'Request Quote'} (${workspace.rfqItems.length})`
+                    : (isEs ? 'Solicitar Presupuesto' : 'Request Quote')}
+                </span>
+              </button>
+            </div>
           }
         />
 
-        <div className="atlas-kpi-grid" style={{ marginBottom: 0 }}>
-          <MetricCard
-            title={isEs ? 'SKUs Certificados' : 'Certified SKUs'}
-            value={String(enrichedRows.length)}
-            subtitle={isEs ? 'Originales con marcado CE · Trazabilidad de lote' : 'CE-marked originals · Full batch traceability'}
-            icon={Layers}
-          />
-          <MetricCard
-            title={isEs ? 'Marcas Líderes' : 'Top Market Brands'}
-            value={isEs ? `${uniqueBrandsCount} Marcas` : `${uniqueBrandsCount} Brands`}
-            subtitle="Juvéderm · Restylane · Belotero · Profhilo · Sculptra"
-            icon={Sparkles}
-          />
-          <MetricCard
-            title={isEs ? 'Stock Local' : 'Local Stock'}
-            value={isEs ? 'Disponible' : 'In Stock'}
-            subtitle={isEs ? 'Almacén local UE · Envío 24–48h' : 'Ready in local EU warehouse · 24–48h dispatch'}
-            icon={ShieldCheck}
-          />
-          <MetricCard
-            title={isEs ? 'Condiciones B2B' : 'Wholeseller Terms'}
-            value={isEs ? 'B2B Directo' : 'Direct B2B'}
-            subtitle={isEs ? 'Caja original precintada · Sin pedido mínimo' : 'Original sealed box · No MOQ'}
-            icon={Syringe}
-          />
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 320px' }}>
-            <GlobalSearchBar
-              size="lg"
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder={isEs ? 'Buscar booster, filler, marca o código...' : 'Search booster, filler, brand or code...'}
-              resultCount={filteredRows.length}
-            />
+        {/* Scope Indicator Header + 2x2 Mobile KPI Grid (Rule #22) */}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <span style={{
+              fontSize: '0.70rem',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '999px',
+              background: '#f1f5f9',
+              color: '#334155',
+              border: '1px solid #cbd5e1',
+            }}>
+              {scopeMode === 'filtered'
+                ? `${isEs ? 'Vista filtrada' : 'Matching Active Filters'} (${filteredRows.length} SKUs)`
+                : `${isEs ? 'Base completa' : 'Entire Database'} (${enrichedRows.length} SKUs)`}
+            </span>
+            <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '2px', gap: '2px' }}>
+              {[
+                { id: 'all', label: isEs ? `Todos (${enrichedRows.length})` : `All (${enrichedRows.length})` },
+                { id: 'filtered', label: isEs ? `Filtrados (${filteredRows.length})` : `Filtered (${filteredRows.length})` },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setScopeMode(s.id)}
+                  style={{
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '3px 9px',
+                    fontSize: '0.71rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    background: scopeMode === s.id ? '#ffffff' : 'transparent',
+                    color: scopeMode === s.id ? '#003666' : '#64748b',
+                    boxShadow: scopeMode === s.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                  }}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <select
-            aria-label={isEs ? 'Filtrar por tipo' : 'Filter by type'}
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            style={{
-              height: '44px',
-              padding: '0 12px',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              background: '#ffffff',
-              color: '#0f172a',
-              fontSize: '0.82rem',
-              fontWeight: 650,
-              cursor: 'pointer'
-            }}
-          >
-            <option value="all">{isEs ? 'Tipo: Todos' : 'Type: All'}</option>
-            <option value="boosters">{isEs ? 'Skin Boosters & Polinucleótidos' : 'Skin Boosters & Polynucleotides'}</option>
-            <option value="fillers">{isEs ? 'Dermal Fillers (HA)' : 'Dermal Fillers (HA)'}</option>
-            <option value="biostimulators">{isEs ? 'Bioestimuladores (PLLA/CaHA)' : 'Biostimulators (PLLA/CaHA)'}</option>
-          </select>
+          <div className="atlas-kpi-grid-2x2" style={{ marginBottom: 0 }}>
+            <MetricCard
+              title={isEs ? 'SKUs Certificados' : 'Certified SKUs'}
+              value={String(scopeMode === 'filtered' ? filteredRows.length : enrichedRows.length)}
+              subtitle={isEs ? 'Originales con marcado CE · Trazabilidad de lote' : 'CE-marked originals · Full batch traceability'}
+              icon={Layers}
+            />
+            <MetricCard
+              title={isEs ? 'Marcas Líderes' : 'Top Market Brands'}
+              value={isEs ? `${uniqueBrandsCount} Marcas` : `${uniqueBrandsCount} Brands`}
+              subtitle="Juvéderm · Restylane · Belotero · Profhilo · Sculptra"
+              icon={Sparkles}
+            />
+            <MetricCard
+              title={isEs ? 'Stock Local' : 'Local Stock'}
+              value={isEs ? 'Disponible' : 'In Stock'}
+              subtitle={isEs ? 'Stock UE & Dubái · Envío 24–48h' : 'EU & Dubai Stock · 24–48h dispatch'}
+              icon={ShieldCheck}
+            />
+            <MetricCard
+              title={isEs ? 'Condiciones B2B' : 'Wholeseller Terms'}
+              value={isEs ? 'B2B Directo' : 'Direct B2B'}
+              subtitle={isEs ? 'Caja original precintada · Sin pedido mínimo' : 'Original sealed box · No MOQ'}
+              icon={Syringe}
+            />
+          </div>
+        </section>
+
+        <GlobalSearchBar
+          size="lg"
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder={isEs ? 'Buscar booster, filler, marca o código...' : 'Search booster, filler, brand or code...'}
+          resultCount={filteredRows.length}
+        />
+
+        {/* Horizontal 1-Line Type Filter Rail (Replaces native select) */}
+        <div className="atlas-chip-rail" aria-label={isEs ? 'Filtrar por tipo' : 'Filter by type'}>
+          {[
+            { id: 'all', label: isEs ? 'Todos' : 'All Types' },
+            { id: 'fillers', label: isEs ? 'Fillers Dérmicos (HA)' : 'Dermal Fillers (HA)' },
+            { id: 'boosters', label: isEs ? 'Skin Boosters & PN' : 'Skin Boosters & PN' },
+            { id: 'biostimulators', label: isEs ? 'Bioestimuladores' : 'Biostimulators' },
+          ].map((tChip) => {
+            const isActive = selectedType === tChip.id;
+            return (
+              <button
+                key={tChip.id}
+                type="button"
+                onClick={() => setSelectedType(tChip.id)}
+                style={{
+                  padding: '5px 12px',
+                  minHeight: '32px',
+                  borderRadius: '999px',
+                  border: isActive ? '1px solid #003666' : '1px solid #cbd5e1',
+                  background: isActive ? '#003666' : '#ffffff',
+                  color: isActive ? '#ffffff' : '#334155',
+                  fontSize: '0.74rem',
+                  fontWeight: isActive ? 700 : 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+              >
+                {tChip.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* 1-Click Brand Jump Pills */}
+        {/* 1-Line Horizontal Brand Jump Rail */}
         {brands.length > 1 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          <div className="atlas-chip-rail" aria-label={isEs ? 'Filtrar por marca' : 'Filter by brand'}>
             {brands.map((b) => {
               const isActive = selectedBrand === b;
               return (
@@ -502,6 +592,7 @@ export default function FillersPriceListClient({
                     fontWeight: isActive ? 700 : 600,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
+                    flexShrink: 0,
                     transition: 'all 0.12s ease'
                   }}
                 >
@@ -512,7 +603,44 @@ export default function FillersPriceListClient({
           </div>
         )}
 
-        {trendingFillers.length > 0 && (
+        {/* Active Filters Strip + Reset (Rule #24) */}
+        {(searchQuery || selectedBrand !== 'all' || selectedType !== 'all') && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            {selectedType !== 'all' && (
+              <button
+                type="button"
+                onClick={() => setSelectedType('all')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '999px', border: '1px solid #bfdbfe', background: '#eff6ff', color: '#003666', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+              >
+                <span>{selectedType}</span>
+                <X size={12} />
+              </button>
+            )}
+            {selectedBrand !== 'all' && (
+              <button
+                type="button"
+                onClick={() => setSelectedBrand('all')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '999px', border: '1px solid #bfdbfe', background: '#eff6ff', color: '#003666', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+              >
+                <span>{selectedBrand}</span>
+                <X size={12} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedBrand('all');
+                setSelectedType('all');
+              }}
+              style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '0.72rem', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}
+            >
+              {isEs ? 'Limpiar filtros' : 'Reset filters'}
+            </button>
+          </div>
+        )}
+
+        {trendingFillers.length > 0 && !searchQuery && selectedBrand === 'all' && selectedType === 'all' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '0.7rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>
               {isEs ? 'Tendencia en Clínicas:' : 'Trending in Clinics:'}
@@ -562,6 +690,31 @@ export default function FillersPriceListClient({
             pageSize={100}
             stickyTopOffset={64}
             groupByKey="brandGroup"
+            mobileCardComponent={PricingScheduleMobileCard}
+            mobileCardProps={{
+              isEs,
+              getTitle: (r) => r.name || r.product_name,
+              getBrand: (r) => r.brand || r.subcategory || 'Aesthetic',
+              getSku: (r) => r.atlas_product_code || r.sku || r.code,
+              getMeta: (r) => r.packSize || r.dosage || 'Standard Box',
+              getPrice: (r) => formatMoney(r.clinicPrice, currency),
+              onQuickView: (r) => setQuickProduct({ slug: r.slug || r.id, title: r.name || r.product_name }),
+              onAddQuote: (r) => {
+                if (workspace?.addToWorkspaceCart) {
+                  workspace.addToWorkspaceCart({
+                    id: r.id,
+                    sku: r.atlas_product_code || r.sku || r.code,
+                    name: r.name || r.product_name,
+                    priceEur: convertCurrencyAmount(r.clinicPrice, currency, 'EUR'),
+                    qty: 1,
+                    category: 'Aesthetic Injectables & Skin Boosters',
+                  });
+                  toast.success(isEs ? `${r.name || r.product_name} añadido` : `Added ${r.name || r.product_name}`);
+                } else {
+                  setIsInquiryOpen(true);
+                }
+              },
+            }}
             renderGroupHeader={(brandName, _firstRow, count) => (
               <div style={{
                 display: 'flex',
@@ -665,6 +818,14 @@ export default function FillersPriceListClient({
         downloadName={pdfPreviewState.name}
         title={isEs ? 'Inyectables Estéticos y Skin Boosters — Tarifa PDF' : 'Aesthetic Injectables & Skin Boosters — Official PDF'}
         subtitle={`${filteredRows.length} SKUs · ${currency}`}
+      />
+
+      <PublicInstitutionalInquiryDrawer
+        isOpen={isInquiryOpen}
+        onClose={() => setIsInquiryOpen(false)}
+        contextType="pricing"
+        entityName="Aesthetic Injectables & Skin Boosters (B2B)"
+        lang={lang}
       />
 
       <PublicUnifiedFooter lang={lang} />

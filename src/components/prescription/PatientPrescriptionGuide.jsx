@@ -575,8 +575,8 @@ export default function PatientPrescriptionGuide({
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
           <div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? '1. Qué hacer hoy' : '1. What to do today'}
+            <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {isEs ? 'Qué hacer hoy' : 'What to do today'}
             </div>
             <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '2px' }}>
               {posologySchedule.timeHint || (isEs ? 'Sigue tu pauta diaria' : 'Follow your daily schedule')}
@@ -636,19 +636,19 @@ export default function PatientPrescriptionGuide({
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '8px' }}>
               {morning.length > 0 && (
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7' }}>☀️ {isEs ? 'Mañana' : 'Morning'}</div>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase' }}>{isEs ? 'Mañana' : 'Morning'}</div>
                   <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124', marginTop: '2px' }}>{morning.join(' · ')}</div>
                 </div>
               )}
               {evening.length > 0 && (
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4f46e5' }}>🌙 {isEs ? 'Noche' : 'Evening'}</div>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4f46e5', textTransform: 'uppercase' }}>{isEs ? 'Noche' : 'Evening'}</div>
                   <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124', marginTop: '2px' }}>{evening.join(' · ')}</div>
                 </div>
               )}
               {weekly.length > 0 && (
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0d9488' }}>🗓️ {isEs ? '1–2× / semana' : '1–2× / week'}</div>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', textTransform: 'uppercase' }}>{isEs ? '1–2× / semana' : '1–2× / week'}</div>
                   <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124', marginTop: '2px' }}>{weekly.join(' · ')}</div>
                 </div>
               )}
@@ -656,25 +656,25 @@ export default function PatientPrescriptionGuide({
           );
         })()}
 
-        {/* Refill Schedule Banner (Always visible when tentativeRefillDate exists; amber alert when <= 14 days) */}
+        {/* Refill Schedule Banner (Compact GCP Inline Banner) */}
         {refillSchedule.tentativeRefillDate && (
           <div
             style={{
               background: refillSchedule.isTwoWeekWarning ? '#fffbeb' : '#f8fafc',
-              border: refillSchedule.isTwoWeekWarning ? '1px solid #fde68a' : '1px solid #e2e8f0',
-              borderLeft: refillSchedule.isTwoWeekWarning ? '4px solid #d97706' : '3px solid #1a73e8',
-              borderRadius: '8px',
-              padding: '9px 12px',
+              border: '1px solid #e2e8f0',
+              borderLeft: refillSchedule.isTwoWeekWarning ? '3px solid #d97706' : '3px solid #1a73e8',
+              borderRadius: '6px',
+              padding: '8px 12px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexWrap: 'wrap',
-              gap: '10px',
+              gap: '8px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.79rem', color: refillSchedule.isTwoWeekWarning ? '#92400e' : '#3c4043', fontWeight: 600 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.77rem', color: refillSchedule.isTwoWeekWarning ? '#92400e' : '#3c4043', fontWeight: 600 }}>
               {refillSchedule.isTwoWeekWarning ? (
-                <AlertTriangle size={15} color="#d97706" style={{ flexShrink: 0 }} />
+                <AlertTriangle size={14} color="#d97706" style={{ flexShrink: 0 }} />
               ) : (
                 <RefreshCw size={14} color="#1a73e8" style={{ flexShrink: 0 }} />
               )}
@@ -696,16 +696,17 @@ export default function PatientPrescriptionGuide({
               <button
                 type="button"
                 onClick={onOpenRefill}
+                className="gcp-btn-secondary"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  padding: '5px 11px',
+                  padding: '5px 10px',
                   borderRadius: '6px',
-                  border: refillSchedule.isTwoWeekWarning ? '1px solid #d97706' : '1px solid #dadce0',
+                  border: '1px solid #cbd5e1',
                   background: '#ffffff',
-                  color: refillSchedule.isTwoWeekWarning ? '#b45309' : '#3c4043',
-                  fontSize: '0.75rem',
+                  color: '#334155',
+                  fontSize: '0.74rem',
                   fontWeight: 650,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',

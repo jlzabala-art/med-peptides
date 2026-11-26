@@ -19,6 +19,7 @@ import {
   FileText,
   ExternalLink
 } from '@/lib/icons';
+import { Syringe, Snowflake } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 import PrescriptionStatusQuickAction from './PrescriptionStatusQuickAction';
 import CopyableId from '@/components/ui/CopyableId';
@@ -281,96 +282,41 @@ export default function PrescriptionMasterHeader({
             </div>
           )}
 
-          {/* PATIENT VIEW ACTIONS: Product Datasheet (when available) + Copy Link for authorized previewers */}
-          {isPatientView && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              {(() => {
-                const firstFormulation = Array.isArray(compoundedFormulations) && compoundedFormulations.length > 0 ? compoundedFormulations[0] : null;
-                let resolvedId = null;
-                const apis = firstFormulation?.apis || rx?.apis || [];
-                for (const api of apis) {
-                  const hit = resolveProductId(api?.slug || api?.name || api?.productName || '');
-                  if (hit) {
-                    resolvedId = hit;
-                    break;
-                  }
-                }
-                if (!resolvedId) {
-                  const hay = `${firstFormulation?.title || ''} ${rx?.treatmentTitle || ''} ${rx?.dispensingForm || ''}`.toLowerCase();
-                  for (const key of Object.keys(COMPOUND_INDEX)) {
-                    if (key.length >= 3 && hay.includes(key)) {
-                      resolvedId = COMPOUND_INDEX[key];
-                      break;
-                    }
-                  }
-                }
-                const datasheetHref =
-                  firstFormulation?.datasheetUrl ||
-                  firstFormulation?.monographUrl ||
-                  (firstFormulation?.productSlug ? `/p/${encodeURIComponent(firstFormulation.productSlug)}` : '') ||
-                  (rx?.productSlug ? `/p/${encodeURIComponent(rx.productSlug)}` : '') ||
-                  (rx?.productUrl && /\/p\//.test(rx.productUrl) ? rx.productUrl : '') ||
-                  (resolvedId ? `/p/${encodeURIComponent(resolvedId)}` : '');
-                if (!datasheetHref) return null;
-                return (
-                  <a
-                    href={datasheetHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      padding: '5px 10px',
-                      minHeight: '32px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      background: '#ffffff',
-                      color: '#334155',
-                      fontSize: '0.74rem',
-                      fontWeight: 650,
-                      textDecoration: 'none',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    <FileText size={13} color="#1a73e8" />
-                    <span>{isEs ? 'Ficha Técnica' : 'Product Datasheet'}</span>
-                    <ExternalLink size={12} color="#64748b" />
-                  </a>
-                );
-              })()}
-              {isAuthorizedViewer && (
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="rx-action-btn-icon"
-                  title={isEs ? 'Copiar enlace de mi prescripción' : 'Copy prescription link'}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    padding: '5px 10px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    color: '#334155',
-                    fontSize: '0.74rem',
-                    fontWeight: 650,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  {copied ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
-                  <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
-                </button>
-              )}
+          {/* PATIENT VIEW ACTIONS: Single Copy Link action (Product Datasheet lives on the formulation card below — zero duplicate CTAs) */}
+          {isPatientView && isAuthorizedViewer && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', maxWidth: '100%' }}>
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="gcp-btn-secondary"
+                title={isEs ? 'Copiar enlace de mi prescripción' : 'Copy prescription link'}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  minHeight: '34px',
+                  width: 'auto',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#334155',
+                  fontSize: '0.75rem',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {copied ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+                <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar enlace' : 'Copy Link')}</span>
+              </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* ── Patient Preview Context Banner (Subtle GCP Info Strip) ──────────── */}
-      {isPatientView && isAuthorizedViewer && (
+      {/* Patient Preview segmented control already indicates active mode — no redundant 85px preview banner */}
+      {false && isPatientView && isAuthorizedViewer && (
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -451,6 +397,17 @@ export default function PrescriptionMasterHeader({
           ? `${rx.durationDays} ${isEs ? 'Días' : 'Days Supply'}`
           : attrs.cycleDisplay;
 
+        const stripEmoji = (s) =>
+          String(s || '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F]/gu, '').replace(/\s{2,}/g, ' ').trim();
+        const cleanRouteText = stripEmoji(
+          isPatientView
+            ? String(multiRouteSummary || '').replace(/\bSubQ\b/gi, isEs ? 'Subcutánea' : 'Under the skin')
+            : multiRouteSummary
+        );
+        const cleanDeviceText = stripEmoji(multiDeviceSummary);
+        const cleanStorageText = stripEmoji(attrs.storageDisplay);
+        const cleanDurationText = stripEmoji(durationDisplay);
+
         return (
           <>
             <style>{`
@@ -475,34 +432,36 @@ export default function PrescriptionMasterHeader({
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isPatientView ? (isEs ? 'Cómo tomarlo' : 'How to take') : (isEs ? 'Vía & Frecuencia' : 'Route & Frequency')}
               </div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                {isPatientView
-                  ? String(multiRouteSummary || '').replace(/\bSubQ\b/gi, isEs ? 'Subcutánea' : 'Under the skin')
-                  : multiRouteSummary}
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Syringe size={13} color="#5f6368" style={{ flexShrink: 0 }} />
+                <span>{cleanRouteText}</span>
               </div>
             </div>
             <div>
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isPatientView ? (isEs ? 'Formato' : 'Formats') : (isEs ? 'Dispositivo / Formato' : 'Device / Presentation')}
               </div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                {multiDeviceSummary}
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Pill size={13} color="#5f6368" style={{ flexShrink: 0 }} />
+                <span>{cleanDeviceText}</span>
               </div>
             </div>
             <div>
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isPatientView ? (isEs ? 'Conservación' : 'Storage') : (isEs ? 'Almacenamiento' : 'Storage Standard')}
               </div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: (rxType.isPen || rxType.isInjectable) ? '#0284c7' : '#0f172a', marginTop: '2px' }}>
-                {attrs.storageDisplay}
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: (rxType.isPen || rxType.isInjectable) ? '#0284c7' : '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Snowflake size={13} color={(rxType.isPen || rxType.isInjectable) ? '#0284c7' : '#5f6368'} style={{ flexShrink: 0 }} />
+                <span>{cleanStorageText}</span>
               </div>
             </div>
             <div>
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isPatientView ? (isEs ? 'Duración' : 'Duration') : (isEs ? 'Ciclo Clínico' : 'Clinical Duration')}
               </div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                {durationDisplay}
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Calendar size={13} color="#5f6368" style={{ flexShrink: 0 }} />
+                <span>{cleanDurationText}</span>
               </div>
             </div>
           </div>

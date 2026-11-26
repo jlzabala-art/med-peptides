@@ -1498,3 +1498,50 @@
     bottom: calc(var(--bottom-bar-h, 56px) + 12px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* Rule #74: Global mobile bottom safe-area clearance so no card/button peeks behind fixed bottom nav */
+@media (max-width: 1024px) {
+  main,
+  .atlas-page-shell,
+  .rx-page-container,
+  .patient-prescription-guide {
+    padding-bottom: calc(var(--bottom-bar-h, 56px) + 36px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Rule #74: Shared Pricing Schedule 2x2 Mobile KPI Grid & Horizontal Chip Rail */
+.atlas-kpi-grid-2x2 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .atlas-kpi-grid-2x2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
+.atlas-chip-rail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.atlas-chip-rail::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .atlas-chip-rail {
+    mask-image: linear-gradient(to right, black 92%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 92%, transparent 100%);
+    padding-right: 14px;
+  }
+}

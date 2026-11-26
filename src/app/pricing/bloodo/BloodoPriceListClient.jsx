@@ -23,6 +23,7 @@ import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
 import EmptyState from '@/components/ui/EmptyState';
 import PageHeroCard from '@/components/ui/PageHeroCard';
+import PricingScheduleMobileCard from '@/components/pricing/shared/PricingScheduleMobileCard';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
@@ -332,6 +333,8 @@ export default function BloodoPriceListClient({
         loginRedirect="/pricing/bloodo"
         hideAiButton={true}
         hideContactButton={true}
+        mobileTitle="Bloodo™ Diagnostics"
+        mobileSubtitle={`CE-IVDR · ${initialProducts.length} Kits`}
         breadcrumb={[
           { label: isEs ? 'Tarifas B2B' : 'B2B Schedules', href: '/pricing' },
           { label: 'Bloodo™ Diagnostics' },
@@ -384,8 +387,24 @@ export default function BloodoPriceListClient({
           </span>
         </div>
 
-        {/* 4 KPIs (Rule #22) */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '12px' }}>
+        {/* Scope Indicator + 2x2 Mobile KPIs (Rule #22) */}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <span style={{
+              fontSize: '0.70rem',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '999px',
+              background: '#f1f5f9',
+              color: '#334155',
+              border: '1px solid #cbd5e1',
+            }}>
+              {filteredProducts.length === initialProducts.length
+                ? `${isEs ? 'Base completa' : 'Entire Database'} (${initialProducts.length} Kits)`
+                : `${isEs ? 'Filtro activo' : 'Matching Active Filters'} (${filteredProducts.length} / ${initialProducts.length} Kits)`}
+            </span>
+          </div>
+          <div className="atlas-kpi-grid-2x2">
           {[
             { icon: Microscope, label: isEs ? 'Paneles Activos' : 'Active Panels', val: `${initialProducts.length} Kits CE-IVDR`, sub: 'NAD+, Testosterone, Cortisol, HbA1c' },
             { icon: Award, label: isEs ? 'Acreditación Lab' : 'Lab Accreditation', val: 'ISO 15189', sub: isEs ? 'Referencia Europea LC-MS/MS' : 'European Reference LC-MS/MS' },
@@ -403,7 +422,8 @@ export default function BloodoPriceListClient({
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        </section>
 
         {/* GlobalSearchBar (Rule #7) */}
         <GlobalSearchBar
@@ -440,6 +460,21 @@ export default function BloodoPriceListClient({
               columns={columns}
               data={filteredProducts}
               rowKey={(row) => row.id}
+              mobileCardComponent={PricingScheduleMobileCard}
+              mobileCardProps={{
+                isEs,
+                getTitle: (r) => (isEs ? (r.nameEs || r.name) : r.name),
+                getBrand: (r) => r.category || 'CE-IVDR',
+                getSku: (r) => r.sku || r.id,
+                getMeta: (r) => `${r.biomarker || ''} · ${r.turnaround || '48–72h'}`,
+                getPrice: (r) => formatPrice(r.wholesalePriceEur),
+                getSecondaryPrice: (r) => `${isEs ? 'Clínica Ref:' : 'Clinic Ref:'} ${formatPrice(r.clinicPriceEur)}`,
+                getQuoteCount: (r) => cartItems?.[r.id] || 0,
+                onAddQuote: (r) => {
+                  handleQtyChange(r, 1);
+                  toast.success(isEs ? `${r.nameEs || r.name} añadido` : `Added ${r.name}`);
+                },
+              }}
               expandableRender={(row) => (
                 <div style={{ padding: '12px 16px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ flex: '1 1 360px', fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>

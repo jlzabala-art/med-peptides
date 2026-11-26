@@ -319,6 +319,8 @@ export default function ModularPriceSchedule({
           setCurrency(c);
           workspace?.setCurrency?.(c);
         }}
+        mobileTitle={navCurrentLabel}
+        mobileSubtitle={`${currency} · ${processedProducts.length} SKUs`}
         breadcrumb={[
           { label: sectionLabel || t('B2B Schedules', 'Tarifas B2B'), href: '/pricing' },
           { label: navCurrentLabel },
@@ -349,10 +351,10 @@ export default function ModularPriceSchedule({
                 {copied ? t('Copied', 'Copiado') : t('Share', 'Compartir')}
               </button>
               <button type="button" className="gcp-btn-secondary" onClick={handleCopyWhatsappPitch} style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650 }} title={t('Copy clinical WhatsApp pitch without prices', 'Copiar resumen clínico para WhatsApp sin precios')}>
-                📋 {t('WhatsApp Pitch', 'Pitch WhatsApp')}
+                {t('WhatsApp Pitch', 'Pitch WhatsApp')}
               </button>
               <button type="button" className="gcp-btn-primary" onClick={() => setIsExportModalOpen(true)} style={{ height: '36px', padding: '0 13px', fontSize: '0.76rem', fontWeight: 750 }}>
-                {t('Export / Print', 'Exportar / Imprimir')}
+                {t('Export PDF / Excel', 'Exportar PDF / Excel')}
               </button>
             </div>
           }

@@ -40,6 +40,7 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
 import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 import DataTable from '@/components/ui/DataTable';
+import PricingScheduleMobileCard from '@/components/pricing/shared/PricingScheduleMobileCard';
 import CatalogMasterDetailPanel from '@/components/pricing/shared/CatalogMasterDetailPanel';
 import PriceScheduleRowActions from '@/components/pricing/shared/PriceScheduleRowActions';
 import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
@@ -642,6 +643,8 @@ export default function GenomicsPriceListClient({
         hideAiButton={true}
         hideContactButton={true}
         hideAccountManager={true}
+        mobileTitle="24Genetics DNA"
+        mobileSubtitle={lang === 'es' ? `${initialProducts.length} Paneles Clínicos` : `${initialProducts.length} Clinical Panels`}
         breadcrumb={[
           { label: 'B2B Schedules', href: '/pricing' },
           { label: '24Genetics Clinical Panels' },
@@ -800,7 +803,7 @@ export default function GenomicsPriceListClient({
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+          <div className="atlas-kpi-grid-2x2">
             <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
                 Total Genomic Panels
@@ -921,6 +924,20 @@ export default function GenomicsPriceListClient({
               pageSize={20}
               showPagination={true}
               sortable={true}
+              mobileCardComponent={PricingScheduleMobileCard}
+              mobileCardProps={{
+                isEs: lang === 'es',
+                getTitle: (r) => r.name,
+                getBrand: (r) => r.category || 'DNA Panel',
+                getSku: (r) => r.sku || r.id,
+                getMeta: (r) => r.turnaround || r.sampleType || 'Saliva Swab CE-IVD',
+                getPrice: (r) => {
+                  const unitEur = isWholesaler ? r.wholesalePriceEur : (isClinicOrDoctor ? r.clinicPriceEur : r.retailPriceEur);
+                  return formatPrice(unitEur);
+                },
+                getQuoteCount: (r) => (cartItems?.[r.id]?.quantity1x || 0) + ((cartItems?.[r.id]?.quantity10x || 0) * 10),
+                onAddQuote: (r) => handleAddToCart(r, '1x'),
+              }}
               expandableRender={renderExpandedRow}
             />
           )}
