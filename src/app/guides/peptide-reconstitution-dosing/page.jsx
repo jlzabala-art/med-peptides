@@ -112,8 +112,40 @@ export default async function PeptideReconstitutionGuidePage({ searchParams }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div style={{ maxWidth: '980px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <section style={{ background: '#003666', color: '#fff', borderRadius: '14px', padding: '24px' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#7dd3fc' }}>
-            Atlas Health Services · Clinical Reference
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#7dd3fc' }}>
+              Atlas Health Services · {isEs ? 'Referencia Clínica' : 'Clinical Reference'}
+            </div>
+            <div style={{ display: 'inline-flex', gap: '6px' }}>
+              <Link
+                href="/guides/peptide-reconstitution-dosing?lang=en"
+                style={{
+                  padding: '3px 9px',
+                  borderRadius: '6px',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  background: !isEs ? '#ffffff' : 'rgba(255,255,255,0.14)',
+                  color: !isEs ? '#003666' : '#ffffff',
+                }}
+              >
+                EN
+              </Link>
+              <Link
+                href="/guides/peptide-reconstitution-dosing?lang=es"
+                style={{
+                  padding: '3px 9px',
+                  borderRadius: '6px',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  background: isEs ? '#ffffff' : 'rgba(255,255,255,0.14)',
+                  color: isEs ? '#003666' : '#ffffff',
+                }}
+              >
+                ES
+              </Link>
+            </div>
           </div>
           <h1 style={{ margin: '6px 0 8px', fontSize: '1.55rem', fontWeight: 800 }}>
             {isEs
@@ -146,11 +178,11 @@ export default async function PeptideReconstitutionGuidePage({ searchParams }) {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#475569' }}>
-                  <th style={{ padding: '8px' }}>Vial</th>
-                  <th style={{ padding: '8px' }}>Diluent</th>
-                  <th style={{ padding: '8px' }}>Concentration</th>
-                  <th style={{ padding: '8px' }}>10 Units (0.10 mL)</th>
-                  <th style={{ padding: '8px' }}>5 Units (0.05 mL)</th>
+                  <th style={{ padding: '8px' }}>{isEs ? 'Vial' : 'Vial'}</th>
+                  <th style={{ padding: '8px' }}>{isEs ? 'Diluyente (BAC)' : 'Diluent'}</th>
+                  <th style={{ padding: '8px' }}>{isEs ? 'Concentración' : 'Concentration'}</th>
+                  <th style={{ padding: '8px' }}>{isEs ? '10 Unidades (0,10 mL)' : '10 Units (0.10 mL)'}</th>
+                  <th style={{ padding: '8px' }}>{isEs ? '5 Unidades (0,05 mL)' : '5 Units (0.05 mL)'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -176,10 +208,10 @@ export default async function PeptideReconstitutionGuidePage({ searchParams }) {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#475569' }}>
-                  <th style={{ padding: '8px' }}>Pen Formulation</th>
-                  <th style={{ padding: '8px' }}>Total Fill</th>
-                  <th style={{ padding: '8px' }}>Dose / Click</th>
-                  <th style={{ padding: '8px' }}>Standard Clinical Dial</th>
+                  <th style={{ padding: '8px' }}>{isEs ? 'Pluma Precargada' : 'Pen Formulation'}</th>
+                  <th style={{ padding: '8px' }}>{isEs ? 'Contenido Total' : 'Total Fill'}</th>
+                  <th style={{ padding: '8px' }}>{isEs ? 'Dosis / Clic' : 'Dose / Click'}</th>
+                  <th style={{ padding: '8px' }}>{isEs ? 'Dosificación Habitual' : 'Standard Clinical Dial'}</th>
                 </tr>
               </thead>
               <tbody>
