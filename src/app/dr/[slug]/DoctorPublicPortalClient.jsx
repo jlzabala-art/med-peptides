@@ -5854,7 +5854,7 @@ export default function DoctorPublicPortalClient({
 
                 {/* 1-Click Segmented Switcher for DNA Analysis vs Blood Lab Diagnostics */}
                 {(['dna_analysis', 'lab_results'].includes(activeAnchor)) && (
-                  <div role="tablist" aria-label="Diagnostic modalities" style={{ display: 'flex', maxWidth: '100%', overflowX: 'auto', background: '#f1f3f4', padding: '3px', borderRadius: '8px', gap: '2px', border: '1px solid #dadce0' }}>
+                  <div role="tablist" aria-label="Diagnostic modalities" style={{ display: 'flex', flexWrap: 'wrap', maxWidth: '100%', background: '#f1f3f4', padding: '3px', borderRadius: '8px', gap: '4px', border: '1px solid #dadce0' }}>
                     {[
                       { id: 'dna_analysis', label: '🧬 DNA Analysis', count: dnaResults.length },
                       { id: 'lab_results', label: '🧪 Lab Diagnostics', count: bloodLabResults.length }
@@ -5868,8 +5868,10 @@ export default function DoctorPublicPortalClient({
                           aria-selected={isTabActive}
                           onClick={() => handleSidebarNavigate(tab.id)}
                           style={{
-                            padding: '4px 12px',
-                            minHeight: '32px',
+                            padding: '6px 12px',
+                            minHeight: '40px',
+                            flex: '1 1 auto',
+                            justifyContent: 'center',
                             borderRadius: '6px',
                             border: 'none',
                             background: isTabActive ? '#ffffff' : 'transparent',
@@ -5896,7 +5898,7 @@ export default function DoctorPublicPortalClient({
 
                 {/* Unified 1-Click Segmented Switcher for Prescriptions / Patients / Pending Actions */}
                 {(['prescriptions', 'patients', 'tasks'].includes(activeAnchor)) && (
-                  <div role="tablist" aria-label="Portal sections" style={{ display: 'flex', maxWidth: '100%', overflowX: 'auto', background: '#f1f5f9', padding: '3px', borderRadius: '8px', gap: '2px', border: '1px solid #e2e8f0' }}>
+                  <div role="tablist" aria-label="Portal sections" style={{ display: 'flex', flexWrap: 'wrap', maxWidth: '100%', background: '#f1f5f9', padding: '3px', borderRadius: '8px', gap: '4px', border: '1px solid #e2e8f0' }}>
                     {[
                       { id: 'prescriptions', label: 'Prescriptions', count: allPrescriptions.length },
                       { id: 'patients', label: 'Patients', count: uniquePatientsCount },
@@ -5911,10 +5913,11 @@ export default function DoctorPublicPortalClient({
                           aria-selected={isTabActive}
                           onClick={() => handleSidebarNavigate(tab.id)}
                           style={{
-                            padding: '4px 12px',
-                            minHeight: '36px',
+                            padding: '6px 12px',
+                            minHeight: '40px',
                             whiteSpace: 'nowrap',
-                            flexShrink: 0,
+                            flex: '1 1 auto',
+                            justifyContent: 'center',
                             borderRadius: '6px',
                             border: 'none',
                             background: isTabActive ? '#ffffff' : 'transparent',

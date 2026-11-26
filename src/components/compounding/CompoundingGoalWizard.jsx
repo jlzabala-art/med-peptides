@@ -11,6 +11,7 @@ import { resolvePhysicalCapsuleSize } from '../../services/pharmapolisCostEngine
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import PatientGeneticConsentModal from '@/components/diagnostic/eterna/PatientGeneticConsentModal';
+import MobileConnectedStepper from '@/components/ui/MobileConnectedStepper';
 
 /* ─── Health Goals Catalog (100% Food Supplements / Nutracéuticos) ───────── */
 const GOALS_CATALOG = [
@@ -415,7 +416,25 @@ export default function CompoundingGoalWizard({
           </button>
         </div>
 
-        {/* Steps Progress Indicator */}
+        {/* Steps Progress Indicator (Desktop Pills + Mobile GCP Connected Stepper) */}
+        <style>{`
+          @media (max-width: 768px) {
+            .cmp-wizard-steps-bar { display: none !important; }
+          }
+        `}</style>
+        <MobileConnectedStepper
+          steps={[
+            { id: 1, label: isEs ? 'Objetivo de Salud' : 'Health Goal' },
+            { id: 2, label: isEs ? 'Cronobiología & Ritmo' : 'Timing & Rhythm' },
+            { id: 3, label: isEs ? 'Propuestas a Medida' : 'Tailored Proposals' },
+          ]}
+          activeIndex={step - 1}
+          onSelect={(idx) => {
+            if (idx + 1 < step) setStep(idx + 1);
+          }}
+          isEs={isEs}
+          ariaLabel={isEs ? 'Pasos del asistente de formulación' : 'Compounding wizard steps'}
+        />
         <div className="cmp-wizard-steps-bar">
           <div className={`cmp-wizard-step-pill ${step === 1 ? 'is-active' : step > 1 ? 'is-completed' : ''}`}>
             <span>1</span> {isEs ? 'Objetivo de Salud' : 'Health Goal'}

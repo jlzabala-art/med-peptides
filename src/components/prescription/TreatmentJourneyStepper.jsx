@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { CheckCircle2, Clock, Dna, RefreshCw } from 'lucide-react';
+import MobileConnectedStepper from '@/components/ui/MobileConnectedStepper';
 
 /**
  * TreatmentJourneyStepper
@@ -63,7 +64,25 @@ export default function TreatmentJourneyStepper({
         boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
       }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .tjs-desktop-track { display: none !important; }
+        }
+      `}</style>
+      <div style={{ width: '100%', flex: '1 1 100%' }}>
+        <MobileConnectedStepper
+          steps={steps.map((s) => ({
+            id: s.id,
+            label: s.label.replace(/^\d+\.\s*/, ''),
+            kicker: isEs ? `Estado ${activeStep} de ${steps.length}` : `Stage ${activeStep} of ${steps.length}`,
+          }))}
+          activeIndex={activeStep - 1}
+          isEs={isEs}
+          ariaLabel={isEs ? 'Progreso del tratamiento' : 'Treatment journey progress'}
+        />
+      </div>
       <div
+        className="tjs-desktop-track"
         style={{
           display: 'flex',
           alignItems: 'center',
