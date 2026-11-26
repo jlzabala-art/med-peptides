@@ -49,6 +49,7 @@ export const PRICING_GROUPS = Object.freeze([
       { id: 'colway', href: '/pricing/colway', labelEn: 'Colway UAE Derma', labelEs: 'Colway UAE', badge: 'UAE' },
       { id: 'colway-hair', href: '/pricing/colway-hair', labelEn: 'Colway Hair & Trichology', labelEs: 'Colway Capilar', badge: 'TRICHO' },
       { id: 'colway-qatar', href: '/pricing/colway-qatar', labelEn: 'Colway Qatar', labelEs: 'Colway Qatar', badge: 'QA' },
+      { id: 'larimedical', href: '/pricing?tab=larimedical', labelEn: 'Larimide & Larimedical', labelEs: 'Larimide y Larimedical', badge: '145 SKUs' },
     ],
   },
 ]);

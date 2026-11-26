@@ -15,7 +15,7 @@ describe('Scalable Clinical Pricing Taxonomy', () => {
       assert.equal(groupIds.has(g.id), false, `Duplicate group id: ${g.id}`);
       groupIds.add(g.id);
       for (const item of g.items) {
-        assert.ok(item.id && item.href.startsWith('/pricing/'));
+        assert.ok(item.id && (item.href.startsWith('/pricing/') || item.href.startsWith('/pricing?')));
         assert.equal(itemIds.has(item.id), false, `Duplicate schedule id: ${item.id}`);
         itemIds.add(item.id);
       }
