@@ -458,6 +458,38 @@ const TOPIC_CONFIG = {
       ],
     },
   },
+  suppliers: {
+    accent: '#003666',
+    accentSoft: '#38bdf8',
+    en: {
+      badge: 'SUPPLIER & MANUFACTURER PARTNER HUB',
+      title1: 'Scale Your Clinical Line',
+      title2: 'Across Europe & GCC',
+      subtitle: 'Consolidated POs · EU GMP & MOH Traceability · Zero Channel Leakage',
+      pills: ['Consolidated B2B POs', 'EUR · USD · AED', '72h Onboarding', 'Refill QR Loop'],
+      cardTitle: 'Partner Infrastructure',
+      cardLines: [
+        { k: 'Corridors', v: 'Europe (EU) · UAE / GCC' },
+        { k: 'Protection', v: 'Role-Gated Pricing · No Leaks' },
+        { k: 'Demand', v: 'Clinical Guides + Atlas AI' },
+        { k: 'Compliance', v: 'Batch · CoA · Import Control' },
+      ],
+    },
+    es: {
+      badge: 'PORTAL PARA FABRICANTES Y SUPPLIERS',
+      title1: 'Escala tu Línea Clínica',
+      title2: 'en Europa y Oriente Medio',
+      subtitle: 'POs Consolidadas · Trazabilidad EU GMP / MOH · Protección de Canal',
+      pills: ['POs Consolidadas', 'EUR · USD · AED', 'Onboarding 72h', 'Recompra vía QR'],
+      cardTitle: 'Infraestructura Partner',
+      cardLines: [
+        { k: 'Corredores', v: 'Europa (UE) · EAU / GCC' },
+        { k: 'Protección', v: 'Precios por Rol · Sin Fugas' },
+        { k: 'Demanda', v: 'Guías Clínicas + Atlas AI' },
+        { k: 'Cumplimiento', v: 'Lotes · CoA · Import Control' },
+      ],
+    },
+  },
 };
 
 export async function GET(request) {
