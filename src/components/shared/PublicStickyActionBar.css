@@ -506,6 +506,13 @@ body.has-sticky-bottom-bar .atlas-ai-public-fab {
     display: none !important;
   }
 
+  .public-sticky-action-bar--overflow.inquire-in-overflow .public-sticky-action-bar__inquire-btn {
+    background: #ffffff !important;
+    color: #3c4043 !important;
+    border: 1px solid #dadce0 !important;
+    box-shadow: none !important;
+  }
+
   .public-sticky-action-bar--overflow .is-primary {
     flex: 1;
     min-height: 44px;

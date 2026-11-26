@@ -2365,6 +2365,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           lang={lang}
           overflowMobile={true}
           inquireIsPrimary={isPatientView}
+          hideQr={true}
           extraActions={
             !isPatientView ? (
               /* Doctor View Supplemental Actions */

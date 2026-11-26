@@ -57,6 +57,8 @@ export default function PublicStickyActionBar({
   overflowMobile = false,
   /** When false, Inquire goes into the overflow menu (another `.is-primary` element is the CTA) */
   inquireIsPrimary = true,
+  /** Hide built-in QR button when caller provides its own domain-specific QR button */
+  hideQr = false,
   children = null,
 }) {
   const [overflowOpen, setOverflowOpen] = useState(false);
@@ -376,29 +378,31 @@ export default function PublicStickyActionBar({
             </button>
 
             {/* Desktop to Mobile QR Bridge Button */}
-            <button
-              type="button"
-              onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
-              className="public-sticky-action-bar__qr-btn"
-              title="Open on Mobile / Scan QR Code"
-              aria-label="Scan QR Code"
-              style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
-                color: '#475569',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                flexShrink: 0
-              }}
-            >
-              <QrCode size={16} />
-            </button>
+            {!hideQr && (
+              <button
+                type="button"
+                onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
+                className="public-sticky-action-bar__qr-btn"
+                title="Open on Mobile / Scan QR Code"
+                aria-label="Scan QR Code"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#475569',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  flexShrink: 0
+                }}
+              >
+                <QrCode size={16} />
+              </button>
+            )}
 
             {/* Smart Back to Top Micro-Button */}
             {showBackToTop && (

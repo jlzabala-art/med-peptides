@@ -1350,6 +1350,12 @@ nav.site-nav,
   .rx-dock-btn-label-desktop {
     display: none;
   }
+  .public-sticky-action-bar--overflow.is-overflow-open .rx-dock-btn-label-desktop {
+    display: inline !important;
+  }
+  .public-sticky-action-bar--overflow .public-sticky-action-bar__ai-btn {
+    display: none !important;
+  }
 }
 
 /* ── Google Cloud UX Safe-Area & Mobile-First High Density Layout ──────────── */
