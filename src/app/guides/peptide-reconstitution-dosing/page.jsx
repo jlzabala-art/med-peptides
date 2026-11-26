@@ -111,7 +111,7 @@ export default async function PeptideReconstitutionGuidePage({ searchParams }) {
     <main style={{ minHeight: '100vh', background: '#f8fafc', padding: '28px 16px 64px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div style={{ maxWidth: '980px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <header style={{ background: '#003666', color: '#fff', borderRadius: '14px', padding: '24px' }}>
+        <section style={{ background: '#003666', color: '#fff', borderRadius: '14px', padding: '24px' }}>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#7dd3fc' }}>
             Atlas Health Services · Clinical Reference
           </div>
@@ -136,7 +136,7 @@ export default async function PeptideReconstitutionGuidePage({ searchParams }) {
               {isEs ? 'Protocolos Clínicos' : 'Clinical Protocols'}
             </Link>
           </div>
-        </header>
+        </section>
 
         <section style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
           <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
