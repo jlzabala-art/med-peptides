@@ -1,7 +1,45 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Bell, CheckCircle2, X } from '@/lib/icons';
+import React, { useState, useMemo } from 'react';
+import { Bell, CheckCircle2, AlertCircle, X } from '@/lib/icons';
+import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
+
+const COMMON_DOMAIN_TYPOS = {
+  'gamil.com': 'gmail.com',
+  'gmial.com': 'gmail.com',
+  'gmai.com': 'gmail.com',
+  'gmail.co': 'gmail.com',
+  'gmail.con': 'gmail.com',
+  'hotmial.com': 'hotmail.com',
+  'hotmal.com': 'hotmail.com',
+  'hotmail.con': 'hotmail.com',
+  'outlok.com': 'outlook.com',
+  'outllok.com': 'outlook.com',
+  'yaho.com': 'yahoo.com',
+  'yahoo.con': 'yahoo.com',
+  'iclud.com': 'icloud.com',
+  'icoud.com': 'icloud.com',
+};
+
+function getEmailSuggestion(rawEmail) {
+  const trimmed = String(rawEmail || '').trim().toLowerCase();
+  const atIdx = trimmed.indexOf('@');
+  if (atIdx < 1) return null;
+  const local = trimmed.slice(0, atIdx);
+  const domain = trimmed.slice(atIdx + 1);
+  if (COMMON_DOMAIN_TYPOS[domain]) {
+    return `${local}@${COMMON_DOMAIN_TYPOS[domain]}`;
+  }
+  return null;
+}
+
+function isValidEmailFormat(rawEmail) {
+  return /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(String(rawEmail || '').trim());
+}
+
+function getPhoneDigitCount(rawPhone) {
+  return String(rawPhone || '').replace(/\D/g, '').length;
+}
 
 /**
  * Subtle, non-intrusive patient contact capture card shown on ?view=patient
@@ -22,7 +60,10 @@ export default function PatientContactReminderCard({
   const needsEmail = !cleanExistingEmail;
 
   const [phone, setPhone] = useState('');
+  const [phonePrefix, setPhonePrefix] = useState(isEs ? '+34' : '+971');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedDone, setSavedDone] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -35,21 +76,50 @@ export default function PatientContactReminderCard({
     }
   });
 
+  const emailTrimmed = email.trim();
+  const emailSuggestion = useMemo(() => getEmailSuggestion(emailTrimmed), [emailTrimmed]);
+  const emailValid = emailTrimmed.length > 0 && isValidEmailFormat(emailTrimmed) && !emailSuggestion;
+  const emailHasError = emailTouched && emailTrimmed.length > 0 && !isValidEmailFormat(emailTrimmed);
+
+  const localDigits = phoneNumber.replace(/\D/g, '');
+  const fullPhone = localDigits.length > 0 ? `${phonePrefix} ${phoneNumber.trim()}`.trim() : phone.trim();
+  const fullDigits = getPhoneDigitCount(fullPhone);
+  const phoneEntered = localDigits.length > 0 || phone.trim().length > 0;
+  const phoneValid = phoneEntered && fullDigits >= 8 && fullDigits <= 15;
+  const phoneTooShort = phoneEntered && fullDigits > 0 && fullDigits < 8;
+
   if ((!needsPhone && !needsEmail) || dismissed) {
     return null;
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const nextPhone = needsPhone ? phone.trim() : cleanExistingPhone;
-    const nextEmail = needsEmail ? email.trim() : cleanExistingEmail;
+    const nextPhone = needsPhone ? (phoneEntered ? fullPhone : '') : cleanExistingPhone;
+    const nextEmail = needsEmail ? emailTrimmed : cleanExistingEmail;
 
-    if ((needsPhone && !phone.trim()) && (needsEmail && !email.trim())) {
-      setErrorMsg(isEs ? 'Introduce tu WhatsApp o email.' : 'Please enter your WhatsApp or email.');
+    if ((needsPhone && !phoneEntered) && (needsEmail && !emailTrimmed)) {
+      setErrorMsg(
+        isEs
+          ? 'Introduce tu WhatsApp (con prefijo de país) o tu email personal.'
+          : 'Please enter your WhatsApp (with country code) or personal email.'
+      );
       return;
     }
-    if (needsEmail && email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setErrorMsg(isEs ? 'Email no válido.' : 'Please enter a valid email.');
+    if (needsPhone && phoneEntered && !phoneValid) {
+      setErrorMsg(
+        isEs
+          ? 'Revisa tu número de WhatsApp: selecciona el país e introduce entre 8 y 15 dígitos.'
+          : 'Check your WhatsApp number: pick your country code and enter 8–15 digits.'
+      );
+      return;
+    }
+    if (needsEmail && emailTrimmed && !isValidEmailFormat(emailTrimmed)) {
+      setEmailTouched(true);
+      setErrorMsg(
+        isEs
+          ? 'El email no parece válido (ejemplo: nombre@gmail.com).'
+          : 'Email format looks invalid (e.g. name@gmail.com).'
+      );
       return;
     }
 
@@ -64,8 +134,8 @@ export default function PatientContactReminderCard({
           code: rxCode,
           status: 'current',
           patientContactCapture: true,
-          ...(needsPhone && phone.trim() ? { patientPhone: phone.trim() } : {}),
-          ...(needsEmail && email.trim() ? { patientEmail: email.trim() } : {}),
+          ...(needsPhone && nextPhone ? { patientPhone: nextPhone } : {}),
+          ...(needsEmail && nextEmail ? { patientEmail: nextEmail } : {}),
         }),
       });
       if (!res.ok) {
@@ -165,7 +235,7 @@ export default function PatientContactReminderCard({
           <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>
             {isEs ? 'Guarda tu guía y aviso de caducidad' : 'Save your guide & BUD reminder'}
           </div>
-          <div style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.45, marginBottom: '10px' }}>
+          <div style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.45, marginBottom: '12px' }}>
             {isEs
               ? 'Añade tu dato de contacto para recibir el recordatorio de caducidad (BUD) y una copia privada de esta guía.'
               : 'Add your contact details to receive your Beyond-Use Date (BUD) refill reminder and a private copy of this guide.'}
@@ -173,74 +243,170 @@ export default function PatientContactReminderCard({
 
           <form
             onSubmit={handleSubmit}
+            noValidate
             style={{
               display: 'flex',
-              flexWrap: 'wrap',
-              gap: '8px',
-              alignItems: 'center',
+              flexDirection: 'column',
+              gap: '10px',
             }}
           >
-            {needsPhone && (
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder={isEs ? 'WhatsApp (ej. +34 600...)' : 'WhatsApp (e.g. +971 50...)'}
-                style={{
-                  flex: '1 1 170px',
-                  minHeight: '38px',
-                  padding: '6px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  fontSize: '0.8rem',
-                  color: '#0f172a',
-                }}
-              />
-            )}
-            {needsEmail && (
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={isEs ? 'Email personal' : 'Personal email'}
-                style={{
-                  flex: '1 1 190px',
-                  minHeight: '38px',
-                  padding: '6px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  fontSize: '0.8rem',
-                  color: '#0f172a',
-                }}
-              />
-            )}
-            <button
-              type="submit"
-              disabled={isSaving}
-              style={{
-                minHeight: '38px',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                border: 'none',
-                background: '#003666',
-                color: '#ffffff',
-                fontSize: '0.78rem',
-                fontWeight: 650,
-                cursor: isSaving ? 'not-allowed' : 'pointer',
-                opacity: isSaving ? 0.7 : 1,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {isSaving ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar' : 'Save')}
-            </button>
-          </form>
-          {errorMsg && (
-            <div style={{ marginTop: '6px', fontSize: '0.73rem', color: '#dc2626', fontWeight: 600 }}>
-              {errorMsg}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'flex-start' }}>
+              {needsPhone && (
+                <div style={{ flex: '1 1 230px', minWidth: 0 }}>
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      fontSize: '0.71rem',
+                      fontWeight: 700,
+                      color: '#334155',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    <span>{isEs ? 'WhatsApp (elige país)' : 'WhatsApp (select country)'}</span>
+                    {phoneValid && (
+                      <span style={{ color: '#16a34a', fontWeight: 700 }}>
+                        ✓ {isEs ? 'Formato válido' : 'Valid'}
+                      </span>
+                    )}
+                  </label>
+                  <InternationalPhoneInput
+                    phonePrefix={phonePrefix}
+                    onPrefixChange={(prefix) => setPhonePrefix(prefix)}
+                    phoneNumber={phoneNumber}
+                    onPhoneNumberChange={(num) => {
+                      setPhoneNumber(num);
+                      if (errorMsg) setErrorMsg('');
+                    }}
+                    onChange={(fullVal) => setPhone(typeof fullVal === 'string' ? fullVal : '')}
+                    countryHint={isEs ? 'ES' : 'AE'}
+                    lang={isEs ? 'es' : 'en'}
+                    placeholder={isEs ? '600 123 456' : '50 123 4567'}
+                  />
+                  <div style={{ fontSize: '0.68rem', color: phoneTooShort ? '#d97706' : '#64748b', marginTop: '4px', lineHeight: 1.35 }}>
+                    {phoneTooShort
+                      ? (isEs
+                          ? 'Faltan dígitos: escribe tu número sin repetir el prefijo.'
+                          : 'Too short: enter your local digits without repeating the country code.')
+                      : (isEs
+                          ? 'Escribe solo el número local sin el 0 inicial (el prefijo ya está incluido).'
+                          : 'Enter local digits only without leading 0 (country code is included).')}
+                  </div>
+                </div>
+              )}
+
+              {needsEmail && (
+                <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+                  <label
+                    htmlFor="patient-reminder-email"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      fontSize: '0.71rem',
+                      fontWeight: 700,
+                      color: '#334155',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    <span>{isEs ? 'Email personal' : 'Personal email'}</span>
+                    {emailValid && (
+                      <span style={{ color: '#16a34a', fontWeight: 700 }}>
+                        ✓ {isEs ? 'Válido' : 'Valid'}
+                      </span>
+                    )}
+                  </label>
+                  <input
+                    id="patient-reminder-email"
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errorMsg) setErrorMsg('');
+                    }}
+                    onBlur={() => setEmailTouched(true)}
+                    placeholder={isEs ? 'nombre@gmail.com' : 'name@gmail.com'}
+                    style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      minHeight: '42px',
+                      padding: '8px 11px',
+                      borderRadius: '8px',
+                      border: `1px solid ${emailHasError ? '#dc2626' : emailValid ? '#16a34a' : '#cbd5e1'}`,
+                      background: '#ffffff',
+                      fontSize: '0.84rem',
+                      color: '#0f172a',
+                    }}
+                  />
+                  {emailSuggestion ? (
+                    <div style={{ marginTop: '4px', fontSize: '0.70rem', color: '#b45309', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span>{isEs ? '¿Quisiste decir' : 'Did you mean'}</span>
+                      <button
+                        type="button"
+                        onClick={() => setEmail(emailSuggestion)}
+                        style={{
+                          border: '1px solid #f59e0b',
+                          background: '#fffbeb',
+                          color: '#92400e',
+                          borderRadius: '6px',
+                          padding: '2px 7px',
+                          fontSize: '0.70rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {emailSuggestion}
+                      </button>
+                      <span>?</span>
+                    </div>
+                  ) : emailHasError ? (
+                    <div style={{ marginTop: '4px', fontSize: '0.69rem', color: '#dc2626', fontWeight: 600 }}>
+                      {isEs ? 'Incluye "@" y dominio (ej. nombre@gmail.com).' : 'Include "@" and domain (e.g. name@gmail.com).'}
+                    </div>
+                  ) : (
+                    <div style={{ marginTop: '4px', fontSize: '0.68rem', color: '#64748b', lineHeight: 1.35 }}>
+                      {isEs ? 'Ejemplo: nombre@gmail.com (sin espacios).' : 'Example: name@gmail.com (no spaces).'}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          )}
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                type="submit"
+                disabled={isSaving}
+                style={{
+                  minHeight: '42px',
+                  padding: '8px 18px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#003666',
+                  color: '#ffffff',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  opacity: isSaving ? 0.7 : 1,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {isSaving ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar contacto' : 'Save contact')}
+              </button>
+
+              {errorMsg && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', color: '#dc2626', fontWeight: 600 }}>
+                  <AlertCircle size={14} />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+            </div>
+          </form>
         </div>
       </div>
     </div>

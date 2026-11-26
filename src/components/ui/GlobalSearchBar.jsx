@@ -832,7 +832,7 @@ export default function GlobalSearchBar({
 
   return (
     <>
-      <div className={`search-bar-wrap atlas-search-size-${size} ${className}`} style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
+      <div className={`search-bar-wrap atlas-search-size-${size} ${className}`} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: '100%' }}>
 
         {/* ── INPUT ROW ──────────────────────────────────────────────────── */}
         <div
@@ -1016,14 +1016,14 @@ export default function GlobalSearchBar({
           )}
         </div>
 
-        {/* ── ACTIVE FILTER CHIPS ZONE (attached in-flow below input) ──────────── */}
+        {/* ── ACTIVE FILTER CHIPS ZONE (attached in-flow below input, GCP standard) ── */}
         {hasActiveFilters && (
           <div
             className="atlas-search__chips-zone"
-            style={{ position: 'relative', marginTop: '6px', zIndex: 10 }}
+            style={{ position: 'relative', zIndex: 10 }}
           >
-            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginRight: '0.25rem', flexShrink: 0 }}>
-              ACTIVE FILTERS:
+            <span className="atlas-search__chips-heading">
+              {lang === 'es' ? 'Filtros activos:' : 'Active filters:'}
             </span>
             {filters.map((filter, idx) => {
               if (!filter) return null;
@@ -1038,15 +1038,24 @@ export default function GlobalSearchBar({
                       {cleanLabel}{hasValue ? ':' : ''}
                     </span>
                   )}
-                  {hasValue && <span>{filter.value}</span>}
+                  {hasValue && <span className="atlas-search__chip-value">{filter.value}</span>}
                   {filter.onRemove && (
-                    <button className="atlas-search__chip-remove" onClick={filter.onRemove} title={`Remove ${cleanLabel || filter.value} filter`}>
-                      <X size={10} />
+                    <button type="button" className="atlas-search__chip-remove" onClick={filter.onRemove} aria-label={`Remove ${cleanLabel || filter.value} filter`} title={`Remove ${cleanLabel || filter.value} filter`}>
+                      <X size={11} />
                     </button>
                   )}
                 </span>
               );
             })}
+            {filters.filter((f) => f && f.onRemove).length > 1 && (
+              <button
+                type="button"
+                className="atlas-search__chips-clear"
+                onClick={() => filters.forEach((f) => f?.onRemove?.())}
+              >
+                {lang === 'es' ? 'Limpiar todo' : 'Clear all'}
+              </button>
+            )}
           </div>
         )}
 

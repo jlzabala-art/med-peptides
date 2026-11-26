@@ -301,8 +301,8 @@ export default function ReferencesTab({ product = {}, slug = 'tirzepatide' }) {
                   padding: '12px 14px'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
-                  <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                  <div style={{ flex: '1 1 220px', minWidth: 0 }}>
                     <h3 style={{ margin: '0 0 4px 0', fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.35 }}>
                       {study.title}
                     </h3>
@@ -324,11 +324,12 @@ export default function ReferencesTab({ product = {}, slug = 'tirzepatide' }) {
                           background: '#eff6ff',
                           border: '1px solid #bfdbfe',
                           padding: '3px 8px',
-                          borderRadius: '4px',
+                          borderRadius: '999px',
                           color: '#1d4ed8',
                           fontSize: '0.70rem',
                           fontWeight: 800,
-                          textDecoration: 'none'
+                          textDecoration: 'none',
+                          whiteSpace: 'nowrap',
                         }}
                         title="Open publication directly in NCBI PubMed"
                       >

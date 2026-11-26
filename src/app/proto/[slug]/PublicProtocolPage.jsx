@@ -1196,7 +1196,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
             boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)',
           }}
         >
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#0369a1', marginBottom: '6px' }}>
               {lang === 'es' ? 'Nivel de Evidencia & Citas PubMed' : 'Evidence Tier & PubMed References'}
             </div>

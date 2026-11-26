@@ -520,6 +520,17 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
           max-width: 1240px;
           margin: 0 auto;
           padding: 1.5rem 1.5rem 6.5rem;
+          box-sizing: border-box;
+        }
+        .pellet-responsive-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 12px;
+        }
+        .pellet-pubmed-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+          gap: 12px;
         }
         .pellet-guide-pill-btn {
           padding: 7px 12px;
@@ -534,7 +545,15 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
         }
         @media (max-width: 768px) {
           .pellet-guide-main {
-            padding: 0.9rem 0.75rem 6.5rem;
+            padding: 0.9rem 0.85rem 6.5rem;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+          }
+          .pellet-responsive-grid,
+          .pellet-pubmed-grid {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 10px;
           }
           .pellet-planner-row {
             flex-direction: column;
@@ -1357,7 +1376,7 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
                   </span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '8px' }}>
+                <div className="pellet-responsive-grid" style={{ gap: '8px' }}>
                   {PREOP_CHECKLIST.map((item) => {
                     const checked = Boolean(checkedItems[item.id]);
                     return (
@@ -1636,7 +1655,7 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
             )}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+          <div className="pellet-pubmed-grid">
             {[
               {
                 pmid: '35893288',
@@ -1701,11 +1720,11 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
                   gap: '6px'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', minWidth: 0 }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', minWidth: 0 }}>
                     {study.journal} · {study.year}
                   </span>
-                  <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#475569', backgroundColor: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>
+                  <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#475569', backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '999px', whiteSpace: 'nowrap', flexShrink: 0 }}>
                     PMID {study.pmid}
                   </span>
                 </div>

@@ -89,6 +89,10 @@
   .trocar-step-track {
     display: none;
   }
+  .trocar-guide-badge,
+  .trocar-info-phase-tag {
+    display: none;
+  }
   .trocar-guide-footer {
     padding: 0.75rem 1rem;
   }

@@ -460,7 +460,7 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
           )}
 
           <div className="trocar-visual-caption">
-            {isEs ? `Esquema Anatómico-Quirúrgico · Fase ${currentStep.step} de 6` : `Anatomical & Surgical Schematic · Stage ${currentStep.step} of 6`}
+            {isEs ? 'Esquema Anatómico-Quirúrgico' : 'Anatomical & Surgical Schematic'}
           </div>
         </div>
 
