@@ -22,7 +22,10 @@ import {
   Activity,
   CheckCircle2,
   ShoppingCart,
-  ChevronDown
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  Mail,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { triggerHaptic } from '@/utils/haptics';
@@ -58,6 +61,7 @@ const CURRENCY_SYMBOLS = {
  * PelletMobileCard — Symmetric 2-Zone Stripe / GCP Mobile Product Card
  * Zone A: Compact clinical identity ([PL-01] + Name + Expand + Strength/Trocar/Duration + Copyable SKU)
  * Zone B: Side-by-side 50/50 pricing tiles (Single Unit vs Pack x10 -10%) with full-width 40px tap targets
+ * Zone C: 3-utility action strip (Guía Clínica ▾ | Atlas AI | Cotizar) — mirrors PeptideMobileCard
  */
 function PelletMobileCard({
   row,
@@ -67,16 +71,22 @@ function PelletMobileCard({
   onAddToCart,
   onUpdateQuantity,
   isEs,
+  onInquire,
+  onOpenAi,
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = React.useState(false);
   const isPellet = row.category !== 'Trocar Kits';
   const unitEur = row.pricing?.wholesalePriceEur || row.pricing?.price_eur || row.pricing?.costPriceEur || 0;
   const packEur = row.pricing?.box10WholesalePriceEur || Number((unitEur * 10 * 0.90).toFixed(2));
   const singleQty = cartItems?.[row.id]?.single || 0;
   const packQty = cartItems?.[row.id]?.pack10 || 0;
+  const isInCart = singleQty > 0 || packQty > 0;
+
+  const slug = row.slug || row.id;
+  const specsUrl = `/p/${slug}`;
 
   return (
-    <div className="pellet-mcard">
+    <div className={`pellet-mcard${isInCart ? ' in-cart' : ''}`}>
       {/* Zone A: Clinical Identity */}
       <div className="pellet-mcard-top">
         <div className="pellet-mcard-header">
@@ -98,7 +108,7 @@ function PelletMobileCard({
             )}
             {isPellet ? (
               <Link
-                href={`/p/${row.slug}`}
+                href={specsUrl}
                 style={{ color: '#003666', fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none', lineHeight: 1.25 }}
               >
                 {row.name}
@@ -107,6 +117,33 @@ function PelletMobileCard({
               <span style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.88rem', lineHeight: 1.25 }}>
                 {row.name}
               </span>
+            )}
+            {/* Specs ↗ quick link (mirrors PeptideMobileCard) */}
+            {isPellet && (
+              <Link
+                href={specsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  fontSize: '0.67rem',
+                  fontWeight: 700,
+                  color: '#5f6368',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  padding: '2px 7px',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+                title={isEs ? `Abrir ficha técnica de ${row.name}` : `Open clinical specs for ${row.name}`}
+              >
+                <FileText size={10} />
+                <span>{isEs ? 'Ficha ↗' : 'Specs ↗'}</span>
+              </Link>
             )}
           </div>
 
@@ -234,6 +271,55 @@ function PelletMobileCard({
         </div>
       </div>
 
+      {/* Zone C: 3-Utility Action Strip (mirrors PeptideMobileCard) */}
+      <div className="pellet-mcard-utility-strip">
+        {expandableRender ? (
+          <button
+            type="button"
+            className="pellet-mcard-util-btn"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            style={{
+              background: expanded ? '#e8f0fe' : 'transparent',
+              color: expanded ? '#1a73e8' : '#3c4043',
+            }}
+          >
+            <Activity size={12} color={expanded ? '#1a73e8' : '#5f6368'} style={{ flexShrink: 0 }} />
+            <span>{isEs ? 'Guía Clínica' : 'Clinical'}</span>
+            {expanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+          </button>
+        ) : (
+          <Link
+            href="/guides/hormone-pellets-implantation"
+            target="_blank"
+            className="pellet-mcard-util-btn"
+            style={{ color: '#3c4043' }}
+          >
+            <Activity size={12} color="#5f6368" style={{ flexShrink: 0 }} />
+            <span>{isEs ? 'Guía' : 'Guide'}</span>
+            <ExternalLink size={10} />
+          </Link>
+        )}
+        <button
+          type="button"
+          className="pellet-mcard-util-btn"
+          onClick={() => onOpenAi && onOpenAi(row)}
+          title={isEs ? 'Consultar con Atlas AI' : 'Ask Atlas AI about this pellet'}
+        >
+          <Sparkles size={12} color="#5f6368" style={{ flexShrink: 0 }} />
+          <span>Atlas AI</span>
+        </button>
+        <button
+          type="button"
+          className="pellet-mcard-util-btn"
+          onClick={() => onInquire && onInquire(row)}
+          title={isEs ? 'Consultar pedido institucional' : 'Inquire about institutional volume'}
+        >
+          <Mail size={12} color="#5f6368" style={{ flexShrink: 0 }} />
+          <span>{isEs ? 'Cotizar' : 'Inquire'}</span>
+        </button>
+      </div>
+
       {/* Expandable Master-Detail */}
       {expanded && expandableRender && (
         <div style={{ padding: '0 12px 12px', background: '#f8fafc' }}>
@@ -283,6 +369,7 @@ export default function PelletsPriceListClient({
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
   const [scopeMode, setScopeMode] = useState('all'); // 'all' | 'filtered'
   const [showMobileSpecs, setShowMobileSpecs] = useState(false);
+  const [isMobileKpiExpanded, setIsMobileKpiExpanded] = useState(false);
 
   const isEs = lang === 'es';
 
@@ -1067,6 +1154,29 @@ export default function PelletsPriceListClient({
         />
         {/* ── 4 KPIs with Scope Switcher (Strict Golden Rule #22) ── */}
         <div className="pellets-kpi-bar">
+          {/* Mobile compact 1-line KPI summary strip (shown instead of full grid on mobile) */}
+          <div className="pellets-kpi-mobile-strip" style={{ marginBottom: '8px' }}>
+            <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.80rem' }}>
+              {activeCount} {isEs ? 'formulaciones' : 'SKUs'}
+            </span>
+            <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>·</span>
+            <span style={{ color: '#003666', fontWeight: 700 }}>
+              {kpiPriceStats.minUnit > 0
+                ? `${formatPrice(kpiPriceStats.minUnit)}–${formatPrice(kpiPriceStats.maxUnit)}`
+                : '—'}
+            </span>
+            <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>·</span>
+            <span style={{ color: '#16a34a', fontWeight: 700 }}>-10% Pack ×10</span>
+            <button
+              type="button"
+              className="pellets-kpi-mobile-toggle"
+              onClick={() => setIsMobileKpiExpanded((v) => !v)}
+              aria-expanded={isMobileKpiExpanded}
+            >
+              {isEs ? 'KPIs' : 'KPIs'}
+              {isMobileKpiExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+          </div>
           <div className="pellets-kpi-header">
             <div className="pellets-kpi-title">
               <Award size={16} color="#003666" />
@@ -1110,7 +1220,7 @@ export default function PelletsPriceListClient({
             </div>
           </div>
 
-          <div className="pellets-kpi-grid">
+          <div className={`pellets-kpi-grid${isMobileKpiExpanded ? ' is-expanded' : ''}`}>
             <div className="pellets-kpi-card">
               <span className="pellets-kpi-card-label">
                 {isEs ? 'Formulaciones Disponibles' : 'Sterile Formulations'}
@@ -1431,6 +1541,8 @@ export default function PelletsPriceListClient({
                   onAddToCart: handleAddToCart,
                   onUpdateQuantity: handleUpdateQuantity,
                   isEs,
+                  onInquire: () => setIsInquiryDrawerOpen(true),
+                  onOpenAi: undefined, // Atlas AI context already registered via useRegisterAtlasContext
                 }}
                 pagination={false}
               />

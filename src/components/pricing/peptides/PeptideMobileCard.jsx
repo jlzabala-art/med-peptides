@@ -17,6 +17,7 @@ import {
   Mail,
   FileText
 } from 'lucide-react';
+import CopyableId from '@/components/ui/CopyableId';
 import { getPeptideClinicalSummary } from '@/constants/peptidePharmacology';
 import { parsePeptideBlendDisplay } from '@/components/pricing/PeptidePricePdfPreviewModal';
 
@@ -600,18 +601,10 @@ export default function PeptideMobileCard({
                 <span>{isEs ? 'T1/2:' : 'Half-life:'} {clinical.halfLife}</span>
               </span>
               {clinical.casNumber && (
-                <span style={{
-                  fontSize: '0.66rem',
-                  fontWeight: 600,
-                  color: '#475569',
-                  background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  padding: '2px 7px',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace'
-                }}>
-                  CAS: {clinical.casNumber}
-                </span>
+                <CopyableId
+                  value={clinical.casNumber}
+                  displayValue={`CAS: ${clinical.casNumber}`}
+                />
               )}
             </div>
 
@@ -731,11 +724,11 @@ export default function PeptideMobileCard({
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
-                            background: '#f3e8ff',
-                            border: '1px solid #d8b4fe',
-                            color: '#6b21a8',
+                            background: '#ffffff',
+                            border: '1px solid #dadce0',
+                            color: '#1a73e8',
                             borderRadius: '4px',
-                            padding: '3px 8px',
+                            padding: '4px 10px',
                             fontSize: '0.68rem',
                             fontWeight: 700,
                             cursor: 'pointer'
@@ -765,25 +758,25 @@ export default function PeptideMobileCard({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: '8px',
-                  background: '#f0f9ff',
-                  color: '#0369a1',
-                  border: '1px solid #bae6fd',
+                  background: '#faf5ff',
+                  color: '#6b21a8',
+                  border: '1px solid #e9d5ff',
                   padding: '8px 14px',
                   borderRadius: '6px',
                   fontSize: '0.76rem',
                   fontWeight: 700,
                   cursor: 'pointer',
                   minHeight: '38px',
-                  boxShadow: '0 1px 2px rgba(2,132,199,0.08)',
+                  boxShadow: '0 1px 2px rgba(124,58,237,0.08)',
                   transition: 'all 0.15s ease'
                 }}
                 title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Sparkles size={14} color="#0284c7" />
+                  <Sparkles size={14} color="#7c3aed" />
                   <span>{isEs ? 'Calcular Pauta y Reconstitución con Atlas AI' : 'Calculate Posology & Reconstitution with Atlas AI'}</span>
                 </div>
-                <ArrowRight size={13} color="#0284c7" />
+                <ArrowRight size={13} color="#7c3aed" />
               </button>
             </div>
           </div>

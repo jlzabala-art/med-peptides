@@ -359,10 +359,45 @@
 .pellet-mcard {
   background: #ffffff;
   border: 1px solid #dadce0;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(60, 64, 67, 0.06);
   margin-bottom: 10px;
+}
+
+.pellet-mcard.in-cart {
+  border: 1.5px solid #1a73e8;
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.14);
+}
+
+/* ── 3-Utility Action Strip (mirrors PeptideMobileCard) ── */
+.pellet-mcard-utility-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.pellet-mcard-util-btn {
+  min-height: 38px;
+  padding: 4px 6px;
+  border: none;
+  background: transparent;
+  color: #3c4043;
+  font-size: 0.71rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+  border-right: 1px solid #e2e8f0;
+  text-decoration: none;
+}
+
+.pellet-mcard-util-btn:last-child {
+  border-right: none;
 }
 
 .pellet-mcard-top {
@@ -656,7 +691,50 @@
     min-height: 40px;
   }
   .pellets-cart-dock-inner {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .pellets-cart-dock {
+    padding: 10px 12px max(10px, env(safe-area-inset-bottom, 10px)) 12px;
+  }
+  /* ── Mobile KPI Compact Strip ── */
+  .pellets-kpi-mobile-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    flex-wrap: wrap;
+  }
+  .pellets-kpi-mobile-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid #dadce0;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.70rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  /* Hide 2x2 KPI grid by default on mobile; show when expanded */
+  .pellets-kpi-grid {
+    display: none;
+  }
+  .pellets-kpi-grid.is-expanded {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .pellets-kpi-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
   }
 }
