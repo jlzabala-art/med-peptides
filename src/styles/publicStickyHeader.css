@@ -1056,7 +1056,7 @@
   font-weight: 700;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1120px) {
   .puh-locale-trigger {
     display: none !important;
   }
@@ -1064,6 +1064,19 @@
   .puh-lang-pills {
     display: inline-flex !important;
   }
+}
+
+@media (max-width: 1119px) {
+  .puh-locale-trigger {
+    display: inline-flex !important;
+  }
+  .puh-currency-pills,
+  .puh-lang-pills {
+    display: none !important;
+  }
+}
+
+@media (min-width: 768px) {
   .gcp-signin-text-desktop {
     display: inline;
   }
@@ -1073,13 +1086,6 @@
 }
 
 @media (max-width: 767px) {
-  .puh-locale-trigger {
-    display: inline-flex !important;
-  }
-  .puh-currency-pills,
-  .puh-lang-pills {
-    display: none !important;
-  }
   .puh-actions-group {
     display: flex !important;
     align-items: center !important;

@@ -28,6 +28,7 @@ export default function PeptidesFilterToolbar({
   selectedCategory = 'all',
   setSelectedCategory,
   selectedFdaStatus = 'all',
+  setSelectedFdaStatus,
   setIsFdaSheetOpen,
   setIsCategorySheetOpen,
   shippingDest = 'EU',
@@ -35,7 +36,12 @@ export default function PeptidesFilterToolbar({
   selectedStrength = 'all',
   setSelectedStrength,
   groupByCategory = true,
-  setGroupByCategory
+  setGroupByCategory,
+  onExportCsv,
+  onOpenBulkQuote,
+  onOpenAtlasAi,
+  currency = 'USD',
+  isDistributor = false,
 }) {
   const isEs = lang === 'es';
   const [isMobileSecondaryOpen, setIsMobileSecondaryOpen] = useState(false);
@@ -45,6 +51,8 @@ export default function PeptidesFilterToolbar({
     selectedFdaStatus === 'all'
       ? (isEs ? 'FDA: Todas' : 'FDA: All')
       : (isEs ? (activeFdaObj?.labelEs || 'FDA') : (activeFdaObj?.labelEn || 'FDA'));
+
+  const activeCorridor = SHIPPING_DESTINATIONS[shippingDest] || SHIPPING_DESTINATIONS.EU;
 
   const filterOptions = [
     {
@@ -56,6 +64,7 @@ export default function PeptidesFilterToolbar({
         value: f.id
       })),
       onChange: (val) => {
+        if (setSelectedFdaStatus) setSelectedFdaStatus(val);
         if (setIsFdaSheetOpen) setIsFdaSheetOpen(false);
       }
     },
@@ -64,7 +73,7 @@ export default function PeptidesFilterToolbar({
       label: isEs ? 'Envío' : 'Shipping',
       value: shippingDest,
       options: Object.values(SHIPPING_DESTINATIONS).map((c) => ({
-        label: `${c.flag || ''} ${c.name}`,
+        label: `${c.flag || ''} ${isEs ? (c.labelEs || c.id) : (c.labelEn || c.id)} ${c.rateBadge || ''}`.trim(),
         value: c.id
       })),
       onChange: (val) => {
@@ -87,8 +96,22 @@ export default function PeptidesFilterToolbar({
 
   return (
     <div className="gcp-search-and-category-block" style={{ marginBottom: '0.75rem' }}>
-      {/* Desktop Filter Sidebar Toggle + Global Search Bar (Google Cloud Standard) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', marginBottom: '8px' }}>
+      {/* Global Search Bar FIRST (Golden Rule #7) + Desktop Filter Sidebar Toggle on Right */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', width: '100%', marginBottom: '8px' }}>
+        <div style={{ flex: 1, minWidth: 0, position: 'relative', zIndex: 50 }}>
+          <GlobalSearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            lang={lang}
+            placeholder={isEs
+              ? 'Buscar péptido (BPC-157, Tirzepatide...)'
+              : 'Search peptide (BPC-157, Tirzepatide...)'}
+            size="lg"
+            resultCount={filteredProducts.length}
+            filters={activeFilterChips}
+            filterOptions={filterOptions}
+          />
+        </div>
         {setIsSidebarOpen && (
           <button
             type="button"
@@ -98,7 +121,7 @@ export default function PeptidesFilterToolbar({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              height: '42px',
+              height: '48px',
               padding: '0 12px',
               borderRadius: '8px',
               border: '1px solid #dadce0',
@@ -117,19 +140,83 @@ export default function PeptidesFilterToolbar({
             <span>{isSidebarOpen ? (isEs ? 'Filtros (On)' : 'Filters (On)') : (isEs ? 'Filtros (Off)' : 'Filters (Off)')}</span>
           </button>
         )}
-        <div style={{ flex: 1, minWidth: 0, position: 'relative', zIndex: 50 }}>
-          <GlobalSearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            lang={lang}
-            placeholder={isEs
-              ? 'Buscar péptido (BPC-157, Tirzepatide...)'
-              : 'Search peptide (BPC-157, Tirzepatide...)'}
-            size="lg"
-            resultCount={filteredProducts.length}
-            filters={activeFilterChips}
-            filterOptions={filterOptions}
-          />
+      </div>
+
+      {/* Compact Corridor + Wholesale Tier + CSV/Bulk Actions Strip (Replaces duplicated filter card) */}
+      <div
+        className="mobile-hide"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px',
+          padding: '7px 12px',
+          marginBottom: '8px',
+          background: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          borderRadius: '8px',
+          fontSize: '0.74rem',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', color: '#334155' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 700, color: '#003666' }}>
+            <Truck size={13} color="#0284c7" />
+            <span>
+              {activeCorridor?.flag}{' '}
+              {shippingDest === 'US'
+                ? (isEs ? 'USA Express · $25 tarifa plana (≤2 kg) · 3–5 días · Cadena fría' : 'USA Express · $25 flat (≤2 kg) · 3–5 business days · Cold-pack')
+                : shippingDest === 'AE'
+                ? (isEs ? 'UAE / GCC Express · $80 (≤2 kg) · 3–5 días · Cadena fría' : 'UAE / GCC Express · $80 (≤2 kg) · 3–5 business days · Cold-pack')
+                : (isEs ? 'Europa Express · €60 (≤2 kg) · 2–4 días · Cadena fría' : 'Europe Express · €60 (≤2 kg) · 2–4 business days · Cold-pack')}
+            </span>
+          </span>
+          <span style={{ color: '#cbd5e1' }}>|</span>
+          <span style={{ color: '#15803d', fontWeight: 700 }}>
+            ✓ {isDistributor ? (isEs ? 'Tier Distribuidor' : 'Distributor Tier') : (isEs ? 'Tarifa Mayorista Autorizada' : 'Authorized Wholesale Tier')} ({currency}) · RP-HPLC ≥99.0% CoA
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {onOpenAtlasAi && (
+            <button
+              type="button"
+              onClick={onOpenAtlasAi}
+              className="gcp-btn-secondary"
+              style={{ padding: '4px 10px', fontSize: '0.72rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              title={isEs ? 'Consultar a Atlas AI sobre esta tarifa' : 'Ask Atlas AI about this schedule'}
+            >
+              <span>✦ Atlas AI</span>
+            </button>
+          )}
+          {onExportCsv && (
+            <button
+              type="button"
+              onClick={onExportCsv}
+              className="gcp-btn-secondary"
+              style={{ padding: '4px 9px', fontSize: '0.72rem', fontWeight: 600 }}
+            >
+              {isEs ? 'Exportar CSV' : 'Export CSV'}
+            </button>
+          )}
+          {onOpenBulkQuote && (
+            <button
+              type="button"
+              onClick={onOpenBulkQuote}
+              className="gcp-btn-secondary"
+              style={{ padding: '4px 9px', fontSize: '0.72rem', fontWeight: 600 }}
+            >
+              {isEs ? 'Cotización 50+ Viales' : 'Bulk Quote (50+ Vials)'}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsMobileSecondaryOpen((prev) => !prev)}
+            className="gcp-btn-secondary"
+            style={{ padding: '4px 9px', fontSize: '0.72rem', fontWeight: 600 }}
+          >
+            {isMobileSecondaryOpen ? (isEs ? 'Ocultar Opciones' : 'Hide Options') : (isEs ? 'Envío y Vista' : 'Shipping & View')}
+          </button>
         </div>
       </div>
 
@@ -211,9 +298,10 @@ export default function PeptidesFilterToolbar({
         </button>
       </div>
 
-      {/* Sub-bar with Shipping Corridor, Dosage Strength Pills & Grouping View */}
+      {/* Sub-bar with Shipping Corridor, Dosage Strength Pills & Grouping View (Progressive Disclosure — collapsed by default) */}
+      {isMobileSecondaryOpen && (
       <div
-        className={`peptides-secondary-filters-subbar ${isMobileSecondaryOpen ? 'mobile-secondary-expanded' : 'mobile-secondary-collapsed'}`}
+        className="peptides-secondary-filters-subbar mobile-secondary-expanded"
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -375,6 +463,7 @@ export default function PeptidesFilterToolbar({
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

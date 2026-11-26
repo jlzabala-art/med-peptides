@@ -115,8 +115,8 @@ export default function PeptidesPriceListClient({
     clinicName: '',
     email: '',
     phone: '',
-    phoneCountryCode: 'es',
-    country: 'Spain',
+    phoneCountryCode: initialDest === 'US' ? 'us' : initialDest === 'AE' ? 'ae' : 'es',
+    country: initialDest === 'US' ? 'United States' : initialDest === 'AE' ? 'United Arab Emirates' : 'Spain',
     addressLine1: '',
     addressLine2: '',
     city: '',
@@ -222,13 +222,27 @@ export default function PeptidesPriceListClient({
     {
       contextAnchor: {
         type: 'peptides_pricing',
-        name: isEs ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
+        name: isEs
+          ? `Tarifa Oficial de Péptidos (${currency} · ${shippingDest})`
+          : `Official Peptides Wholesale Schedule (${currency} · ${shippingDest})`,
+        currency,
+        shippingDest,
+        tier: isDistributor ? 'distributor' : 'wholesale',
+        activeCategory: selectedCategory,
+        fdaFilter: selectedFdaStatus,
+        visibleCount: filteredProducts.length,
+        corridorSummary:
+          shippingDest === 'US'
+            ? 'USA Express $25 flat (≤2 kg), 3–5 business days, cold-pack insulated, Pack ×10 volume savings (-15% to -52%), RP-HPLC ≥99.0% CoA'
+            : shippingDest === 'AE'
+            ? 'UAE / GCC Express $80 (≤2 kg), 3–5 business days, cold-pack insulated, Pack ×10 volume savings'
+            : 'Europe Express €60 (≤2 kg), 2–4 business days, cold-pack insulated, Pack ×10 volume savings',
       },
       bottomBar: {
         // Mutual exclusion: hide GlobalBottomStickyBar while PeptidesBottomCartDock is active
         hidden: totalCartCount > 0,
         summaryTitle: isEs ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
-        summarySubtitle: 'Atlas Health Services',
+        summarySubtitle: `${currency} · ${shippingDest} · Atlas Health Services`,
         atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
         onOpenAtlasAi: () => setIsAtlasAiOpen(true),
         showSections: true,
@@ -246,7 +260,7 @@ export default function PeptidesPriceListClient({
         },
       },
     },
-    [isEs, totalCartCount]
+    [isEs, totalCartCount, currency, shippingDest, isDistributor, selectedCategory, selectedFdaStatus, filteredProducts.length]
   );
 
   // Auth context & user info
@@ -653,6 +667,7 @@ export default function PeptidesPriceListClient({
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
               selectedFdaStatus={selectedFdaStatus}
+              setSelectedFdaStatus={setSelectedFdaStatus}
               setIsFdaSheetOpen={setIsFdaSheetOpen}
               setIsCategorySheetOpen={setIsCategorySheetOpen}
               shippingDest={shippingDest}
@@ -661,6 +676,48 @@ export default function PeptidesPriceListClient({
               setSelectedStrength={setSelectedStrength}
               groupByCategory={groupByCategory}
               setGroupByCategory={setGroupByCategory}
+              currency={currency}
+              isDistributor={isDistributor}
+              onOpenAtlasAi={() => setIsAtlasAiOpen(true)}
+              onOpenBulkQuote={() => {
+                setInquiryProductContext({
+                  productName: isEs ? 'Cotización Volumen 50+ Viales' : 'Custom Bulk Quote (50+ / 100+ Vials)',
+                  dosage: `${shippingDest} · ${currency}`,
+                  unitPrice: 0,
+                  pack10Price: 0,
+                });
+                setIsInquiryDrawerOpen(true);
+              }}
+              onExportCsv={() => {
+                try {
+                  const headers = ['Peptide', 'Strength', 'Category', 'FDA Status', `Unit (${currency})`, `Pack x10 (${currency})`, 'Savings %'];
+                  const rows = filteredProducts.map((p) => {
+                    const unit = formatPrice ? formatPrice(p.unitPrice || p.wholesalePriceUsd || 0) : '';
+                    const pack = formatPrice ? formatPrice(p.pack10Price || 0) : '';
+                    const savePct = p.savingsPct ? `${p.savingsPct}%` : '';
+                    return [
+                      `"${String(p.name || p.productName || '').replace(/"/g, '""')}"`,
+                      `"${String(p.dosage || p.strength || '').replace(/"/g, '""')}"`,
+                      `"${String(p.categoryLabel || p.categoryKey || '').replace(/"/g, '""')}"`,
+                      `"${String(p.fdaStatus || 'Research').replace(/"/g, '""')}"`,
+                      `"${unit}"`,
+                      `"${pack}"`,
+                      `"${savePct}"`,
+                    ].join(',');
+                  });
+                  const csv = [headers.join(','), ...rows].join('\n');
+                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `Atlas_Peptides_${shippingDest}_${currency}_Schedule.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success(isEs ? 'Tarifa CSV descargada ✓' : 'CSV Schedule exported ✓');
+                } catch {
+                  toast.error(isEs ? 'Error al exportar CSV' : 'Could not export CSV');
+                }
+              }}
             />
 
             {/* Price Drift Notice */}

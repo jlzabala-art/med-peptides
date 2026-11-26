@@ -17,8 +17,11 @@ function normalizeCurrency(rawCurrency) {
 export async function generateMetadata({ searchParams }) {
   const resolvedSearch = await searchParams;
   const lang = normalizeMetaLang(resolvedSearch);
-  const currency = normalizeCurrency(resolvedSearch?.currency);
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
+  const currency = normalizeCurrency(resolvedSearch?.currency || resolvedSearch?.cur);
+  const rawDest = String(resolvedSearch?.dest || resolvedSearch?.region || '').toUpperCase();
+  const destLabel = rawDest === 'US' ? 'USA' : rawDest === 'AE' ? 'UAE / GCC' : 'EU';
+  const rawRef = String(resolvedSearch?.ref || '').toLowerCase();
+  const isWholesaler = rawRef.includes('whole');
 
   return buildBilingualMetadata({
     lang,
@@ -27,12 +30,16 @@ export async function generateMetadata({ searchParams }) {
     path: '/pricing/peptides',
     siteName: 'Atlas Health Services',
     en: {
-      title: `Clinical Lyophilized Peptides • Official B2B Price Schedule (${currency})`,
-      description: `Official institutional and wholesale price schedule in ${currency} for sterile lyophilized bioactive peptide vials (10R). ≥99.0% HPLC purity, cGMP certified, with Pack ×10 volume savings.`,
+      title: isWholesaler
+        ? `Clinical Lyophilized Peptides • ${destLabel} Wholesale Price Schedule (${currency})`
+        : `Clinical Lyophilized Peptides • Official B2B Price Schedule (${currency})`,
+      description: `Official ${destLabel} wholesale & clinic price schedule in ${currency} for sterile lyophilized peptide vials (10R). ≥99.0% RP-HPLC purity, third-party CoA, cold-pack dispatch & Pack ×10 volume savings.`,
     },
     es: {
-      title: `Péptidos Clínicos Liofilizados • Tarifa Oficial B2B (${currency})`,
-      description: `Tarifa oficial institucional y mayorista en ${currency} para viales de péptidos bioactivos liofilizados estériles (10R). Pureza analítica ≥99.0% HPLC, certificación cGMP y ahorro por volumen en Pack ×10.`,
+      title: isWholesaler
+        ? `Péptidos Clínicos Liofilizados • Tarifa Mayorista ${destLabel} (${currency})`
+        : `Péptidos Clínicos Liofilizados • Tarifa Oficial B2B (${currency})`,
+      description: `Tarifa oficial mayorista y para clínicas (${destLabel}) en ${currency} para viales de péptidos liofilizados estériles (10R). Pureza analítica ≥99,0% HPLC, CoA por lote y ahorro en Pack ×10.`,
     },
   });
 }
