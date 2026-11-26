@@ -66,7 +66,12 @@ export default function PatientExactDoseCard({
           }
           @media (max-width: 640px) {
             .atlas-dose-calc-grid {
-              grid-template-columns: 1fr;
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 7px;
+            }
+            .atlas-dose-calc-card--hero {
+              grid-column: 1 / -1;
+              order: -1;
             }
           }
         `}</style>
@@ -74,6 +79,7 @@ export default function PatientExactDoseCard({
           {calc.cards.map((card, idx) => (
             <div
               key={idx}
+              className={card.highlight ? 'atlas-dose-calc-card--hero' : ''}
               style={{
                 background: '#ffffff',
                 border: card.highlight ? '1.5px solid #1a73e8' : '1px solid #dadce0',

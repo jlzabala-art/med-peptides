@@ -60,14 +60,14 @@ export const EXPORT_CATALOGUES = [
   {
     id: 'larimedical',
     supplierId: 'supplier-larimedical',
-    brandName: 'LARIMEDICAL (Sterilia)',
+    brandName: 'LARIMIDE · LARIMIDE PRO · LARIMEDICAL',
     catalogueFilter: null,
     flag: '🇪🇸',
     defaultCurrency: 'EUR',
     warehouse: 'EU Hub - Spain (Alcoy, Alicante)',
     defaultCostMarginAvailable: true,
-    variantCount: 8,
-    description: 'Sterile Mesotherapy Solutions (Spain)'
+    variantCount: 149,
+    description: 'Larimide, Larimide Pro, Larimedical Biopeels & Sterilia Solutions (Spain)'
   },
   {
     id: 'europeptides',

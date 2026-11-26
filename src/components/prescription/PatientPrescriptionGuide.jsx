@@ -1225,24 +1225,28 @@ export default function PatientPrescriptionGuide({
 
               {/* Card Body (Flat Google Cloud UX: How to take it 16px + Quick tip + 3-Phase Visual Stepper) */}
               {(() => {
-                const itemOwnHay = `${item.title || ''} ${item.dispensingForm || ''} ${item.route || ''} ${item.dosageForm || ''} ${item.vehicle?.name || ''}`.toLowerCase();
-                const hasOwnOral = /\b(capsule|caps|oral|tablet|troche|sublingual|hpmc|hygrocaps)\b/i.test(itemOwnHay);
-                const hasOwnNasal = /\b(nasal|intranasal)\b/i.test(itemOwnHay) || (itemOwnHay.includes('spray') && !itemOwnHay.includes('trichosol'));
-                const hasOwnPen = /\b(pen|pluma|bioblend)\b/i.test(itemOwnHay) && !itemOwnHay.includes('pentravan');
-                const hasOwnHormoneCream = /\b(topiclick|pentravan|transdermal|cream|gel)\b/i.test(itemOwnHay);
-                const hasOwnHairTopical = /\b(trichosol|trichowash|trichooil|scalp|hair|capilar|shampoo|foam|lotion)\b/i.test(itemOwnHay);
-                const hasOwnVial = /\b(vial|lyophilized|liofilizado|bac water|reconstitut)\b/i.test(itemOwnHay) || item.category?.type === 'peptide';
+                const itemOwnHay = `${item.title || ''} ${item.dispensingForm || ''} ${item.route || ''} ${item.dosageForm || ''} ${item.vehicle?.name || ''} ${item.posology?.dosageInstructions || ''} ${item.posology?.regimen || ''}`.toLowerCase();
+                const hasExplicitPen =
+                  item.category?.type === 'prefilled_pen' ||
+                  item.category?.type === 'peptide_pen' ||
+                  (/\b(pen|pens|pluma|plumas|bioblend|click|clicks|cartridge)\b/i.test(itemOwnHay) && !itemOwnHay.includes('pentravan'));
+                const hasOwnOral = !hasExplicitPen && /\b(capsule|caps|oral|tablet|troche|sublingual|hpmc|hygrocaps)\b/i.test(itemOwnHay);
+                const hasOwnNasal = !hasExplicitPen && (/\b(nasal|intranasal)\b/i.test(itemOwnHay) || (itemOwnHay.includes('spray') && !itemOwnHay.includes('trichosol')));
+                const hasOwnPen = hasExplicitPen;
+                const hasOwnHormoneCream = !hasExplicitPen && /\b(topiclick|pentravan|transdermal|cream|gel)\b/i.test(itemOwnHay);
+                const hasOwnHairTopical = !hasExplicitPen && /\b(trichosol|trichowash|trichooil|scalp|hair|capilar|shampoo|foam|lotion)\b/i.test(itemOwnHay);
+                const hasOwnVial = !hasExplicitPen && (/\b(vial|lyophilized|liofilizado|bac water|reconstitut)\b/i.test(itemOwnHay) || item.category?.type === 'peptide');
                 const hasExplicitOwnForm = hasOwnOral || hasOwnNasal || hasOwnPen || hasOwnHormoneCream || hasOwnHairTopical || hasOwnVial;
 
                 const fallbackHay = hasExplicitOwnForm ? '' : `${rx?.dispensingForm || ''} ${rx?.treatmentTitle || ''}`.toLowerCase();
                 const hay = `${itemOwnHay} ${fallbackHay}`.trim();
 
-                const isOral = hasOwnOral;
-                const isNasal = !isOral && (hasOwnNasal || (!hasExplicitOwnForm && hay.includes('nasal')));
-                const isPenDevice = !isOral && !isNasal && (hasOwnPen || item.category?.type === 'prefilled_pen' || item.category?.type === 'peptide_pen');
-                const isHormonalTransdermal = !isOral && !isNasal && !isPenDevice && (hasOwnHormoneCream || (!hasExplicitOwnForm && (item.category?.isTransdermal || /\b(topiclick|pentravan|hormon|estradiol|progesterone|testosterone|dhea)\b/i.test(hay))));
-                const isHairTopical = !isOral && !isNasal && !isPenDevice && !isHormonalTransdermal && (hasOwnHairTopical || (!hasExplicitOwnForm && (item.category?.type === 'topical' || /\b(trichosol|scalp|hair|capilar|minoxidil|finasteride|dutasteride|latanoprost)\b/i.test(hay))));
-                const isVial = !isOral && !isNasal && !isPenDevice && !isHormonalTransdermal && !isHairTopical && (hasOwnVial || item.category?.type === 'peptide' || /\b(vial|lyophilized|liofilizado)\b/i.test(hay));
+                const isPenDevice = hasOwnPen || (!hasExplicitOwnForm && /\b(pen|pluma|click)\b/i.test(fallbackHay) && !fallbackHay.includes('pentravan'));
+                const isOral = !isPenDevice && hasOwnOral;
+                const isNasal = !isPenDevice && !isOral && (hasOwnNasal || (!hasExplicitOwnForm && hay.includes('nasal')));
+                const isHormonalTransdermal = !isPenDevice && !isOral && !isNasal && (hasOwnHormoneCream || (!hasExplicitOwnForm && (item.category?.isTransdermal || /\b(topiclick|pentravan|hormon|estradiol|progesterone|testosterone|dhea)\b/i.test(hay))));
+                const isHairTopical = !isPenDevice && !isOral && !isNasal && !isHormonalTransdermal && (hasOwnHairTopical || (!hasExplicitOwnForm && (item.category?.type === 'topical' || /\b(trichosol|scalp|hair|capilar|minoxidil|finasteride|dutasteride|latanoprost)\b/i.test(hay))));
+                const isVial = !isPenDevice && !isOral && !isNasal && !isHormonalTransdermal && !isHairTopical && (hasOwnVial || item.category?.type === 'peptide' || /\b(vial|lyophilized|liofilizado)\b/i.test(hay));
 
                 const rawDirection =
                   item.posology?.dosageInstructions ||

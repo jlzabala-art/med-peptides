@@ -19,6 +19,8 @@ import {
   MessageCircle,
   Building2,
   BookOpen,
+  SlidersHorizontal,
+  ChevronDown,
 } from 'lucide-react';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -28,6 +30,397 @@ import LabelsRowQuickPreview from './LabelsRowQuickPreview';
 import PrescriptionStatusPopover from '@/components/prescription/PrescriptionStatusPopover';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { sanitizeRecentCode, getWorklistTestKind } from '../utils/labelHelpers';
+
+function LabelsWorklistMobileCard({
+  row: p,
+  isEs,
+  role,
+  statusOverrides,
+  setStatusOverrides,
+  selectedCodes,
+  setSelectedCodes,
+  allWorklistItems,
+  handleAddMultipleToQueue,
+  formatResultDate,
+  renderPrintStatusBadge,
+  renderRefillTag,
+  sharedRowCodes,
+  openRowMenuCode,
+  setOpenRowMenuCode,
+  buildPatientShareUrl,
+  markRowShared,
+  missingPhoneCode,
+  setMissingPhoneCode,
+  phoneDraft,
+  setPhoneDraft,
+  handleSelectOrAddPatient,
+  expandableRender,
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const cleanCode = sanitizeRecentCode(p.code);
+  const isChecked = selectedCodes.includes(cleanCode);
+  const pName = (p.name || p.patientName || '').trim().toLowerCase();
+  const samePatientItems = pName && Array.isArray(allWorklistItems)
+    ? allWorklistItems.filter((item) => (item.name || item.patientName || '').trim().toLowerCase() === pName)
+    : [];
+  const rxCount = Math.max(1, samePatientItems.length);
+  const isMultiRx = rxCount > 1;
+  const mergedRx = statusOverrides[p.code] ? { ...p, ...statusOverrides[p.code] } : p;
+  const wasShared = Boolean(sharedRowCodes[cleanCode] || sharedRowCodes[p.code] || p.patientGuideSharedAt);
+  const isDeliveredPendingGuide =
+    String(p.shippingStatus || p.fulfillmentStatus || p.status || '').toLowerCase() === 'delivered' && !wasShared;
+  const patientUrl = buildPatientShareUrl(p);
+  const patientDisplayName = p.name || p.patientName || 'Patient';
+  const rawPhone = String(p.patientPhone || p.phone || p.patient?.phone || '').replace(/[^\d]/g, '');
+  const rawDate = p.importedAt || p.createdAt || p.uploadedAt || p.updatedAt || p.date;
+  const dateStr = formatResultDate(rawDate) || '';
+  const isMenuOpen = openRowMenuCode === p.code;
+
+  return (
+    <div
+      style={{
+        background: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '10px',
+        padding: '11px 12px',
+        marginBottom: '8px',
+        boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)',
+      }}
+    >
+      {/* Row 1: Checkbox + Patient Name + Status + Expand */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <input
+          type="checkbox"
+          checked={isChecked}
+          aria-label={isEs ? `Seleccionar ${patientDisplayName}` : `Select ${patientDisplayName}`}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            setSelectedCodes((prev) =>
+              checked ? (prev.includes(cleanCode) ? prev : [...prev, cleanCode]) : prev.filter((x) => x !== cleanCode)
+            );
+          }}
+          style={{ width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer', accentColor: '#1a73e8' }}
+        />
+
+        <div style={{ minWidth: 0, flex: 1, fontSize: '0.88rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {patientDisplayName}
+        </div>
+
+        <div onClick={(e) => e.stopPropagation()} style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <PrescriptionStatusPopover
+            prescription={mergedRx}
+            cleanCode={cleanCode}
+            role={role || 'admin'}
+            isEs={isEs}
+            onUpdated={(_code, nextPrimary, nextAxes) => {
+              setStatusOverrides((prev) => ({
+                ...prev,
+                [p.code]: { status: nextPrimary, ...nextAxes },
+              }));
+            }}
+          />
+          {renderRefillTag(p)}
+        </div>
+
+        {expandableRender && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpanded((v) => !v);
+            }}
+            aria-label={isEs ? 'Ver detalle' : 'Toggle details'}
+            aria-expanded={expanded}
+            style={{
+              width: '30px',
+              height: '30px',
+              borderRadius: '6px',
+              border: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              color: '#475569',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              cursor: 'pointer',
+            }}
+          >
+            <ChevronDown size={15} style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+          </button>
+        )}
+      </div>
+
+      {/* Row 2: Code + Rx Count + Print State + Date */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginTop: '6px', fontSize: '0.7rem' }}
+      >
+        <CopyableId value={cleanCode} displayValue={`#${p.code}`} />
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+            padding: '1px 7px',
+            borderRadius: '999px',
+            fontSize: '0.67rem',
+            fontWeight: 700,
+            background: isMultiRx ? '#f3e8fd' : '#f1f5f9',
+            color: isMultiRx ? '#7c3aed' : '#475569',
+            border: isMultiRx ? '1px solid #e9d5ff' : '1px solid #e2e8f0',
+          }}
+        >
+          {rxCount} Rx
+        </span>
+        {isMultiRx && (
+          <button
+            type="button"
+            onClick={() => {
+              const codes = samePatientItems.map((item) => item.code).filter(Boolean);
+              if (handleAddMultipleToQueue && codes.length > 0) {
+                handleAddMultipleToQueue(codes);
+                toast.success(
+                  isEs
+                    ? `${codes.length} recetas añadidas a la cola`
+                    : `Added ${codes.length} prescriptions to queue`
+                );
+              }
+            }}
+            style={{
+              padding: '1px 7px',
+              borderRadius: '6px',
+              fontSize: '0.66rem',
+              fontWeight: 700,
+              background: '#eff6ff',
+              color: '#1d4ed8',
+              border: '1px solid #bfdbfe',
+              cursor: 'pointer',
+            }}
+          >
+            {isEs ? 'Queue all' : 'Queue all'}
+          </button>
+        )}
+        {renderPrintStatusBadge(p.code, p.a4PrintCount)}
+        {dateStr && <span style={{ color: '#64748b', marginLeft: 'auto' }}>{dateStr}</span>}
+      </div>
+
+      {/* Row 3: Concise Formula Title */}
+      <div
+        style={{
+          fontSize: '0.76rem',
+          color: '#475569',
+          lineHeight: 1.35,
+          marginTop: '5px',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}
+      >
+        {p.title || p.treatmentTitle || 'Prescription protocol'}
+      </div>
+
+      {/* Row 4: Single-line Action Strip */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+          gap: '5px',
+          marginTop: '8px',
+          paddingTop: '8px',
+          borderTop: '1px solid #f1f5f9',
+          position: 'relative',
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setOpenRowMenuCode(isMenuOpen ? null : p.code)}
+          style={{
+            minHeight: '34px',
+            borderRadius: '6px',
+            border: '1px solid #dadce0',
+            background: isMenuOpen ? '#e8f0fe' : wasShared ? '#f0fdf4' : isDeliveredPendingGuide ? '#fffbeb' : '#ffffff',
+            color: isMenuOpen ? '#1a73e8' : wasShared ? '#15803d' : isDeliveredPendingGuide ? '#b45309' : '#3c4043',
+            fontSize: '0.7rem',
+            fontWeight: 650,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {wasShared ? (isEs ? 'Enviado ✓' : 'Sent ✓') : (isEs ? 'Enviar ▾' : 'Share ▾')}
+        </button>
+
+        <a
+          href={`/rx/${encodeURIComponent(cleanCode)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            minHeight: '34px',
+            borderRadius: '6px',
+            border: '1px solid #dadce0',
+            background: '#ffffff',
+            color: '#1a73e8',
+            fontSize: '0.7rem',
+            fontWeight: 700,
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '3px',
+          }}
+        >
+          <span>Rx</span>
+          <ExternalLink size={10} />
+        </a>
+
+        <button
+          type="button"
+          onClick={() => handleSelectOrAddPatient(p.code, true, 'backQr')}
+          style={{
+            minHeight: '34px',
+            borderRadius: '6px',
+            border: '1px solid #dadce0',
+            background: '#ffffff',
+            color: '#3c4043',
+            fontSize: '0.7rem',
+            fontWeight: 650,
+            cursor: 'pointer',
+          }}
+        >
+          Delivery
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleSelectOrAddPatient(p.code, true, 'shipping')}
+          style={{
+            minHeight: '34px',
+            borderRadius: '6px',
+            border: '1px solid #dadce0',
+            background: '#ffffff',
+            color: '#3c4043',
+            fontSize: '0.7rem',
+            fontWeight: 650,
+            cursor: 'pointer',
+          }}
+        >
+          Shipping
+        </button>
+
+        {isMenuOpen && (
+          <div
+            style={{
+              gridColumn: '1 / -1',
+              background: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              padding: '6px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              marginTop: '4px',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                  navigator.clipboard.writeText(patientUrl);
+                }
+                markRowShared(cleanCode);
+                setOpenRowMenuCode(null);
+                toast.success(isEs ? 'Link copiado ✓' : 'Patient link copied ✓');
+              }}
+              style={{
+                padding: '7px 10px',
+                borderRadius: '6px',
+                border: '1px solid #e2e8f0',
+                background: '#ffffff',
+                color: '#202124',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+              }}
+            >
+              <Link2 size={14} color="#5f6368" />
+              <span>{isEs ? 'Copiar Link Paciente' : 'Copy Patient Link'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const msg = isEs
+                  ? `Hola ${patientDisplayName}, aquí tienes tu guía privada (#${cleanCode}): ${patientUrl}`
+                  : `Hi ${patientDisplayName}, here is your private treatment guide (#${cleanCode}): ${patientUrl}`;
+                if (!rawPhone) {
+                  setMissingPhoneCode(p.code);
+                  setPhoneDraft('');
+                  return;
+                }
+                window.open(`https://wa.me/${rawPhone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+                markRowShared(cleanCode);
+                setOpenRowMenuCode(null);
+              }}
+              style={{
+                padding: '7px 10px',
+                borderRadius: '6px',
+                border: '1px solid #bbf7d0',
+                background: '#f0fdf4',
+                color: '#15803d',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+              }}
+            >
+              <MessageCircle size={14} />
+              <span>{isEs ? 'WhatsApp al Paciente' : 'WhatsApp to Patient'}</span>
+            </button>
+            {missingPhoneCode === p.code && (
+              <div style={{ display: 'flex', gap: '4px', marginTop: '2px' }}>
+                <input
+                  type="tel"
+                  value={phoneDraft}
+                  onChange={(e) => setPhoneDraft(e.target.value)}
+                  placeholder="+97150..."
+                  style={{ flex: 1, minWidth: 0, padding: '5px 8px', fontSize: '0.74rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cleaned = phoneDraft.replace(/[^\d]/g, '');
+                    const msg = isEs
+                      ? `Hola ${patientDisplayName}, aquí tienes tu guía privada (#${cleanCode}): ${patientUrl}`
+                      : `Hi ${patientDisplayName}, here is your private treatment guide (#${cleanCode}): ${patientUrl}`;
+                    window.open(`${cleaned ? `https://wa.me/${cleaned}` : 'https://wa.me/'}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+                    markRowShared(cleanCode, cleaned);
+                    setMissingPhoneCode(null);
+                    setOpenRowMenuCode(null);
+                  }}
+                  style={{ padding: '5px 10px', borderRadius: '6px', border: 'none', background: '#16a34a', color: '#ffffff', fontSize: '0.72rem', fontWeight: 700 }}
+                >
+                  {isEs ? 'Enviar' : 'Send'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {expanded && expandableRender && (
+        <div style={{ marginTop: '8px' }}>
+          {expandableRender(p)}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function LabelsHomeView({
   isEs,
@@ -73,6 +466,7 @@ export default function LabelsHomeView({
   const [manualsMenuOpen, setManualsMenuOpen] = useState(false);
   const [missingPhoneCode, setMissingPhoneCode] = useState(null);
   const [phoneDraft, setPhoneDraft] = useState('');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [sharedRowCodes, setSharedRowCodes] = useState(() => {
     if (typeof window === 'undefined') return {};
     try {
@@ -499,7 +893,39 @@ export default function LabelsHomeView({
             )}
           </div>
 
-          {/* Worklist Filter Tabs + Date Range */}
+          {/* Worklist Filter Tabs + Collapsible Secondary Filters */}
+          <style>{`
+            .pls-mobile-filters-toggle { display: none; }
+            @media (max-width: 768px) {
+              .pls-mobile-filters-toggle {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 10px;
+                min-height: 30px;
+                border-radius: 16px;
+                border: 1px solid #cbd5e1;
+                background: #ffffff;
+                color: #334155;
+                font-size: 0.72rem;
+                font-weight: 700;
+                cursor: pointer;
+                flex-shrink: 0;
+                white-space: nowrap;
+              }
+              .pls-secondary-filters-collapsed {
+                display: none !important;
+              }
+            }
+          `}</style>
+          {(() => {
+            const activeSecondaryFilterCount =
+              (worklistCountryFilter !== 'all' ? 1 : 0) +
+              (worklistDateRange !== '30d' ? 1 : 0) +
+              ((worklistTestFilter || 'all') !== 'all' ? 1 : 0);
+
+            return (
+              <>
           <div
             style={{
               padding: '10px 20px',
@@ -512,7 +938,8 @@ export default function LabelsHomeView({
               flexWrap: 'wrap',
             }}
           >
-            <div className="atlas-chip-rail" style={{ maxWidth: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: '1 1 320px', maxWidth: '100%' }}>
+              <div className="atlas-chip-rail" style={{ maxWidth: '100%', flex: 1 }}>
               {[
                 { id: 'unprinted', labelEs: 'Pendientes', labelEn: 'Unprinted' },
                 { id: 'pending_approval', labelEs: 'Por aprobar', labelEn: 'Pending Approval' },
@@ -564,9 +991,31 @@ export default function LabelsHomeView({
                   </button>
                 );
               })}
+              </div>
+
+              <button
+                type="button"
+                className="pls-mobile-filters-toggle"
+                onClick={() => setMobileFiltersOpen((v) => !v)}
+                aria-expanded={mobileFiltersOpen}
+                style={{
+                  borderColor: mobileFiltersOpen || activeSecondaryFilterCount > 0 ? '#1a73e8' : '#cbd5e1',
+                  background: mobileFiltersOpen || activeSecondaryFilterCount > 0 ? '#e8f0fe' : '#ffffff',
+                  color: mobileFiltersOpen || activeSecondaryFilterCount > 0 ? '#1a73e8' : '#334155',
+                }}
+              >
+                <SlidersHorizontal size={13} />
+                <span>
+                  {isEs ? 'Filtros' : 'Filters'}
+                  {activeSecondaryFilterCount > 0 ? ` (${activeSecondaryFilterCount})` : ''}
+                </span>
+              </button>
             </div>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <div
+              className={!mobileFiltersOpen ? 'pls-secondary-filters-collapsed' : ''}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}
+            >
               <select
                 aria-label={isEs ? 'País del médico' : 'Doctor country'}
                 value={worklistCountryFilter}
@@ -625,7 +1074,7 @@ export default function LabelsHomeView({
 
           {/* Test kind filter sub-bar */}
           <div
-            className="atlas-chip-rail"
+            className={`atlas-chip-rail${!mobileFiltersOpen ? ' pls-secondary-filters-collapsed' : ''}`}
             style={{
               padding: '7px 20px',
               background: '#ffffff',
@@ -683,6 +1132,9 @@ export default function LabelsHomeView({
               );
             })}
           </div>
+              </>
+            );
+          })()}
 
           {/* Unified Single Worklist Table */}
           <div>
@@ -1377,6 +1829,30 @@ export default function LabelsHomeView({
                 keyField="code"
                 globalSearch={false}
                 hidePagination={true}
+                mobileCardComponent={LabelsWorklistMobileCard}
+                mobileCardProps={{
+                  isEs,
+                  role,
+                  statusOverrides,
+                  setStatusOverrides,
+                  selectedCodes,
+                  setSelectedCodes,
+                  allWorklistItems,
+                  handleAddMultipleToQueue,
+                  formatResultDate,
+                  renderPrintStatusBadge,
+                  renderRefillTag,
+                  sharedRowCodes,
+                  openRowMenuCode,
+                  setOpenRowMenuCode,
+                  buildPatientShareUrl,
+                  markRowShared,
+                  missingPhoneCode,
+                  setMissingPhoneCode,
+                  phoneDraft,
+                  setPhoneDraft,
+                  handleSelectOrAddPatient,
+                }}
                 expandableRender={(row) => {
                   const pName = (row.name || row.patientName || '').trim().toLowerCase();
                   const samePatientItems = pName && Array.isArray(allWorklistItems)

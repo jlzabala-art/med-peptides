@@ -113,10 +113,13 @@ export default function NominalWelcomeBanner({
       }}
     >
       <style>{`
+        .nwb-install-short { display: none; }
         @media (max-width: 768px) {
-          .nwb-root { padding: 5px 12px !important; }
-          .nwb-root .nwb-tagline { display: none; }
-          .nwb-root .nwb-patient-welcome-text { display: none; }
+          .nwb-root { padding: 4px 10px !important; }
+          .nwb-root .nwb-tagline,
+          .nwb-root .nwb-install-full { display: none; }
+          .nwb-root .nwb-install-short { display: inline; }
+          .nwb-root .nwb-patient-welcome-text { font-size: 0.72rem; }
           .nwb-root button { min-height: 30px; justify-content: center; }
         }
       `}</style>
@@ -190,22 +193,25 @@ export default function NominalWelcomeBanner({
               alignItems: 'center',
               gap: '5px',
               transition: 'background 0.2s ease',
+              whiteSpace: 'nowrap',
             }}
           >
-            <Smartphone size={13} color="#93c5fd" />
-            <span>{isEs ? 'Añadir a Inicio' : 'Add to Home Screen'}</span>
+            <Smartphone size={13} color="#0284c7" />
+            <span className="nwb-install-full">{isEs ? 'Añadir a Inicio' : 'Add to Home Screen'}</span>
+            <span className="nwb-install-short">{isEs ? 'Instalar' : 'Install'}</span>
           </button>
 
           <button
             type="button"
             onClick={handleDismiss}
             title={isEs ? 'Ocultar aviso de bienvenida' : 'Dismiss welcome notice'}
+            aria-label={isEs ? 'Cerrar' : 'Dismiss'}
             style={{
               background: 'transparent',
               border: 'none',
-              color: 'rgba(255,255,255,0.7)',
+              color: '#64748b',
               cursor: 'pointer',
-              padding: '2px',
+              padding: '4px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

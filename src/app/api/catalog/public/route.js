@@ -26,6 +26,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const channel = (searchParams.get('channel') || 'b2c').toLowerCase();
     const category = (searchParams.get('category') || '').toLowerCase().trim();
+    const supplierIdParam = (searchParams.get('supplierId') || '').trim();
     const goal = (searchParams.get('goal') || '').toLowerCase().trim();
     const search = (searchParams.get('search') || '').toLowerCase().trim();
     const limit = Math.min(parseInt(searchParams.get('limit') || '100', 10), 200);
@@ -35,7 +36,11 @@ export async function GET(request) {
       .where('status', 'in', ['active', 'published'])
       .limit(limit);
 
-    if (category && category !== 'all') {
+    if (supplierIdParam) {
+      queryRef = adminDb.collection('products')
+        .where('supplierId', '==', supplierIdParam)
+        .limit(limit);
+    } else if (category && category !== 'all') {
       queryRef = adminDb.collection('products')
         .where('status', 'in', ['active', 'published'])
         .where('categoryId', '==', category)

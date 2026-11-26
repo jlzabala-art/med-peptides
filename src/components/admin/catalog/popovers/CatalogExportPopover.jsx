@@ -16,7 +16,7 @@ const BASE_SUPPLIER_SCOPES = [
   { id: 'lotusland',    label: 'Lotusland / RegenPept',          badge: 'Peptides & Research', currency: 'USD', filter: 'supplier-lotusland', catalogueFilter: 'RegenPept' },
   { id: 'magenta',      label: 'Magenta (Compounding & Peptides)', badge: 'Compounding Lab', currency: 'AED', filter: 'supplier-magenta' },
   { id: 'europeptides', label: 'EuroPeptides',                   badge: 'European Research', currency: 'USD', filter: 'supplier-europeptides' },
-  { id: 'larimedical',  label: 'LARIMEDICAL (Sterilia)',         badge: 'Clinical Sterile', currency: 'EUR', filter: 'supplier-larimedical' },
+  { id: 'larimedical',  label: 'LARIMIDE / LARIMEDICAL (Spain)', badge: '149 SKUs · Dermocosmetics', currency: 'EUR', filter: 'supplier-larimedical' },
   { id: 'fagron',       label: 'Fagron Genomics',                badge: 'Genomics & Tests', currency: 'EUR', filter: 'supplier-fagron' },
   { id: 'dermadry',     label: 'Dermadry',                       badge: 'Medical Devices',  currency: 'USD', filter: 'supplier-dermadry' },
   { id: 'colway',       label: 'Colway',                         badge: 'Native Collagen',  currency: 'EUR', filter: 'supplier-colway' },
@@ -58,8 +58,10 @@ const SUPPLIER_CATEGORY_MAP = {
     { id: 'peptide', label: 'Peptides & Bioregulators' },
   ],
   larimedical: [
-    { id: 'all',       label: 'All LARIMEDICAL Categories' },
-    { id: 'cosmetics', label: 'Clinical Sterile & Cosmeceuticals' },
+    { id: 'all',                        label: 'All Larimide & Larimedical Lines (149)' },
+    { id: 'dermatology_cosmeceuticals', label: 'LARIMEDICAL & LARIMIDE PRO (Peels & Cabins)' },
+    { id: 'cosmetics',                  label: 'LARIMIDE & Sterilia (Skincare & Mesotherapy)' },
+    { id: 'trichology_hair_care',       label: 'Kojaxin Trichology & Hair Care' },
   ],
   fagron: [
     { id: 'all',                 label: 'All Fagron Categories' },

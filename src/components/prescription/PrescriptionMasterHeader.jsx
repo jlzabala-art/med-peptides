@@ -282,9 +282,9 @@ export default function PrescriptionMasterHeader({
             </div>
           )}
 
-          {/* PATIENT VIEW ACTIONS: Single Copy Link action (Product Datasheet lives on the formulation card below — zero duplicate CTAs) */}
+          {/* PATIENT VIEW ACTIONS: Compact Copy Link button without vertical sprawl */}
           {isPatientView && isAuthorizedViewer && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', maxWidth: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
               <button
                 type="button"
                 onClick={handleCopyLink}
@@ -293,21 +293,21 @@ export default function PrescriptionMasterHeader({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  minHeight: '34px',
+                  gap: '5px',
+                  padding: '4px 10px',
+                  minHeight: '30px',
                   width: 'auto',
                   borderRadius: '6px',
                   border: '1px solid #cbd5e1',
                   background: '#ffffff',
                   color: '#334155',
-                  fontSize: '0.75rem',
+                  fontSize: '0.72rem',
                   fontWeight: 650,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                 }}
               >
-                {copied ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+                {copied ? <Check size={12} style={{ color: '#16a34a' }} /> : <Copy size={12} />}
                 <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar enlace' : 'Copy Link')}</span>
               </button>
             </div>

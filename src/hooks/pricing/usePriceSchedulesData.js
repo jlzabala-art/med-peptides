@@ -308,16 +308,32 @@ export const BASELINE_PRICE_SCHEDULES = [
       { name: 'Dr. Raffanie Lucenio', organization: 'The Masters Medical Center (Doha)', role: 'doctor', channel: 'whatsapp', date: '18 Nov 2026', views: 7, status: 'opened' },
       { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare (Dubai)', role: 'clinic', channel: 'whatsapp', date: '17 Nov 2026', views: 9, status: 'opened' }
     ]
+  },
+  {
+    id: 'larimedical',
+    label: 'Larimide & Larimedical',
+    icon: Sparkles,
+    badge: '145 SKUs · Spain',
+    supplier: 'Larimide S.L.U. (ISO 22716 · AEMPS)',
+    description: 'Spanish dermocosmetics, professional cabin ampoules, biochemical peels, Kojaxin hair protocol & reNAD+ cellular repair',
+    pricingNote: 'Cost × 1.3225 Wholesale · Official Professional & Retail EUR',
+    route: '/pricing?tab=larimedical',
+    skuCount: 145,
+    currency: 'EUR',
+    fetchGroup: 'larimedical',
+    status: 'active',
+    sharesCount: 0,
+    recipients: []
   }
 ];
 
 export const TOTAL_SKUS = BASELINE_PRICE_SCHEDULES.reduce((s, g) => s + g.skuCount, 0);
 
 export const MACRO_CATEGORIES = [
-  { id: 'all', label: 'All Catalogs (15)' },
+  { id: 'all', label: `All Catalogs (${BASELINE_PRICE_SCHEDULES.length})` },
   { id: 'peptides', label: 'Peptides & Hormones', groupIds: ['peptides', 'pellets', 'dnlab-pens', 'ultraperson', 'weight-management', 'hair-treatments'] },
   { id: 'genomics', label: 'Genomics CE-IVD', groupIds: ['24genetics', '24genomics-qatar', 'teletest', 'eterna'] },
-  { id: 'cosmetics', label: 'Cosmetics & Collagen', groupIds: ['colway', 'colway-hair', 'colway-qatar'] },
+  { id: 'cosmetics', label: 'Cosmetics & Collagen', groupIds: ['colway', 'colway-hair', 'colway-qatar', 'larimedical'] },
   { id: 'injectables', label: 'Medical Injectables', groupIds: ['aesthetic-injectables'] },
   { id: 'diagnostics', label: 'DBS Diagnostics', groupIds: ['bloodo', 'teletest'] },
 ];
@@ -512,7 +528,39 @@ export async function fetchGroupProductsWithCache(groupId, fetchGroup, { forceRe
 
   // Layer 3/4: Firestore (SSOT) for Admin or Public API
   try {
-    if (isAdmin && db && fetchGroup) {
+    if (groupId === 'larimedical' || fetchGroup === 'larimedical') {
+      if (isAdmin && db) {
+        const q = query(
+          collection(db, 'products'),
+          where('supplierId', '==', 'supplier-larimedical'),
+          limit(200)
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const flat = [];
+          snap.docs.forEach((d) => {
+            const pdata = d.data();
+            if (Array.isArray(pdata.variants) && pdata.variants.length > 0) {
+              pdata.variants.forEach((v) => flat.push({ ...v, parentId: d.id, catalogBrand: v.catalogBrand || pdata.catalogBrand }));
+            } else {
+              flat.push({ id: d.id, ...pdata });
+            }
+          });
+          products = flat;
+        }
+      }
+
+      if (products.length === 0) {
+        try {
+          const mod = await import('@/data/larimide2026CatalogData');
+          products = mod.getLarimide2026FlatProducts() || [];
+        } catch (_) {
+          products = [];
+        }
+      }
+    }
+
+    if (products.length === 0 && isAdmin && db && fetchGroup) {
       const q = query(
         collection(db, 'products'),
         where('categoryId', '==', fetchGroup),
