@@ -159,9 +159,23 @@ export default function PrescriptionMasterHeader({
                   isEs={isEs}
                 />
               ) : (
-                <StatusBadge 
-                  status={currentStatus || 'active'} 
-                />
+                <>
+                  <StatusBadge 
+                    status={currentStatus || 'active'} 
+                  />
+                  {isAuthorizedViewer && handleCopyLink && (
+                    <button
+                      type="button"
+                      onClick={handleCopyLink}
+                      className="rx-action-btn-icon"
+                      style={{ width: 28, height: 28 }}
+                      title={isEs ? 'Copiar enlace de mi prescripción' : 'Copy prescription link'}
+                      aria-label={isEs ? 'Copiar enlace de mi prescripción' : 'Copy prescription link'}
+                    >
+                      {copied ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+                    </button>
+                  )}
+                </>
               )}
             </div>
 
@@ -282,36 +296,7 @@ export default function PrescriptionMasterHeader({
             </div>
           )}
 
-          {/* PATIENT VIEW ACTIONS: Compact Copy Link button without vertical sprawl */}
-          {isPatientView && isAuthorizedViewer && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="gcp-btn-secondary"
-                title={isEs ? 'Copiar enlace de mi prescripción' : 'Copy prescription link'}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  padding: '4px 10px',
-                  minHeight: '30px',
-                  width: 'auto',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#334155',
-                  fontSize: '0.72rem',
-                  fontWeight: 650,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {copied ? <Check size={12} style={{ color: '#16a34a' }} /> : <Copy size={12} />}
-                <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar enlace' : 'Copy Link')}</span>
-              </button>
-            </div>
-          )}
+          {/* Patient View Copy Link moved inline next to StatusBadge to avoid mobile vertical sprawl */}
         </div>
       </div>
 

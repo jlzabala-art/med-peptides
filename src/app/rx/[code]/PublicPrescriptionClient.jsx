@@ -3060,8 +3060,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             {!isDispensed ? (
               <button
                 type="button"
-                className="rx-patient-mobile-btn"
-                style={{ background: '#eff6ff', color: '#003666' }}
+                className={`rx-patient-mobile-btn ${isInquiryDrawerOpen ? 'is-active' : ''}`}
                 onClick={() => {
                   triggerHaptic('selection');
                   if (!isPatientAuthenticated) {
@@ -3071,7 +3070,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   }
                 }}
               >
-                <ShoppingBag size={18} color="#003666" />
+                <ShoppingBag size={18} />
                 <span>{isEs ? 'Pedir' : 'Order'}</span>
               </button>
             ) : (

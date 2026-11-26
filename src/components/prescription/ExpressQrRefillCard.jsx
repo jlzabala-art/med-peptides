@@ -422,7 +422,7 @@ export default function ExpressQrRefillCard({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <RefreshCw size={17} color="#1a73e8" />
           <span style={{ fontWeight: 700, fontSize: '1.02rem', color: '#202124' }}>
-            {isEs ? '3. Solicitar Refill' : '3. Request Refill'}
+            {isEs ? 'Solicitar Refill' : 'Request Refill'}
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
