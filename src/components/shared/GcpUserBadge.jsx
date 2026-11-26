@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -44,22 +45,30 @@ export default function GcpUserBadge({
   const pathname = usePathname();
   const { user, activeRole, logout, userProfile } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [popoverPos, setPopoverPos] = useState({ top: 56, right: 12, left: 12 });
   const containerRef = useRef(null);
+  const popoverRef = useRef(null);
 
   const isEs = lang === 'es';
   const isDark = variant === 'dark';
 
-  // Close on outside click
+  // Close on outside click / touch
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+      const inTrigger = containerRef.current && containerRef.current.contains(e.target);
+      const inPopover = popoverRef.current && popoverRef.current.contains(e.target);
+      if (!inTrigger && !inPopover) {
         setIsOpen(false);
       }
     };
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside, { passive: true });
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, [isOpen]);
 
   // Close on route change
@@ -241,6 +250,14 @@ export default function GcpUserBadge({
         type="button"
         onClick={() => {
           triggerHaptic('light');
+          if (!isOpen && containerRef.current && typeof window !== 'undefined') {
+            const rect = containerRef.current.getBoundingClientRect();
+            setPopoverPos({
+              top: Math.round(rect.bottom + 8),
+              right: Math.max(12, Math.round(window.innerWidth - rect.right)),
+              left: Math.max(12, Math.round(rect.left)),
+            });
+          }
           setIsOpen((prev) => !prev);
         }}
         className="gcp-user-badge-pill"
@@ -276,35 +293,21 @@ export default function GcpUserBadge({
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
-        {/* Status Dot */}
-        <span
-          style={{
-            position: 'absolute',
-            top: '3px',
-            left: '22px',
-            width: '7px',
-            height: '7px',
-            borderRadius: '50%',
-            background: '#22c55e',
-            border: isDark ? '1.5px solid #002b4d' : '1.5px solid #ffffff',
-            boxShadow: '0 0 5px #22c55e',
-            zIndex: 2
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Circular Avatar with Initials */}
+        {/* Clean Google Cloud Circular Avatar with Initials */}
         <div
+          className="gcp-user-badge-avatar"
           style={{
-            width: '26px',
-            height: '26px',
+            width: '28px',
+            height: '28px',
             borderRadius: '50%',
             background: avatarBgColor,
             color: '#ffffff',
+            border: isDark ? '1.5px solid rgba(255, 255, 255, 0.85)' : '1.5px solid #ffffff',
+            boxShadow: isOpen ? '0 0 0 2px rgba(56, 189, 248, 0.65)' : '0 1px 3px rgba(0,0,0,0.2)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '0.70rem',
+            fontSize: '0.72rem',
             fontWeight: 800,
             letterSpacing: '-0.02em',
             flexShrink: 0
@@ -350,9 +353,10 @@ export default function GcpUserBadge({
           </span>
         </div>
 
-        {/* Chevron Indicator */}
+        {/* Chevron Indicator (Desktop only — hidden on mobile for clean circular GCP avatar) */}
         <ChevronDown
           size={12}
+          className="gcp-user-badge-chevron"
           color={isDark ? '#94a3b8' : '#5f6368'}
           style={{
             marginLeft: '1px',
@@ -394,21 +398,22 @@ export default function GcpUserBadge({
         </button>
       )}
 
-      {/* Google Cloud Console Account Dropdown Popover */}
-      {isOpen && (
+      {/* Google Cloud Console Account Dropdown Popover (Portal so overflow-x headers never clip it) */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
         <div
+          ref={popoverRef}
           role="menu"
           aria-label="User account menu"
           style={{
-            position: 'absolute',
-            [align]: 0,
-            top: 'calc(100% + 6px)',
-            width: '240px',
+            position: 'fixed',
+            ...(align === 'left' ? { left: `${popoverPos.left}px` } : { right: `${popoverPos.right}px` }),
+            top: `${popoverPos.top}px`,
+            width: 'min(260px, calc(100vw - 24px))',
             background: '#ffffff',
-            borderRadius: '8px',
+            borderRadius: '10px',
             border: '1px solid #dadce0',
-            boxShadow: '0 10px 28px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.10)',
-            zIndex: 1500,
+            boxShadow: '0 12px 32px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.10)',
+            zIndex: 10080,
             padding: '12px',
             display: 'flex',
             flexDirection: 'column',
@@ -616,7 +621,8 @@ export default function GcpUserBadge({
             <LogOut size={14} color="#dc2626" />
             <span>{isEs ? 'Cerrar Sesión' : 'Sign Out'}</span>
           </button>
-        </div>
+        </div>,
+        document.body
       )}
 
       <style jsx>{`
@@ -631,12 +637,21 @@ export default function GcpUserBadge({
           }
         }
         @media (max-width: 640px) {
-          .gcp-user-badge-info {
+          .gcp-user-badge-info,
+          :global(.gcp-user-badge-chevron) {
             display: none !important;
           }
           :global(.gcp-user-badge-pill) {
-            padding: 2px 4px 2px 2px !important;
-            gap: 3px !important;
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            gap: 0 !important;
+          }
+          :global(.gcp-user-badge-avatar) {
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 0.74rem !important;
           }
         }
       `}</style>
