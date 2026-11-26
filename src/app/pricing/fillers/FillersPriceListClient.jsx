@@ -388,7 +388,7 @@ export default function FillersPriceListClient({
           workspace?.setCurrency?.(nextCurr);
         }}
         loginRedirect="/pricing/fillers"
-        hideAiButton={true}
+        hideAiButton={false}
         hideContactButton={true}
         mobileTitle="Boosters & Fillers"
         mobileSubtitle={isEs ? `Tarifa B2B · ${enrichedRows.length} SKUs` : `B2B Wholeseller · ${enrichedRows.length} SKUs`}

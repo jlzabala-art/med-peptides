@@ -331,7 +331,7 @@ export default function BloodoPriceListClient({
         }}
         brandHref="/"
         loginRedirect="/pricing/bloodo"
-        hideAiButton={true}
+        hideAiButton={false}
         hideContactButton={true}
         mobileTitle="Bloodo™ Diagnostics"
         mobileSubtitle={`CE-IVDR · ${initialProducts.length} Kits`}

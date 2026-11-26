@@ -1123,7 +1123,7 @@ export default function DnLabPensClient({
         onLangChange={handleLangChange}
         currency={currency}
         onCurrencyChange={handleCurrencyChange}
-        hideAiButton={true}
+        hideAiButton={false}
         hideContactButton={true}
         hideCopyButton={true}
         breadcrumb={breadcrumbItems}

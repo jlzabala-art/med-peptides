@@ -528,7 +528,7 @@ export default function PeptidesPriceListClient({
         onLangChange={handleLanguageChange}
         currency={currency}
         onCurrencyChange={handleCurrencyChange}
-        hideAiButton={true}
+        hideAiButton={false}
         hideContactButton={true}
         breadcrumb={[
           { label: isEs ? 'Tarifas B2B' : 'B2B Schedules', href: '/pricing' },

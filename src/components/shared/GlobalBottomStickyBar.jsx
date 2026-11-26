@@ -298,6 +298,11 @@ export default function GlobalBottomStickyBar() {
     }
   };
 
+  const isCatalogOrPricingRoute =
+    pathname.startsWith('/pricing') ||
+    pathname.startsWith('/collection') ||
+    pathname.startsWith('/vials');
+
   if (
     pathname?.startsWith('/labels') ||
     pathname?.startsWith('/rx') ||
@@ -307,10 +312,22 @@ export default function GlobalBottomStickyBar() {
     return null;
   }
 
+  const desktopHideClass = isCatalogOrPricingRoute ? 'atlas-global-sticky-dock--mobile-only' : '';
+
   if (isMinimized) {
     return (
-      <div
-        className="no-print atlas-global-sticky-dock"
+      <>
+        {isCatalogOrPricingRoute && (
+          <style>{`
+            @media (min-width: 768px) {
+              .atlas-global-sticky-dock--mobile-only {
+                display: none !important;
+              }
+            }
+          `}</style>
+        )}
+        <div
+          className={`no-print atlas-global-sticky-dock ${desktopHideClass}`}
         style={{
           position: 'sticky',
           bottom: '0.75rem',
@@ -379,12 +396,23 @@ export default function GlobalBottomStickyBar() {
           </button>
         </div>
       </div>
+      </>
     );
   }
 
   return (
-    <div
-      className="no-print atlas-global-sticky-dock"
+    <>
+      {isCatalogOrPricingRoute && (
+        <style>{`
+          @media (min-width: 768px) {
+            .atlas-global-sticky-dock--mobile-only {
+              display: none !important;
+            }
+          }
+        `}</style>
+      )}
+      <div
+        className={`no-print atlas-global-sticky-dock ${desktopHideClass}`}
       style={{
         position: 'sticky',
         bottom: '0.75rem',
@@ -433,5 +461,6 @@ export default function GlobalBottomStickyBar() {
         </button>
       </div>
     </div>
+    </>
   );
 }

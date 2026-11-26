@@ -640,7 +640,7 @@ export default function GenomicsPriceListClient({
           setLocalLang(nextLang);
           workspace?.setLang?.(nextLang);
         }}
-        hideAiButton={true}
+        hideAiButton={false}
         hideContactButton={true}
         hideAccountManager={true}
         mobileTitle="24Genetics DNA"

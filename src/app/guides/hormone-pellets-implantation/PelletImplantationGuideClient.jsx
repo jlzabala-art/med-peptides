@@ -236,7 +236,20 @@ export default function PelletImplantationGuideClient() {
   const completedChecklistCount = Object.values(checkedItems).filter(Boolean).length;
 
   const toggleCheck = (id) => {
-    setCheckedItems((prev) => ({ ...prev, [id]: !prev[id] }));
+    setCheckedItems((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      if (next[id] && typeof document !== 'undefined') {
+        const nextUnchecked = PREOP_CHECKLIST.find((item) => item.id !== id && !next[item.id]);
+        setTimeout(() => {
+          if (nextUnchecked) {
+            document.getElementById(`preop-item-${nextUnchecked.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } else {
+            toast.success(isEs ? 'Checklist Pre-Quirúrgico completo ✓' : 'Pre-Op Checklist complete ✓');
+          }
+        }, 120);
+      }
+      return next;
+    });
   };
 
   const handleCopyPatientCare = async () => {
@@ -441,6 +454,47 @@ export default function PelletImplantationGuideClient() {
             </Link>
           </div>
         </div>
+      </div>
+
+      {/* ── MOBILE STICKY CLINICAL PROGRESS BAR ── */}
+      <style>{`
+        .pellet-mobile-progress-bar { display: none; }
+        @media (max-width: 768px) {
+          .pellet-mobile-progress-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 35;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            font-size: 0.74rem;
+          }
+        }
+      `}</style>
+      <div className="pellet-mobile-progress-bar no-print">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+          <span style={{ fontWeight: 700, color: '#003666', whiteSpace: 'nowrap' }}>
+            {isEs ? 'Pre-Op' : 'Pre-Op'} {completedChecklistCount}/{PREOP_CHECKLIST.length}
+          </span>
+          <div style={{ flex: 1, height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+            <div style={{ width: `${Math.round((completedChecklistCount / PREOP_CHECKLIST.length) * 100)}%`, height: '100%', background: completedChecklistCount === PREOP_CHECKLIST.length ? '#16a34a' : '#0284c7', transition: 'width 0.2s ease' }} />
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setOpsTab('checklist');
+            document.getElementById('clinical-ops')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#0f172a', fontWeight: 700, fontSize: '0.72rem', whiteSpace: 'nowrap', cursor: 'pointer' }}
+        >
+          {isEs ? 'Checklist' : 'Checklist'}
+        </button>
       </div>
 
       {/* ── MAIN CONTENT CONTAINER (Generous bottom padding so floating dock never overlaps) ── */}
@@ -932,6 +986,7 @@ export default function PelletImplantationGuideClient() {
                     return (
                       <label
                         key={item.id}
+                        id={`preop-item-${item.id}`}
                         style={{
                           display: 'flex',
                           alignItems: 'flex-start',

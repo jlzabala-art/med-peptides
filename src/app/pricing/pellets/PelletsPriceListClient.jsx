@@ -995,7 +995,7 @@ export default function PelletsPriceListClient({
         currency={currency}
         onCurrencyChange={(c) => workspace?.setCurrency?.(c)}
         onLangChange={(l) => workspace?.setLang?.(l)}
-        hideAiButton={true}
+        hideAiButton={false}
         hideContactButton={true}
         breadcrumb={[
           { label: isEs ? 'Tarifas B2B' : 'B2B Schedules', href: '/pricing' },
@@ -1390,6 +1390,43 @@ export default function PelletsPriceListClient({
                 onChange={setSearchQuery}
                 resultCount={filteredProducts.length}
                 size="lg"
+                filterOptions={[
+                  {
+                    key: 'profile',
+                    label: isEs ? 'Perfil Clínico' : 'Clinical Profile',
+                    value: selectedProfile,
+                    onChange: (val) => {
+                      const next = val || 'all';
+                      setSelectedProfile(next);
+                      if (typeof window !== 'undefined') {
+                        const url = new URL(window.location.href);
+                        if (next === 'all') url.searchParams.delete('profile');
+                        else url.searchParams.set('profile', next);
+                        window.history.replaceState({}, '', url.toString());
+                      }
+                    },
+                    options: [
+                      { label: isEs ? 'Todos' : 'All', value: 'all' },
+                      { label: isEs ? 'Mujer / BHRT' : 'Female BHRT', value: 'female' },
+                      { label: isEs ? 'Hombre / TRT' : 'Male TRT', value: 'male' },
+                    ],
+                  },
+                ]}
+                filters={[
+                  selectedProfile !== 'all' && {
+                    key: 'profile',
+                    label: isEs ? 'Perfil' : 'Profile',
+                    value: selectedProfile === 'female' ? (isEs ? 'Mujer / BHRT' : 'Female BHRT') : (isEs ? 'Hombre / TRT' : 'Male TRT'),
+                    onRemove: () => {
+                      setSelectedProfile('all');
+                      if (typeof window !== 'undefined') {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('profile');
+                        window.history.replaceState({}, '', url.toString());
+                      }
+                    },
+                  },
+                ].filter(Boolean)}
               />
 
               {/* Mobile Horizontal Scrollable Category Strip (Replaces 340px vertical sidebar on mobile) */}
@@ -1423,69 +1460,6 @@ export default function PelletsPriceListClient({
                   <Activity size={12} />
                   <span>{isEs ? 'Guía Trócar' : 'Trocar Guide'}</span>
                 </Link>
-              </div>
-
-              {/* Guided Clinical Profile Strip (1-Click Female BHRT / Male TRT + Clinical Window Tip) */}
-              <div style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '10px',
-                padding: '8px 12px',
-                marginTop: '8px',
-                display: 'flex',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '8px',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: '#475569', marginRight: '2px' }}>
-                    {isEs ? 'Perfil Clínico:' : 'Clinical Profile:'}
-                  </span>
-                  {[
-                    { id: 'all', label: isEs ? 'Todos' : 'All' },
-                    { id: 'female', label: isEs ? 'Mujer / BHRT' : 'Female BHRT' },
-                    { id: 'male', label: isEs ? 'Hombre / TRT' : 'Male TRT' },
-                  ].map((prof) => {
-                    const active = selectedProfile === prof.id;
-                    return (
-                      <button
-                        key={prof.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedProfile(prof.id);
-                          if (typeof window !== 'undefined') {
-                            const url = new URL(window.location.href);
-                            if (prof.id === 'all') url.searchParams.delete('profile');
-                            else url.searchParams.set('profile', prof.id);
-                            window.history.replaceState({}, '', url.toString());
-                          }
-                        }}
-                        style={{
-                          padding: '4px 10px',
-                          minHeight: '30px',
-                          borderRadius: '999px',
-                          border: active ? '1px solid #003666' : '1px solid #cbd5e1',
-                          background: active ? '#003666' : '#f8fafc',
-                          color: active ? '#ffffff' : '#334155',
-                          fontSize: '0.73rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {prof.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div style={{ fontSize: '0.72rem', color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '3px 9px', borderRadius: '6px', fontWeight: 600 }}>
-                  {selectedProfile === 'female'
-                    ? (isEs ? 'Trócar 3.2 mm · Ventana T: 150–350 ng/dL · E2: 40–110 pg/mL' : '3.2 mm Trocar · Target T: 150–350 ng/dL · E2: 40–110 pg/mL')
-                    : selectedProfile === 'male'
-                      ? (isEs ? 'Trócar 4.5 mm (>50 mg) · Ventana T: 400–800 ng/dL' : '4.5 mm Trocar (>50 mg) · Target T: 400–800 ng/dL')
-                      : (isEs ? '≥99.5% USP · Liberación orden cero 3.5–6 meses · Sin primer paso hepático' : '≥99.5% USP · Zero-order release 3.5–6 mo · Zero hepatic first-pass')}
-                </div>
               </div>
 
               {/* Active Filter Chips (Rule #24) */}
