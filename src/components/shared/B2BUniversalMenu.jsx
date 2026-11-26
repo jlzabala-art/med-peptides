@@ -545,9 +545,9 @@ export default function B2BUniversalMenu({
                 </div>
               )}
 
-              {/* 2. Collapsible 4 B2B Domains */}
+              {/* 2. Collapsible B2B Domains (omit redundant Catalogs/Pricing list when already inside /pricing/* where ClinicalFormatSwitcher is visible) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {B2B_NAV_DOMAINS.map((domain) => {
+                {B2B_NAV_DOMAINS.filter((domain) => !(pathname?.startsWith('/pricing') && (domain.id === 'catalogs' || domain.id === 'pricing' || String(domain.titleEn || '').toLowerCase().includes('catalogs & pricing')))).map((domain) => {
                   const expanded = openDomainId === domain.id;
                   return (
                     <div
