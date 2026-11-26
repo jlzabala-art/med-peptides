@@ -588,7 +588,7 @@ export default function PeptidesPriceListClient({
             .peptides-mob-cat-pill.active { background: #e8f0fe; border-color: #1a73e8; color: #1a73e8; }
             .peptides-mob-cat-count { font-size: 0.65rem; background: #f1f5f9; color: #475569; padding: 1px 6px; border-radius: 999px; font-variant-numeric: tabular-nums; }
             .peptides-mob-cat-pill.active .peptides-mob-cat-count { background: #1a73e8; color: #ffffff; }
-            .peptides-mobile-quick-filters-rail { display: grid !important; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+            .peptides-mobile-quick-filters-rail { display: none !important; }
             .peptides-mob-rail-chip { display: inline-flex; align-items: center; justify-content: space-between; gap: 5px; padding: 8px 11px; min-height: 44px; border-radius: 8px; border: 1px solid #dadce0; background: #ffffff; color: #3c4043; font-size: 0.75rem; font-weight: 700; cursor: pointer; min-width: 0; }
             .peptides-mob-rail-chip.active { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; }
             .peptides-kpis-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }

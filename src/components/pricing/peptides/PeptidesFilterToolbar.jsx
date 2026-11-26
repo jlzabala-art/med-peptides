@@ -46,6 +46,45 @@ export default function PeptidesFilterToolbar({
       ? (isEs ? 'FDA: Todas' : 'FDA: All')
       : (isEs ? (activeFdaObj?.labelEs || 'FDA') : (activeFdaObj?.labelEn || 'FDA'));
 
+  const filterOptions = [
+    {
+      key: 'fda',
+      label: 'FDA',
+      value: selectedFdaStatus,
+      options: FDA_FILTERS.map((f) => ({
+        label: isEs ? (f.labelEs || f.label) : (f.labelEn || f.label),
+        value: f.id
+      })),
+      onChange: (val) => {
+        if (setIsFdaSheetOpen) setIsFdaSheetOpen(false);
+      }
+    },
+    {
+      key: 'shipping',
+      label: isEs ? 'Envío' : 'Shipping',
+      value: shippingDest,
+      options: Object.values(SHIPPING_DESTINATIONS).map((c) => ({
+        label: `${c.flag || ''} ${c.name}`,
+        value: c.id
+      })),
+      onChange: (val) => {
+        handleShippingDestChange && handleShippingDestChange(val);
+      }
+    },
+    {
+      key: 'dosage',
+      label: isEs ? 'Dosis' : 'Dose',
+      value: selectedStrength,
+      options: DOSAGE_STRENGTHS.map((d) => ({
+        label: isEs ? (d.labelEs || d.label) : (d.labelEn || d.label),
+        value: d.id
+      })),
+      onChange: (val) => {
+        setSelectedStrength && setSelectedStrength(val);
+      }
+    }
+  ];
+
   return (
     <div className="gcp-search-and-category-block" style={{ marginBottom: '0.75rem' }}>
       {/* Desktop Filter Sidebar Toggle + Global Search Bar (Google Cloud Standard) */}
@@ -89,6 +128,7 @@ export default function PeptidesFilterToolbar({
             size="lg"
             resultCount={filteredProducts.length}
             filters={activeFilterChips}
+            filterOptions={filterOptions}
           />
         </div>
       </div>
