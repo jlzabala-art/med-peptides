@@ -13,6 +13,7 @@ import { resolveVariantPrice } from '../../../utils/resolvePrice';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import WarehouseComparisonTable from './WarehouseComparisonTable';
 import LotuslandProcurementLedger from './LotuslandProcurementLedger';
+import SupplierOrderHistoryLedger from './SupplierOrderHistoryLedger';
 import { exportLotuslandProcurementXlsx } from '../../../utils/exportLotuslandProcurementXlsx';
 
 function SupplierDocumentsTab({ supplierName, supplierId }) {
@@ -849,7 +850,13 @@ export default function SupplierDetail({ w, onClose, onUpdate, initialVariantId 
               id: 'api-procurement',
               label: 'API Procurement Ledger (10 Invoices)',
               content: <LotuslandProcurementLedger />
-            }] : []),
+            }] : [{
+              id: 'order-history',
+              label: (w.id === 'supplier-norma-hellas' || String(w.name || w.companyName || '').toLowerCase().includes('norma'))
+                ? 'Order History & Portal (7 Imports)'
+                : 'Order History & Portal',
+              content: <SupplierOrderHistoryLedger supplier={w} />
+            }]),
             ...(w.hasMultiWarehouse || w.id === 'supplier-lotusland' || (Array.isArray(w.warehouses) && w.warehouses.length > 0) ? [{
               id: 'warehouses',
               label: 'Warehouses (Compare Hubs)',

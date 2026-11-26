@@ -288,6 +288,59 @@ export default function SupplierMasterDetailCard({
       >
         <button
           type="button"
+          onClick={async () => {
+            const name = supplier?.name || supplier?.companyName || '';
+            const url = `https://www.atlashealth-services.com/partners/suppliers?lang=en&cur=EUR${name ? `&partner=${encodeURIComponent(name)}` : ''}`;
+            try {
+              await navigator.clipboard.writeText(url);
+              notifier.success(`Copied presentation link for ${name || 'supplier'}`);
+            } catch {
+              notifier.error('Could not copy link');
+            }
+          }}
+          className="gcp-btn-secondary"
+          style={{
+            fontSize: '0.78rem',
+            padding: '4px 10px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px'
+          }}
+        >
+          <ExternalLink size={13} />
+          Copy Presentation
+        </button>
+
+        {(supplier?.partnerPortalSlug ||
+          supplier?.id === 'supplier-lotusland' ||
+          String(supplier?.name || supplier?.companyName || '').toLowerCase().includes('lotus') ||
+          supplier?.id === 'supplier-norma-hellas' ||
+          String(supplier?.name || supplier?.companyName || '').toLowerCase().includes('norma')) && (
+          <a
+            href={
+              (supplier?.id === 'supplier-lotusland' || String(supplier?.name || supplier?.companyName || '').toLowerCase().includes('lotus'))
+                ? '/b2b/lotusland'
+                : `/b2b/supplier/${encodeURIComponent(supplier?.partnerPortalSlug || 'norma-hellas')}${supplier?.partnerPortalToken ? `?token=${encodeURIComponent(supplier.partnerPortalToken)}&lang=en` : ''}`
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="gcp-btn-secondary"
+            style={{
+              fontSize: '0.78rem',
+              padding: '4px 10px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              textDecoration: 'none'
+            }}
+          >
+            <ExternalLink size={13} />
+            Live Portal
+          </a>
+        )}
+
+        <button
+          type="button"
           onClick={() => openSupplierAI(supplier)}
           className="gcp-btn-secondary"
           style={{
