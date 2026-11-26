@@ -1489,3 +1489,12 @@
     -webkit-mask-image: linear-gradient(to right, black 86%, transparent 100%);
   }
 }
+
+/* Rule #74: Prevent floating FABs/docks from peeking behind the 56px mobile bottom nav */
+@media (max-width: 1024px) {
+  .atlas-chat-fab,
+  .public-sticky-action-bar,
+  .workspace-floating-dock {
+    bottom: calc(var(--bottom-bar-h, 56px) + 12px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}

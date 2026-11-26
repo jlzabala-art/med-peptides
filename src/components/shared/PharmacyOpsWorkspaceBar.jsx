@@ -185,9 +185,9 @@ export default function PharmacyOpsWorkspaceBar({ lang = 'en' }) {
           })}
         </div>
 
-        {/* Right: Quick Live Patient / RX-XXXX Search */}
+        {/* Right: Quick Live Patient / RX-XXXX Search (Rule #74: Full-width on mobile) */}
         {canQuickSearchRx && (
-          <div ref={wrapRef} style={{ position: 'relative', minWidth: '220px', flex: '0 1 280px', padding: '4px 0' }}>
+          <div ref={wrapRef} style={{ position: 'relative', minWidth: '220px', flex: '1 1 280px', padding: '4px 0' }}>
             <div
               style={{
                 display: 'flex',
@@ -196,8 +196,8 @@ export default function PharmacyOpsWorkspaceBar({ lang = 'en' }) {
                 background: '#f1f3f4',
                 border: rxOpen ? '1px solid #1a73e8' : '1px solid #dadce0',
                 borderRadius: '6px',
-                padding: '4px 10px',
-                minHeight: '32px',
+                padding: '6px 10px',
+                minHeight: '38px',
               }}
             >
               <Search size={13} color="#5f6368" style={{ flexShrink: 0 }} />

@@ -63,7 +63,20 @@ export default function TreatmentJourneyStepper({
         boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flex: '1 1 420px' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          flexWrap: 'nowrap',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          flex: '1 1 100%',
+          maxWidth: '100%',
+          paddingBottom: '2px',
+        }}
+      >
         {steps.map((step, idx) => {
           const isDone = step.id < activeStep;
           const isCurrent = step.id === activeStep;

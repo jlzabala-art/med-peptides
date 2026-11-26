@@ -473,8 +473,8 @@ export default function PatientPrescriptionGuide({
           bg: '#f5f3ff',
           border: '#ddd6fe',
           storageNote: isEs
-            ? '❄️ Requiere Nevera (2°C – 8°C). Lista para Inyección · No Congelar'
-            : '❄️ Mandatory Refrigeration (2°C – 8°C). Ready-to-Use Pen · Do Not Freeze',
+            ? 'Requiere Nevera (2°C – 8°C). Lista para Inyección · No Congelar'
+            : 'Mandatory Refrigeration (2°C – 8°C). Ready-to-Use Pen · Do Not Freeze',
           requiresReconstitution: false
         };
       } else if (isPeptide) {
@@ -485,7 +485,7 @@ export default function PatientPrescriptionGuide({
           color: '#1a73e8',
           bg: '#f8fafc',
           border: '#dadce0',
-          storageNote: isEs ? '❄️ Requiere Nevera (2°C – 8°C). ¡No congelar!' : '❄️ Mandatory Refrigeration (2°C – 8°C). Do Not Freeze!',
+          storageNote: isEs ? 'Requiere Nevera (2°C – 8°C). No congelar.' : 'Mandatory Refrigeration (2°C – 8°C). Do Not Freeze.',
           requiresReconstitution: true
         };
       } else if (isSupplement) {

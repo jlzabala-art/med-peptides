@@ -103,18 +103,13 @@ export default function NominalWelcomeBanner({
       className="nwb-root"
       data-nwb
       style={{
-        background: isDoc
-          ? 'linear-gradient(90deg, #002244 0%, #003666 60%, #004b87 100%)'
-          : isPatient
-          ? 'linear-gradient(90deg, #185abc 0%, #1a73e8 60%, #4285f4 100%)'
-          : 'linear-gradient(90deg, #1c1917 0%, #292524 60%, #44403c 100%)',
-        color: '#ffffff',
-        padding: '7px 16px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        background: '#f8fafc',
+        color: '#334155',
+        padding: '6px 14px',
         position: 'relative',
-        zIndex: 90,
-        fontSize: '0.80rem',
-        borderBottom: '1px solid rgba(255,255,255,0.12)',
+        zIndex: 10,
+        fontSize: '0.76rem',
+        borderBottom: '1px solid #e2e8f0',
       }}
     >
       <style>{`
@@ -122,7 +117,7 @@ export default function NominalWelcomeBanner({
           .nwb-root { padding: 5px 12px !important; }
           .nwb-root .nwb-tagline { display: none; }
           .nwb-root .nwb-patient-welcome-text { display: none; }
-          .nwb-root button { min-height: 32px; justify-content: center; }
+          .nwb-root button { min-height: 30px; justify-content: center; }
         }
       `}</style>
       <div
@@ -136,34 +131,35 @@ export default function NominalWelcomeBanner({
           gap: '8px',
         }}
       >
-        {/* Left: Personalized Nominal Welcome & Verification Shield */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        {/* Left: Subtle Inline Verified Chip (Rule #74: No heavy sticky blue bar) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {!hideVerifiedBadge && (
             <div
               style={{
-                background: 'rgba(255,255,255,0.18)',
-                padding: '3px 8px',
-                borderRadius: '6px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                color: '#15803d',
+                padding: '2px 8px',
+                borderRadius: '999px',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
                 fontWeight: 700,
-                fontSize: '0.74rem',
+                fontSize: '0.70rem',
                 letterSpacing: '0.02em',
-                backdropFilter: 'blur(4px)',
               }}
             >
-              <ShieldCheck size={14} color="#86efac" />
+              <ShieldCheck size={13} color="#16a34a" />
               <span>{isEs ? 'ACCESO VERIFICADO' : 'VERIFIED ACCESS'}</span>
             </div>
           )}
 
-          <div className={isPatient ? 'nwb-patient-welcome-text' : ''} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div className={isPatient ? 'nwb-patient-welcome-text' : ''} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a' }}>
             <span>
               {isEs ? 'Bienvenido/a,' : 'Welcome,'} <strong>{cleanTitle}</strong>
             </span>
-            <span className="nwb-tagline" style={{ opacity: 0.6 }}>•</span>
-            <span className="nwb-tagline" style={{ opacity: 0.9, fontSize: '0.76rem' }}>
+            <span className="nwb-tagline" style={{ opacity: 0.4 }}>•</span>
+            <span className="nwb-tagline" style={{ color: '#475569', fontSize: '0.74rem' }}>
               {isDoc
                 ? (isEs ? `Sesión clínica activa por ${sessionDuration} sin contraseña` : `Active clinical session for ${sessionDuration} passwordless`)
                 : isPatient
@@ -175,20 +171,20 @@ export default function NominalWelcomeBanner({
           </div>
         </div>
 
-        {/* Right: Add to Home Screen (PWA) & Dismiss */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Right: Subtle Add to Home Screen & Dismiss */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <button
             type="button"
             onClick={handleInstallClick}
             title={isEs ? 'Añadir icono a la pantalla de inicio de tu smartphone' : 'Add icon to smartphone home screen'}
             style={{
-              background: 'rgba(255,255,255,0.15)',
-              border: '1px solid rgba(255,255,255,0.3)',
-              color: '#ffffff',
-              padding: '3px 10px',
+              background: '#ffffff',
+              border: '1px solid #cbd5e1',
+              color: '#003666',
+              padding: '3px 9px',
               borderRadius: '6px',
-              fontSize: '0.72rem',
-              fontWeight: 600,
+              fontSize: '0.71rem',
+              fontWeight: 650,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',

@@ -179,7 +179,8 @@ export default function ReconstitutionGuideCard({
                   borderRadius: '4px'
                 }}
               >
-                ❄️ {isEs ? 'Requiere Nevera 2–8°C' : 'Requires Refrigeration 2–8°C'}
+                <Thermometer size={11} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />
+                {isEs ? 'Requiere Nevera 2–8°C' : 'Requires Refrigeration 2–8°C'}
               </span>
             </div>
             <h4 style={{ margin: '4px 0 0 0', fontSize: '0.98rem', fontWeight: 800, color: '#1e3a8a' }}>
@@ -281,7 +282,7 @@ export default function ReconstitutionGuideCard({
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '1.3rem' }}>🎯</span>
+                <Droplets size={18} color="#7dd3fc" style={{ flexShrink: 0 }} />
                 <div>
                   <div style={{ fontSize: '0.70rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#93c5fd' }}>
                     {isEs ? 'Calculadora Visual de Dosis en Jeringa' : 'Visual Syringe Dose Converter'}
