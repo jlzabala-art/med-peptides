@@ -26,11 +26,22 @@ export function buildBilingualMetadata({
 }) {
   const isEs = lang === 'es';
   const copy = isEs ? (es || en) : (en || es);
-  const resolvedUrl = url || (path ? `${DEFAULT_BASE_URL}${path.startsWith('/') ? path : `/${path}`}` : DEFAULT_BASE_URL);
+  let resolvedUrl = url || (path ? `${DEFAULT_BASE_URL}${path.startsWith('/') ? path : `/${path}`}` : DEFAULT_BASE_URL);
+  if (isEs && !/[?&]lang=/i.test(resolvedUrl)) {
+    resolvedUrl += resolvedUrl.includes('?') ? '&lang=es' : '?lang=es';
+  }
   const title = copy?.title || 'Atlas Health Services';
   const description = copy?.description || 'Institutional clinical intelligence and pharmaceutical reference.';
 
-  const normalizedImages = Array.isArray(images) && images.length > 0 ? images : undefined;
+  const defaultImages = [
+    {
+      url: `${DEFAULT_BASE_URL}/og-catalog.png`,
+      width: 1200,
+      height: 630,
+      alt: title,
+    },
+  ];
+  const normalizedImages = Array.isArray(images) && images.length > 0 ? images : defaultImages;
   const twitterImages = normalizedImages
     ? normalizedImages.map((img) => (typeof img === 'string' ? img : img.url)).filter(Boolean)
     : undefined;

@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function generateMetadata({ searchParams }) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
   const resolvedSearch = await searchParams;
   const lang = normalizeMetaLang(resolvedSearch);
   const currency = String(resolvedSearch?.cur || resolvedSearch?.currency || 'USD').toUpperCase();
@@ -24,6 +25,16 @@ export async function generateMetadata({ searchParams }) {
     lang,
     path: profile ? `/pricing/pellets?profile=${encodeURIComponent(profile)}` : '/pricing/pellets',
     siteName: 'Atlas Health Services',
+    images: [
+      {
+        url: `${appUrl}/og-catalog.png`,
+        width: 1200,
+        height: 630,
+        alt: lang === 'es'
+          ? `Pellets Hormonales Subcutáneos EU GMP (${validCurrency})`
+          : `EU GMP Subcutaneous Hormone Pellets (${validCurrency})`,
+      },
+    ],
     en: isFemaleProfile ? {
       title: `Female Bioidentical Hormone Pellets • Gynecology & Menopause Formulary (${validCurrency})`,
       description: `Pre-filtered EU GMP sterile hormone pellets for gynecology & female BHRT (17β-Estradiol, Bi-Est, Progesterone, female-dosed Testosterone) and 3.2 mm trocar kits in ${validCurrency}.`,
@@ -37,6 +48,9 @@ export async function generateMetadata({ searchParams }) {
     es: isFemaleProfile ? {
       title: `Pellets Hormonales Bioidénticos Femeninos • Ginecología y Menopausia (${validCurrency})`,
       description: `Tarifa EU GMP prefiltrada para ginecología y THS femenina (17β-Estradiol, Bi-Est, Progesterona, Testosterona dosis femenina) y kits trócar 3.2 mm en ${validCurrency}.`,
+    } : isMaleProfile ? {
+      title: `Pellets Hormonales Bioidénticos Masculinos • Andrología y TRT (${validCurrency})`,
+      description: `Tarifa EU GMP prefiltrada de Testosterona y Testosterona + Anastrozol para TRT masculina y kits trócar 4.5 mm en ${validCurrency}.`,
     } : {
       title: `Pellets Hormonales Subcutáneos EU GMP y Kits Trócar • Tarifa Oficial B2B (${validCurrency})`,
       description: `Tarifa oficial EU GMP de pellets hormonales subcutáneos bioidénticos (17β-Estradiol, Testosterona) y kits quirúrgicos de trócar en ${validCurrency}. Liberación continua de orden cero, blísters estériles monodosis y ahorro institucional en Pack ×10.`,
