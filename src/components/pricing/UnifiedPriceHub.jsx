@@ -397,22 +397,24 @@ export default function UnifiedPriceHub({
     }
   }, []);
 
+  const activeCurrency = selectedGroup?.currency || (selectedCurrencyFilter !== 'all' ? selectedCurrencyFilter : 'EUR');
+
   useRegisterAtlasContext(
     {
       contextAnchor: {
         type: 'pricing-hub',
         name: selectedGroup?.label || 'Unified B2B Price Hub',
         subtitle: selectedGroup
-          ? `${selectedGroup.skuCount || ''} SKUs · ${currency}`
+          ? `${selectedGroup.skuCount || ''} SKUs · ${activeCurrency}`
           : `${schedules.length} Schedules · ${TOTAL_SKUS} SKUs`,
         sectionTitle: selectedGroup?.label || 'Unified B2B Price Hub',
-        currency,
+        currency: activeCurrency,
       },
       bottomBar: {
         summaryTitle: selectedGroup?.label || 'Institutional Price Schedules',
         summarySubtitle: selectedGroup
-          ? `${currency} · ${selectedGroup.label}`
-          : `${currency} · ${schedules.length} Schedules · ${TOTAL_SKUS} SKUs`,
+          ? `${activeCurrency} · ${selectedGroup.label}`
+          : `${activeCurrency} · ${schedules.length} Schedules · ${TOTAL_SKUS} SKUs`,
         atlasAiLabel: 'Ask Atlas AI',
         primaryAction: selectedGroup
           ? {
@@ -427,7 +429,7 @@ export default function UnifiedPriceHub({
             },
       },
     },
-    [selectedGroup, currency, schedules.length, handleGeneratePdf]
+    [selectedGroup, activeCurrency, schedules.length, handleGeneratePdf]
   );
 
   return (
