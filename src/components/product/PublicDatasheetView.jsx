@@ -225,6 +225,7 @@ export default function PublicDatasheetView({
   }, []);
 
   const { user, activeRole } = useAuth();
+  const isAdminViewer = Boolean(activeRole === 'admin' || user?.role === 'admin' || user?.isAdmin);
   const router = useRouter();
 
   const handleOpenInquiry = () => {
@@ -1585,9 +1586,11 @@ export default function PublicDatasheetView({
       : (activeFormat?.id || activeFormatId || 'vial');
     params.set('presentation', currentFormat);
 
-    // 3. Supplier: Always bind the concrete active or canonical supplier
-    const targetSupplier = getConcreteSupplierId(activeSupplierId, supplierName);
-    params.set('supplier', targetSupplier);
+    // 3. Supplier: ONLY bind supplier query param for authenticated Admins (Golden Rule #73 White-Label)
+    if (isAdminViewer) {
+      const targetSupplier = getConcreteSupplierId(activeSupplierId, supplierName);
+      params.set('supplier', targetSupplier);
+    }
 
     // 4. Batch & Code: Synchronized authentic discreet lot code
     params.set('batch', effectiveBatchCode);
@@ -1605,7 +1608,7 @@ export default function PublicDatasheetView({
     const q = params.toString();
     const canonicalDomain = 'https://www.atlashealth-services.com';
     return `${canonicalDomain}/p/${slug}${q ? `?${q}` : ''}`;
-  }, [slug, selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, supplierName, effectiveBatchCode, lang]);
+  }, [slug, selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, supplierName, effectiveBatchCode, lang, isAdminViewer]);
 
   // 🔄 Synchronize browser address bar with unique product identity parameters (Golden UX Rule)
   useEffect(() => {
@@ -1659,11 +1662,13 @@ export default function PublicDatasheetView({
     p.set('presentation', currentFormat);
     p.set('format', currentFormat);
 
-    const targetSupplier = getConcreteSupplierId(activeSupplierId, supplierName);
-    p.set('supplier', targetSupplier);
+    if (isAdminViewer) {
+      const targetSupplier = getConcreteSupplierId(activeSupplierId, supplierName);
+      p.set('supplier', targetSupplier);
 
-    if (supplierName && !supplierName.includes('All Certified Laboratories') && !supplierName.includes('Multi-Source')) {
-      p.set('supplierName', supplierName);
+      if (supplierName && !supplierName.includes('All Certified Laboratories') && !supplierName.includes('Multi-Source')) {
+        p.set('supplierName', supplierName);
+      }
     }
 
     p.set('batch', effectiveBatchCode);
@@ -1702,7 +1707,9 @@ export default function PublicDatasheetView({
       ? (activeFormat?.id && !activeFormat.id.includes('vial') ? activeFormat.id : 'diagnostic_kit')
       : (activeFormat?.id || activeFormatId || 'vial');
     qs.set('presentation', currentFormat);
-    qs.set('supplier', barcodeSupplier);
+    if (isAdminViewer) {
+      qs.set('supplier', barcodeSupplier);
+    }
     qs.set('batch', effectiveBatchCode);
     if (isDiagnosticKit) {
       qs.set('kitCode', effectiveBatchCode);
@@ -2393,18 +2400,18 @@ export default function PublicDatasheetView({
                               <span style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '4px',
-                                backgroundColor: '#ecfdf5',
-                                color: '#065f46',
-                                border: '1px solid #6ee7b7',
-                                borderRadius: '6px',
-                                padding: '2px 8px',
+                                gap: '5px',
+                                backgroundColor: '#f0fdf4',
+                                color: '#166534',
+                                border: '1px solid #bbf7d0',
+                                borderRadius: '999px',
+                                padding: '2px 10px',
                                 fontSize: '0.72rem',
                                 fontWeight: 700
                               }}>
-                                <ShieldCheck size={13} color="#059669" />
-                                <span>{lang === 'es' ? 'Lote Verificado:' : 'Batch Verified:'}</span>
-                                <code style={{ fontFamily: 'monospace', fontWeight: 800, color: '#047857' }}>{initialBatch}</code>
+                                <ShieldCheck size={13} color="#16a34a" />
+                                <span>{lang === 'es' ? 'Lote Verificado:' : 'Verified Batch:'}</span>
+                                <CopyableId value={initialBatch} displayValue={initialBatch} />
                               </span>
                             )}
                           </>
@@ -3410,14 +3417,18 @@ export default function PublicDatasheetView({
                       </>
                     ) : (
                       <>
-                        <strong>Quality & Regulatory Governance:</strong> Sourced through authorized synthesis partner ({supplierName}). All analytical batches undergo independent dual-column RP-HPLC and LC-MS release testing meeting pharmacopeial grade standards. This technical document is intended exclusively for authorized medical professionals, clinical researchers, and institutional partners.
+                        <strong>Quality &amp; Regulatory Governance:</strong>{' '}
+                        {isAdminViewer
+                          ? `Sourced through authorized synthesis partner (${supplierName}). `
+                          : 'Sourced through EU GMP / cGMP authorized clinical synthesis network. '}
+                        All analytical batches undergo independent dual-column RP-HPLC and LC-MS release testing meeting pharmacopeial grade standards. This technical document is intended exclusively for authorized medical professionals, clinical researchers, and institutional partners.
                       </>
                     )}
                   </p>
                   <p className="pds-footer-meta">
                     Document Ref: PDS-{slug.toUpperCase()}-2026 • Rev {versionInfo.version} • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
                   </p>
-                  {isStrictlyLotusland && (
+                  {isAdminViewer && isStrictlyLotusland && (
                     <p style={{ marginTop: '6px', fontSize: '0.6rem', color: '#94a3b8', opacity: 0.55, lineHeight: 1.4 }}>
                       {lang === 'es' ? 'Fabricación externalizada: ' : 'Contract manufacturer: '}
                       <a
