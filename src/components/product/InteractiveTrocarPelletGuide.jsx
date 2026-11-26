@@ -532,7 +532,7 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
                 <span>{isEs ? 'Matriz Clínica de Combinación & Titulación BHRT' : 'Clinical BHRT Synergy & Titration Matrix'}</span>
               </div>
               <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                {isEs ? 'Directrices de posología para los pellets del catálogo Pharmapolis' : 'Prescription guidelines across Pharmapolis pellet strengths'}
+                {isEs ? 'Directrices de posología para formulaciones de pellets EU GMP' : 'Prescription guidelines across EU GMP pellet strengths'}
               </div>
             </div>
 

@@ -462,7 +462,7 @@ export async function generateMetadata({ params, searchParams }) {
   const pageTitle = viewMode === 'patient'
     ? (isEs ? `${name} — Guía del Paciente y Reconstitución | Atlas Health` : `${name} — Patient Guide & Reconstitution | Atlas Health`)
     : isPellet
-    ? `${name} | Pharmapolis Compounding Pharmacy • EU GMP Subcutaneous Pellets`
+    ? `${name} | Atlas Health Services • EU GMP Subcutaneous Pellets`
     : isNorma
     ? `${name} | Norma Hellas S.A. • EU GMP Human Pharmaceuticals & TRT`
     : isTeletest
@@ -475,7 +475,7 @@ export async function generateMetadata({ params, searchParams }) {
       ? `Guía clara para el paciente sobre ${name}: qué es, pasos de reconstitución, conservación y preguntas frecuentes.`
       : `Clear patient guide for ${name}: overview, step-by-step reconstitution instructions, storage, and safety FAQ.`)
     : isPellet
-    ? (product.shortDescription || product.description || 'Pharmapolis Bioidentical Hormone Subcutaneous Pellet (EU GMP certified). 100% pure crystalline implant.')
+    ? (product.shortDescription || product.description || 'Bioidentical Hormone Subcutaneous Pellet (EU GMP certified). 100% pure crystalline implant.')
     : isNorma
     ? 'Testosterone Enanthate/Norma® 250 mg/ml oily solution for injection (1 mL ampoule). EOF Greece MA # 45945/03-10-2008. Batch release by EVER Pharma Jena GmbH. Authoritative SmPC and clinical monograph.'
     : isTeletest

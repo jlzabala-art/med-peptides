@@ -849,7 +849,7 @@ export default function PelletsPriceListClient({
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '6px', fontSize: '0.72rem', color: '#64748b' }}>
           <span>
             <strong>{isEs ? 'Estándar:' : 'Standard:'}</strong>{' '}
-            {isAdmin ? `Supplier: ${row.adminSupplierLabel || 'Pharmapolis (Bulgaria)'}` : 'EU GMP Certified Facility'}
+            {isEs ? 'Instalación Certificada EU GMP' : 'EU GMP Certified Facility'}
           </span>
           <span>•</span>
           <span><strong>{isEs ? 'Esterilidad:' : 'Sterility:'}</strong> E-Beam SAL 10⁻⁶</span>
@@ -963,14 +963,14 @@ export default function PelletsPriceListClient({
     {
       contextAnchor: {
         type: 'pricing-pellets',
-        name: isAdmin ? 'Pharmapolis Hormone Pellets' : 'Subcutaneous Hormone Pellets',
+        name: isEs ? 'Pellets Hormonales Subcutáneos' : 'Subcutaneous Hormone Pellets',
         subtitle: 'EU GMP Subcutaneous Therapy · Surgical Trocars',
-        sectionTitle: isEs ? 'Pellets Hormonales Subcutáneos' : (isAdmin ? 'Pharmapolis Hormone Pellets' : 'Subcutaneous Hormone Pellets'),
+        sectionTitle: isEs ? 'Pellets Hormonales Subcutáneos' : 'Subcutaneous Hormone Pellets',
         currency,
         skuCount: initialProducts.length,
       },
       bottomBar: {
-        summaryTitle: isEs ? 'Pellets Hormonales Subcutáneos' : (isAdmin ? 'Pharmapolis Hormone Pellets' : 'Subcutaneous Hormone Pellets'),
+        summaryTitle: isEs ? 'Pellets Hormonales Subcutáneos' : 'Subcutaneous Hormone Pellets',
         summarySubtitle: `${currency} · ${initialProducts.length} SKUs · EU GMP`,
         atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
         primaryAction: {
@@ -1010,14 +1010,13 @@ export default function PelletsPriceListClient({
       <main className="pellets-price-container">
         {/* ── UNIFIED COMPACT GCP RESOURCE HERO (Consistent across all platform screens) ── */}
         <PageHeroCard
-          brandRight={isAdmin ? 'PHARMAPOLIS EU GMP' : 'EU GMP CERTIFIED'}
+          brandRight="EU GMP CERTIFIED"
           badges={[
             isEs ? 'E-Beam SAL 10⁻⁶ · POM' : 'E-Beam SAL 10⁻⁶ · POM',
             isEs ? 'Liberación 3.5–6 Meses' : '3.5–6 Mo Zero-Order',
           ]}
           metaItems={[
-            { label: 'REF:', value: isAdmin ? 'DOC-BG-PHARM-PELLET-2026' : 'DOC-EU-PELLET-2026', mono: true },
-            ...(isAdmin ? [{ label: 'SUPPLIER:', value: 'Pharmapolis (Bulgaria)' }] : []),
+            { label: 'REF:', value: 'DOC-EU-PELLET-2026', mono: true },
           ]}
           title={
             isEs

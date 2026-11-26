@@ -143,7 +143,7 @@ export default function SupplementTechnicalSpecs({
           color: '#334155'
         }}>
           <ShieldCheck size={16} color="#059669" />
-          <span>{isEs ? 'EU GMP Certificado · Pharmapolis' : 'EU GMP Certified · Pharmapolis'}</span>
+          <span>{isEs ? 'EU GMP Certificado · Atlas Health' : 'EU GMP Certified · Atlas Health'}</span>
         </div>
       </div>
 

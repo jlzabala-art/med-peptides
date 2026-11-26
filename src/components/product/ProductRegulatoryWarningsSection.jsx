@@ -824,8 +824,8 @@ export default function ProductRegulatoryWarningsSection({
             </div>
             <div className="gcp-detail-value">
               {isEs 
-                ? `Lotes analizados por laboratorios independientes para garantizar la ausencia de metales pesados, pesticidas y microorganismos patógenos. Distribución autorizada por ${supplierName || 'Pharmapolis'}.`
-                : `Third-party batch certified for absent heavy metals, pesticide residues, and microbial pathogens. Sourced through authorized partner ${supplierName || 'Pharmapolis'}.`}
+                ? `Lotes analizados por laboratorios independientes para garantizar la ausencia de metales pesados, pesticidas y microorganismos patógenos. Distribución autorizada por ${supplierName || 'Atlas Clinical Network'}.`
+                : `Third-party batch certified for absent heavy metals, pesticide residues, and microbial pathogens. Sourced through authorized partner ${supplierName || 'Atlas Clinical Network'}.`}
             </div>
           </div>
         </div>

@@ -187,12 +187,12 @@ export default function HormonePelletDetail({
       contextAnchor: {
         type: 'hormone_pellet',
         name: p.name || 'Hormone Pellet',
-        brand: 'Pharmapolis Compounding Pharmacy',
+        brand: 'Atlas Health Services • EU GMP',
       },
       bottomBar: {
         summaryTitle: p.commercialName || p.name || 'Bioidentical Hormone Pellet',
-        summarySubtitle: `${p.strength || ''} · Subcutaneous Trocar Implant · EU GMP Bulgaria`,
-        badge: 'Pharmapolis EU GMP',
+        summarySubtitle: `${p.strength || ''} · Subcutaneous Trocar Implant · EU GMP`,
+        badge: 'EU GMP Certified',
         atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
         showSections: true,
         sectionsLabel: isEs ? 'Secciones' : 'Sections',
@@ -268,11 +268,11 @@ export default function HormonePelletDetail({
               <div className="gcp-resource-meta-line">
                 <span className="gcp-resource-meta-item">
                   <Building2 size={13} />
-                  <span>Pharmapolis Compounding Pharmacy</span>
+                  <span>{isEs ? 'Laboratorio Certificado EU GMP' : 'EU GMP Certified Compounding Facility'}</span>
                 </span>
                 <span className="gcp-resource-meta-sep">•</span>
                 <span className="gcp-resource-meta-item">
-                  <span>Plovdiv, Bulgaria (EU)</span>
+                  <span>European Union (Ph. Eur.)</span>
                 </span>
                 <span className="gcp-resource-meta-sep">•</span>
                 <span className="gcp-resource-meta-item">
@@ -420,7 +420,7 @@ export default function HormonePelletDetail({
               <div className="pellet-metric-box">
                 <div className="pellet-metric-label">{isEs ? 'Pureza y Fabricación' : 'Purity & Grade'}</div>
                 <div className="pellet-metric-value">≥ 99.5% USP</div>
-                <div className="pellet-metric-sub">Pharmapolis EU GMP (Bulgaria)</div>
+                <div className="pellet-metric-sub">{isEs ? 'Estándar EU GMP' : 'EU GMP Certified'}</div>
               </div>
 
               <div className="pellet-metric-box">
@@ -545,8 +545,8 @@ export default function HormonePelletDetail({
 
               <p style={{ fontSize: '0.88rem', lineHeight: 1.65, color: '#334155', marginBottom: '1.25rem' }}>
                 {isEs
-                  ? 'A diferencia de los comprimidos orales (que sufren una degradación hepática masiva de primer paso) o los geles/parches transdérmicos (que dependen de la variabilidad de la barrera del estrato córneo), los pellets subcutáneos de Pharmapolis actúan como micro-depósitos de disolución constante.'
-                  : 'Unlike oral pills (which undergo heavy hepatic first-pass degradation) or transdermal patches/gels (which suffer from erratic stratum corneum barrier variability), Pharmapolis subcutaneous pellets provide continuous micro-vascular diffusion.'}
+                  ? 'A diferencia de los comprimidos orales (que sufren una degradación hepática masiva de primer paso) o los geles/parches transdérmicos (que dependen de la variabilidad de la barrera del estrato córneo), los pellets subcutáneos EU GMP actúan como micro-depósitos de disolución constante.'
+                  : 'Unlike oral pills (which undergo heavy hepatic first-pass degradation) or transdermal patches/gels (which suffer from erratic stratum corneum barrier variability), EU GMP subcutaneous pellets provide continuous micro-vascular diffusion.'}
               </p>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', margin: '1.25rem 0' }}>
@@ -764,7 +764,7 @@ export default function HormonePelletDetail({
               <div style={{ padding: '1.25rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#166534', fontWeight: 800, fontSize: '0.90rem', marginBottom: '6px' }}>
                   <ShieldCheck size={18} />
-                  <span>Laboratorio Fabricante: Pharmapolis Compounding Pharmacy (Plovdiv, Bulgaria EU)</span>
+                  <span>{isEs ? 'Instalación Farmacéutica Certificada EU GMP (Unión Europea)' : 'EU GMP Certified Compounding Facility (European Union)'}</span>
                 </div>
                 <p style={{ fontSize: '0.82rem', color: '#166534', margin: 0, lineHeight: 1.55 }}>
                   {isEs
@@ -932,8 +932,8 @@ export default function HormonePelletDetail({
 
               <p style={{ fontSize: '0.86rem', color: '#475569', marginBottom: '1.25rem', lineHeight: 1.55 }}>
                 {isEs
-                  ? 'Precios oficiales validados del catálogo de Pharmapolis (Bulgaria EU GMP). Disponibilidad directa para clínicas y médicos autorizados en la Unión Europea, GCC y red médica global.'
-                  : 'Official validated pricing from Pharmapolis (Bulgaria EU GMP) catalog schedule. Available for accredited medical clinics and registered physicians across EU, GCC, and global partner networks.'}
+                  ? 'Precios oficiales validados del catálogo EU GMP. Disponibilidad directa para clínicas y médicos autorizados en la Unión Europea, GCC y red médica global.'
+                  : 'Official validated pricing from the EU GMP catalog schedule. Available for accredited medical clinics and registered physicians across EU, GCC, and global partner networks.'}
               </p>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '1.5rem' }}>
@@ -1124,8 +1124,8 @@ export default function HormonePelletDetail({
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#64748b' }}>{isEs ? 'Laboratorio:' : 'Lab:'}</span>
-                <span style={{ color: '#0f172a' }}>Pharmapolis (EU GMP)</span>
+                <span style={{ color: '#64748b' }}>{isEs ? 'Estándar:' : 'Standard:'}</span>
+                <span style={{ color: '#0f172a' }}>EU GMP Certified</span>
               </div>
             </div>
           </div>
@@ -1136,7 +1136,7 @@ export default function HormonePelletDetail({
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Layers size={14} color="#003666" />
                 <span style={{ color: '#003666', fontWeight: 800 }}>
-                  {isEs ? 'Colección Pellets Pharmapolis' : 'Pharmapolis Pellets Collection'}
+                  {isEs ? 'Colección Pellets EU GMP' : 'EU GMP Pellets Collection'}
                 </span>
               </div>
               <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: '#dcfce7', color: '#166534', fontWeight: 700 }}>
@@ -1221,8 +1221,8 @@ export default function HormonePelletDetail({
           code: p.sku || 'SKU-PHARM-HORM',
           strength: p.strength,
           category: 'Pellets Hormonales Subcutáneos (BHRT)',
-          supplier: 'Pharmapolis Compounding Pharmacy',
-          brand: 'Pharmapolis (Bulgaria EU GMP)',
+          supplier: 'Atlas Health Services',
+          brand: 'EU GMP Certified',
           galenicForm: 'Pellet Subcutáneo Estéril (Blister Individual)',
           inquiryGoal: 'hospital_clinic_allocation'
         }}
@@ -1237,8 +1237,8 @@ export default function HormonePelletDetail({
           slug: slug,
           strength: p.strength,
           category: p.category || 'Hormone Pellets',
-          brand: 'Pharmapolis Compounding Pharmacy',
-          supplier: 'Pharmapolis (Bulgaria EU GMP)'
+          brand: 'Atlas Health Services',
+          supplier: 'EU GMP Certified'
         }}
       />
 

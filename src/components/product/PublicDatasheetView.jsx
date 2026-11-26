@@ -1865,7 +1865,7 @@ export default function PublicDatasheetView({
             isSpray,
             isCurrentlyActive,
             purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : (isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV 6.6%)' : isSupplementProduct ? (lang === 'es' ? 'EU GMP Farmacéutico · Vegano' : 'EU GMP Certified · Vegan') : '≥ 99.0% (RP-HPLC)')),
-            supplierName: activeSupplierObj.name || (isSupplementProduct ? 'Pharmapolis' : 'Clinical Peptide Hub'),
+            supplierName: activeSupplierObj.name || (isSupplementProduct ? 'EU GMP Compounding Network' : 'Clinical Peptide Hub'),
             supplierId: activeSupplierObj.id
           });
         });

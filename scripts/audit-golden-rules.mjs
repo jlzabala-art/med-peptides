@@ -43,6 +43,16 @@ const nativeDialogs = [];
 const rawTables = [];
 const bespokeHeaders = [];
 const clientRootPages = [];
+const supplierLeaks = [];
+
+const PUBLIC_WHITE_LABEL_PATHS = [
+  'src/app/pricing/pellets/',
+  'src/app/guides/',
+  'src/components/product/layouts/HormonePelletDetail.jsx',
+  'src/components/product/InteractiveTrocarPelletGuide.jsx',
+  'src/components/product/SupplementTechnicalSpecs.jsx',
+  'src/components/product/ProductRegulatoryWarningsSection.jsx',
+];
 
 for (const file of srcFiles) {
   const rel = path.relative(ROOT, file);
@@ -88,6 +98,16 @@ for (const file of srcFiles) {
     if (rel.startsWith('src/app/') && /<header[\s>]/.test(line)) {
       bespokeHeaders.push(`${rel}:${ln}`);
     }
+    if (
+      PUBLIC_WHITE_LABEL_PATHS.some((prefix) => rel.startsWith(prefix)) &&
+      !trimmed.startsWith('import ') &&
+      !trimmed.startsWith('//') &&
+      !trimmed.startsWith('*') &&
+      /['"`][^'"`]*pharmapolis[^'"`]*['"`]/i.test(line) &&
+      !/getAllPharmapolis|isPharmapolisPelletSlug|getPharmapolis/i.test(line)
+    ) {
+      supplierLeaks.push(`${rel}:${ln}`);
+    }
   });
 }
 
@@ -95,6 +115,7 @@ console.log('=== Atlas Golden Rules Audit ===');
 console.log(`Total rules in AGENTS.md : ${ruleNums.length} (duplicates: ${dupes.length})`);
 console.log(`window.confirm/alert     : ${nativeDialogs.length} (enforced = 0)`);
 console.log(`Ad-hoc <header> in app/  : ${bespokeHeaders.length} (enforced = 0)`);
+console.log(`Supplier leaks (Rule #73): ${supplierLeaks.length} (enforced = 0)`);
 console.log(`Raw <table> (non-PDF)    : ${rawTables.length} (inventory)`);
 console.log(`Client-root page.jsx     : ${clientRootPages.length} (inventory)`);
 
@@ -114,6 +135,12 @@ if (nativeDialogs.length > 0) {
 if (bespokeHeaders.length > 0) {
   console.error('❌ Ad-hoc <header> in src/app/ found (Rule #63):');
   bespokeHeaders.forEach((x) => console.error('  -', x));
+  failed = true;
+}
+
+if (supplierLeaks.length > 0) {
+  console.error('❌ Public supplier string leak found (Rule #73):');
+  supplierLeaks.forEach((x) => console.error('  -', x));
   failed = true;
 }
 
