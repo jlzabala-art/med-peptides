@@ -193,9 +193,55 @@ export default async function PelletsPricingPage({ searchParams }) {
     )
   );
 
-  const allProducts = [...pellets, ...TROCAR_KITS].map((item) =>
-    toProductViewModel(item, { tier: 'wholesale', targetCurrency: initialCurrency })
-  );
+  const allProducts = [...pellets, ...TROCAR_KITS].map((item) => {
+    const vm = toProductViewModel(item, { tier: 'wholesale', targetCurrency: initialCurrency });
+    // Normalize hormoneType server-side so Firestore-only pellets never fall out of category counts
+    const rawType = String(vm.hormoneType || '').toLowerCase();
+    let normalizedType = rawType;
+    if (vm.category === 'Trocar Kits' || rawType === 'instrument') {
+      normalizedType = 'instrument';
+    } else if (!['estrogen', 'biest', 'androgen', 'progesterone', 'synergy'].includes(rawType)) {
+      const text = `${vm.name || ''} ${vm.canonicalName || ''} ${vm.subcategory || ''}`.toLowerCase();
+      if (text.includes('trocar')) normalizedType = 'instrument';
+      else if (text.includes('anastrozol')) normalizedType = 'synergy';
+      else if (text.includes('progesteron')) normalizedType = 'progesterone';
+      else if (text.includes('estradiol') || text.includes('biest') || text.includes('bi-est') || text.includes('estriol') || text.includes('estrogen')) normalizedType = 'estrogen';
+      else if (text.includes('testosteron') || text.includes('nandrolon') || text.includes('androgen') || text.includes('dhea')) normalizedType = 'androgen';
+      else normalizedType = 'other';
+    }
+    return { ...vm, hormoneType: normalizedType };
+  });
+
+  // Server-computed facet counts & global KPI stats (Golden Rule #22)
+  const serverCategoryCounts = {
+    all: allProducts.length,
+    estrogen: 0,
+    androgen: 0,
+    progesterone: 0,
+    synergy: 0,
+    trocar: 0,
+    other: 0,
+  };
+  const globalPrices = [];
+  for (const p of allProducts) {
+    if (p.hormoneType === 'estrogen' || p.hormoneType === 'biest') serverCategoryCounts.estrogen++;
+    else if (p.hormoneType === 'androgen') serverCategoryCounts.androgen++;
+    else if (p.hormoneType === 'progesterone') serverCategoryCounts.progesterone++;
+    else if (p.hormoneType === 'synergy') serverCategoryCounts.synergy++;
+    else if (p.category === 'Trocar Kits' || p.hormoneType === 'instrument') serverCategoryCounts.trocar++;
+    else serverCategoryCounts.other++;
+
+    const eur = Number(p.pricing?.wholesalePriceEur || p.pricing?.price_eur || p.pricing?.costPriceEur || 0);
+    if (Number.isFinite(eur) && eur > 0) globalPrices.push(eur);
+  }
+
+  const serverKpiStats = globalPrices.length > 0
+    ? {
+        minUnit: Math.min(...globalPrices),
+        maxUnit: Math.max(...globalPrices),
+        minPack10: Number((Math.min(...globalPrices) * 10 * 0.90).toFixed(2)),
+      }
+    : { minUnit: 0, maxUnit: 0, minPack10: 0 };
 
   const jsonLd = buildPricingPageJsonLd({
     path: '/pricing/pellets',
@@ -223,6 +269,8 @@ export default async function PelletsPricingPage({ searchParams }) {
         initialProducts={allProducts}
         initialCurrency={initialCurrency}
         initialLang={initialLang}
+        initialCategoryCounts={serverCategoryCounts}
+        initialKpiStats={serverKpiStats}
       />
     </>
   );

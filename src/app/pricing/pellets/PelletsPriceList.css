@@ -355,6 +355,10 @@
   display: none;
 }
 
+.pellets-kpi-mobile-strip {
+  display: none;
+}
+
 /* ── Symmetric 2-Zone Stripe/GCP Mobile Product Card ── */
 .pellet-mcard {
   background: #ffffff;

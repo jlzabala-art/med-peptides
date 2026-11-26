@@ -333,7 +333,9 @@ function PelletMobileCard({
 export default function PelletsPriceListClient({
   initialProducts = [],
   initialCurrency = 'USD',
-  initialLang = 'en'
+  initialLang = 'en',
+  initialCategoryCounts = null,
+  initialKpiStats = null,
 }) {
   const workspace = usePublicWorkspace();
   const { is } = useRoleAccess();
@@ -451,6 +453,8 @@ export default function PelletsPriceListClient({
         if (item.hormoneType !== 'synergy') return false;
       } else if (selectedCategory === 'trocar') {
         if (item.category !== 'Trocar Kits' && item.hormoneType !== 'instrument') return false;
+      } else if (selectedCategory === 'other') {
+        if (item.hormoneType !== 'other') return false;
       }
 
       // Clinical profile filter (1-click guided selection)
@@ -560,18 +564,20 @@ export default function PelletsPriceListClient({
     }
   };
 
-  // Category counts
+  // Category counts (prefer server-computed facet counts; fallback to normalized calculation)
   const categoryCounts = useMemo(() => {
-    const counts = { all: initialProducts.length, estrogen: 0, androgen: 0, progesterone: 0, synergy: 0, trocar: 0 };
+    if (initialCategoryCounts) return initialCategoryCounts;
+    const counts = { all: initialProducts.length, estrogen: 0, androgen: 0, progesterone: 0, synergy: 0, trocar: 0, other: 0 };
     initialProducts.forEach(p => {
       if (p.hormoneType === 'estrogen' || p.hormoneType === 'biest') counts.estrogen++;
       else if (p.hormoneType === 'androgen') counts.androgen++;
       else if (p.hormoneType === 'progesterone') counts.progesterone++;
       else if (p.hormoneType === 'synergy') counts.synergy++;
       else if (p.category === 'Trocar Kits' || p.hormoneType === 'instrument') counts.trocar++;
+      else counts.other++;
     });
     return counts;
-  }, [initialProducts]);
+  }, [initialCategoryCounts, initialProducts]);
 
   // DataTable columns definition (Strict Rule #3 & Rule #30 - Zero horizontal scroll)
   const columns = useMemo(() => [
@@ -938,10 +944,11 @@ export default function PelletsPriceListClient({
     </div>
   ), [isEs, currency]);
 
-  // Contextual KPI values (dynamically computed from active scope)
+  // Contextual KPI values (server-computed for global scope; dynamic for filtered scope — Rule #22)
   const kpiProducts = scopeMode === 'all' ? initialProducts : filteredProducts;
   const activeCount = kpiProducts.length;
   const kpiPriceStats = useMemo(() => {
+    if (scopeMode === 'all' && initialKpiStats) return initialKpiStats;
     const prices = kpiProducts
       .map((p) => Number(p.pricing?.wholesalePriceEur || p.pricing?.price_eur || p.pricing?.costPriceEur || 0))
       .filter((n) => Number.isFinite(n) && n > 0);
@@ -950,7 +957,7 @@ export default function PelletsPriceListClient({
     const maxUnit = Math.max(...prices);
     const minPack10 = Number((minUnit * 10 * 0.90).toFixed(2));
     return { minUnit, maxUnit, minPack10 };
-  }, [kpiProducts]);
+  }, [scopeMode, initialKpiStats, kpiProducts]);
 
   useRegisterAtlasContext(
     {
@@ -1338,6 +1345,17 @@ export default function PelletsPriceListClient({
                 <span>{isEs ? 'Kits de Trócar' : 'Trocar Kits'}</span>
                 <span className="pellets-cat-count">{categoryCounts.trocar}</span>
               </button>
+
+              {categoryCounts.other > 0 && (
+                <button
+                  type="button"
+                  className={`pellets-cat-btn ${selectedCategory === 'other' ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory('other')}
+                >
+                  <span>{isEs ? 'Otras Formulaciones' : 'Other Formulations'}</span>
+                  <span className="pellets-cat-count">{categoryCounts.other}</span>
+                </button>
+              )}
             </div>
 
             <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #f1f5f9' }}>
@@ -1363,71 +1381,7 @@ export default function PelletsPriceListClient({
 
           {/* Main Table Column */}
           <div style={{ minWidth: 0 }}>
-            {/* Guided Clinical Profile Strip (1-Click Female BHRT / Male TRT / Trocars + Clinical Window Tip) */}
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '10px',
-              padding: '10px 14px',
-              marginBottom: '10px',
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '8px',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: '#475569', marginRight: '2px' }}>
-                  {isEs ? 'Perfil Clínico:' : 'Clinical Profile:'}
-                </span>
-                {[
-                  { id: 'all', label: isEs ? 'Todos' : 'All Formulations' },
-                  { id: 'female', label: isEs ? 'Mujer / BHRT' : 'Female BHRT' },
-                  { id: 'male', label: isEs ? 'Hombre / TRT' : 'Male TRT' },
-                  { id: 'trocar', label: isEs ? 'Kits Trócar' : 'Trocar Kits' },
-                ].map((prof) => {
-                  const active = selectedProfile === prof.id;
-                  return (
-                    <button
-                      key={prof.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedProfile(prof.id);
-                        if (typeof window !== 'undefined') {
-                          const url = new URL(window.location.href);
-                          if (prof.id === 'all') url.searchParams.delete('profile');
-                          else url.searchParams.set('profile', prof.id);
-                          window.history.replaceState({}, '', url.toString());
-                        }
-                      }}
-                      style={{
-                        padding: '5px 11px',
-                        minHeight: '34px',
-                        borderRadius: '999px',
-                        border: active ? '1px solid #003666' : '1px solid #cbd5e1',
-                        background: active ? '#003666' : '#f8fafc',
-                        color: active ? '#ffffff' : '#334155',
-                        fontSize: '0.74rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {prof.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div style={{ fontSize: '0.73rem', color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 600 }}>
-                {selectedProfile === 'female'
-                  ? (isEs ? 'Trócar 3.2 mm · Ventana T: 150–350 ng/dL · E2: 40–110 pg/mL' : '3.2 mm Trocar · Target T: 150–350 ng/dL · E2: 40–110 pg/mL')
-                  : selectedProfile === 'male'
-                    ? (isEs ? 'Trócar 4.5 mm (>50 mg) · Ventana T: 400–800 ng/dL' : '4.5 mm Trocar (>50 mg) · Target T: 400–800 ng/dL')
-                    : (isEs ? '≥99.5% USP · Liberación orden cero 3.5–6 meses · Sin primer paso hepático' : '≥99.5% USP · Zero-order release 3.5–6 mo · Zero hepatic first-pass')}
-              </div>
-            </div>
-
-            {/* Global Search Bar (Strict Rule #6 & #7 — single profile bar above, no duplicate filter box) */}
+            {/* Global Search Bar FIRST (Strict Rule #6 & #7) */}
             <div className="pellets-filter-toolbar">
               <GlobalSearchBar
                 namespace="pellets"
@@ -1448,6 +1402,7 @@ export default function PelletsPriceListClient({
                   { id: 'progesterone', label: isEs ? 'Progesterona' : 'Progesterone', count: categoryCounts.progesterone },
                   { id: 'synergy', label: 'T + Anastrozole', count: categoryCounts.synergy },
                   { id: 'trocar', label: isEs ? 'Trócares' : 'Trocars', count: categoryCounts.trocar },
+                  ...(categoryCounts.other > 0 ? [{ id: 'other', label: isEs ? 'Otras' : 'Other', count: categoryCounts.other }] : []),
                 ].map((cat) => (
                   <button
                     key={cat.id}
@@ -1469,6 +1424,69 @@ export default function PelletsPriceListClient({
                   <Activity size={12} />
                   <span>{isEs ? 'Guía Trócar' : 'Trocar Guide'}</span>
                 </Link>
+              </div>
+
+              {/* Guided Clinical Profile Strip (1-Click Female BHRT / Male TRT + Clinical Window Tip) */}
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                padding: '8px 12px',
+                marginTop: '8px',
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: '#475569', marginRight: '2px' }}>
+                    {isEs ? 'Perfil Clínico:' : 'Clinical Profile:'}
+                  </span>
+                  {[
+                    { id: 'all', label: isEs ? 'Todos' : 'All' },
+                    { id: 'female', label: isEs ? 'Mujer / BHRT' : 'Female BHRT' },
+                    { id: 'male', label: isEs ? 'Hombre / TRT' : 'Male TRT' },
+                  ].map((prof) => {
+                    const active = selectedProfile === prof.id;
+                    return (
+                      <button
+                        key={prof.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedProfile(prof.id);
+                          if (typeof window !== 'undefined') {
+                            const url = new URL(window.location.href);
+                            if (prof.id === 'all') url.searchParams.delete('profile');
+                            else url.searchParams.set('profile', prof.id);
+                            window.history.replaceState({}, '', url.toString());
+                          }
+                        }}
+                        style={{
+                          padding: '4px 10px',
+                          minHeight: '30px',
+                          borderRadius: '999px',
+                          border: active ? '1px solid #003666' : '1px solid #cbd5e1',
+                          background: active ? '#003666' : '#f8fafc',
+                          color: active ? '#ffffff' : '#334155',
+                          fontSize: '0.73rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {prof.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div style={{ fontSize: '0.72rem', color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '3px 9px', borderRadius: '6px', fontWeight: 600 }}>
+                  {selectedProfile === 'female'
+                    ? (isEs ? 'Trócar 3.2 mm · Ventana T: 150–350 ng/dL · E2: 40–110 pg/mL' : '3.2 mm Trocar · Target T: 150–350 ng/dL · E2: 40–110 pg/mL')
+                    : selectedProfile === 'male'
+                      ? (isEs ? 'Trócar 4.5 mm (>50 mg) · Ventana T: 400–800 ng/dL' : '4.5 mm Trocar (>50 mg) · Target T: 400–800 ng/dL')
+                      : (isEs ? '≥99.5% USP · Liberación orden cero 3.5–6 meses · Sin primer paso hepático' : '≥99.5% USP · Zero-order release 3.5–6 mo · Zero hepatic first-pass')}
+                </div>
               </div>
 
               {/* Active Filter Chips (Rule #24) */}
