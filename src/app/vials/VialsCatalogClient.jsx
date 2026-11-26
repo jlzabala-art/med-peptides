@@ -2,9 +2,11 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, ShoppingCart, Package, Check, CheckCircle2, ShieldCheck, ArrowRight, X, Plus, Minus, Globe, QrCode } from '@/lib/icons';
+import { Search, ShoppingCart, Package, Check, CheckCircle2, ShieldCheck, ArrowRight, X, Plus, Minus, Globe, QrCode, SlidersHorizontal } from '@/lib/icons';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import CopyableId from '@/components/ui/CopyableId';
+import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
+import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 import { trackReferralVisitAction, fetchCollectionProductsAction } from '@/actions/vialsCatalogActions';
 import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
 import { usePricing } from '@/hooks/usePricing';
@@ -76,16 +78,24 @@ const SHIPPING_OPTIONS = [
   { code: 'ROW', label: 'International / Worldwide (DHL Express)', cost: 55 }
 ];
 
-export default function VialsCatalogClient({ initialVials = [], initialCollection = 'vials', referralInfo = null, isPatientView = false }) {
+export default function VialsCatalogClient({ initialVials = [], initialCollection = 'vials', initialLang = 'en', initialCurrency = 'EUR', referralInfo = null, isPatientView = false }) {
   const { isAdmin, pricingRole, resolve: resolveProduct } = usePricing();
+  const isEs = initialLang === 'es';
   const [activeCollection, setActiveCollection] = useState(initialCollection || 'vials');
   const [vials, setVials] = useState(initialVials);
   const [isLoadingCollection, setIsLoadingCollection] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGoal, setSelectedGoal] = useState('all');
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [copiedSpecialtyUrl, setCopiedSpecialtyUrl] = useState(false);
   const [copiedWhatsAppMsg, setCopiedWhatsAppMsg] = useState(false);
+
+  useEffect(() => {
+    const onOpenFilters = () => setMobileFiltersOpen(true);
+    window.addEventListener('open-catalog-filters', onOpenFilters);
+    return () => window.removeEventListener('open-catalog-filters', onOpenFilters);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -446,25 +456,61 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
       />
 
       {/* ── Main Catalog Workspace ── */}
-      <main className="atlas-page-shell">
-        <PageHeroCard
-          brandLeft={isPatientView ? 'PATIENT GUIDE' : 'ATLAS HEALTH'}
-          brandRight={isPatientView ? 'RECONSTITUTION & CARE' : (SUPPORTED_COLLECTIONS[activeCollection]?.title?.toUpperCase() || 'CLINICAL FORMULATIONS')}
-          badges={isPatientView ? ['PATIENT EDUCATION', 'RECONSTITUTION GUIDES'] : ['≥99.0% HPLC', 'DIRECT SUPPLY']}
-          title={isPatientView
-            ? 'Patient Peptide & Reconstitution Guide Directory'
-            : (SUPPORTED_COLLECTIONS[activeCollection]?.title || 'Clinical Formulations Directory')}
-          subtitle={isPatientView
-            ? 'Select your prescribed peptide below to open step-by-step reconstitution, storage, and administration guidance.'
-            : (SUPPORTED_COLLECTIONS[activeCollection]?.description || 'Institutional sterile lyophilized peptides, clinical supplements, and regenerative formulations.')}
-          metaItems={[
-            { label: 'AUDIENCE:', value: isPatientView ? 'PATIENT GUIDE' : 'PHYSICIAN / CLINIC', mono: true },
-            { label: 'PRODUCTS:', value: `${vials.length} SKUs`, mono: true },
-          ]}
-        />
-        
-        {/* ── Multi-Collection Switcher (Golden Rule #7 & GCP Tabs) ── */}
-        <div style={{ marginBottom: '20px' }}>
+      <style>{`
+        .vials-mobile-filter-bar { display: none; }
+        .vials-cards-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+          gap: 16px;
+        }
+        .vials-checkout-two-col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+        @media (max-width: 768px) {
+          .vials-hero-wrap,
+          .vials-notice-banner,
+          .vials-desktop-filters {
+            display: none !important;
+          }
+          .vials-mobile-filter-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 12px;
+          }
+          .vials-cards-grid {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 12px;
+          }
+          .vials-checkout-two-col {
+            grid-template-columns: minmax(0, 1fr);
+          }
+        }
+      `}</style>
+      <main className="atlas-page-shell" style={{ overflowX: 'hidden' }}>
+        <div className="vials-hero-wrap">
+          <PageHeroCard
+            brandLeft={isPatientView ? 'PATIENT GUIDE' : 'ATLAS HEALTH'}
+            brandRight={isPatientView ? 'RECONSTITUTION & CARE' : (SUPPORTED_COLLECTIONS[activeCollection]?.title?.toUpperCase() || 'CLINICAL FORMULATIONS')}
+            badges={isPatientView ? ['PATIENT EDUCATION', 'RECONSTITUTION GUIDES'] : ['≥99.0% HPLC', 'DIRECT SUPPLY']}
+            title={isPatientView
+              ? 'Patient Peptide & Reconstitution Guide Directory'
+              : (SUPPORTED_COLLECTIONS[activeCollection]?.title || 'Clinical Formulations Directory')}
+            subtitle={isPatientView
+              ? 'Select your prescribed peptide below to open step-by-step reconstitution, storage, and administration guidance.'
+              : (SUPPORTED_COLLECTIONS[activeCollection]?.description || 'Institutional sterile lyophilized peptides, clinical supplements, and regenerative formulations.')}
+            metaItems={[
+              { label: 'AUDIENCE:', value: isPatientView ? 'PATIENT GUIDE' : 'PHYSICIAN / CLINIC', mono: true },
+              { label: 'PRODUCTS:', value: `${vials.length} SKUs`, mono: true },
+            ]}
+          />
+        </div>
+
+        {/* ── Multi-Collection Switcher (Desktop) ── */}
+        <div className="vials-desktop-filters" style={{ marginBottom: '20px' }}>
           <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
             Select Clinical Collection:
           </div>
@@ -504,7 +550,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
         {(() => {
           const colInfo = SUPPORTED_COLLECTIONS[activeCollection] || SUPPORTED_COLLECTIONS.vials;
           return (
-            <div style={{
+            <div className="vials-notice-banner" style={{
               backgroundColor: '#eff6ff',
               border: '1px solid #bfdbfe',
               borderRadius: '12px',
@@ -526,52 +572,70 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
           );
         })()}
 
-        {/* ── Search & Filter Bar (Google Cloud Rule #7: Search First) ── */}
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{
-            position: 'relative',
-            maxWidth: '100%',
-            marginBottom: '16px'
-          }}>
-            <Search size={18} color="#64748b" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
-            <input
-              type="text"
+        {/* ── Search & Filter Bar (Google Cloud Rule #7: Search First with GlobalSearchBar) ── */}
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{ marginBottom: '12px' }}>
+            <GlobalSearchBar
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by peptide name (e.g. BPC-157, Tirzepatide, GHK-Cu, NAD+, Epithalon)..."
-              style={{
-                width: '100%',
-                padding: '14px 44px 14px 46px',
-                fontSize: '0.95rem',
-                borderRadius: '10px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#ffffff',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
+              onChange={setSearchQuery}
+              placeholder={isEs ? 'Buscar péptido (ej. BPC-157, Tirzepatida, GHK-Cu, NAD+, Epithalon)...' : 'Search by peptide name (e.g. BPC-157, Tirzepatide, GHK-Cu, NAD+, Epithalon)...'}
+              size="lg"
+              resultCount={filteredVials.length}
+              isLocalOnly={true}
+              filters={[
+                ...(activeCollection !== 'vials'
+                  ? [{
+                      key: 'collection',
+                      label: isEs ? 'Colección' : 'Collection',
+                      value: COLLECTIONS_LIST.find((c) => c.id === activeCollection)?.label || activeCollection,
+                      onRemove: () => handleSwitchCollection('vials'),
+                    }]
+                  : []),
+                ...(selectedGoal !== 'all'
+                  ? [{
+                      key: 'goal',
+                      label: isEs ? 'Objetivo' : 'Goal',
+                      value: GOAL_OPTIONS.find((g) => g.id === selectedGoal)?.label || selectedGoal,
+                      onRemove: () => setSelectedGoal('all'),
+                    }]
+                  : []),
+                ...(selectedSpecialty && SPECIALTY_FILTERS[selectedSpecialty]
+                  ? [{
+                      key: 'specialty',
+                      label: isEs ? 'Especialidad' : 'Specialty',
+                      value: SPECIALTY_FILTERS[selectedSpecialty].label,
+                      onRemove: () => {
+                        setSelectedSpecialty(null);
+                        if (typeof window !== 'undefined') {
+                          const url = new URL(window.location.href);
+                          url.searchParams.delete('specialty');
+                          window.history.replaceState({}, '', url.toString());
+                        }
+                      },
+                    }]
+                  : []),
+              ]}
             />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                style={{
-                  position: 'absolute',
-                  right: '14px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#94a3b8'
-                }}
-              >
-                <X size={16} />
-              </button>
-            )}
           </div>
 
-          {/* Goal Filter Chips + Specialty Selector */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* Mobile Compact Filter Trigger Bar */}
+          <div className="vials-mobile-filter-bar">
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569' }}>
+              {filteredVials.length} {isEs ? 'referencias' : 'formulations'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setMobileFiltersOpen(true)}
+              className="gcp-btn-secondary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', minHeight: '40px', padding: '6px 14px', fontSize: '0.80rem', fontWeight: 700 }}
+            >
+              <SlidersHorizontal size={14} />
+              <span>{isEs ? 'Filtros y Colecciones' : 'Filters & Collections'}</span>
+            </button>
+          </div>
+
+          {/* Goal Filter Chips + Specialty Selector (Desktop) */}
+          <div className="vials-desktop-filters" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
               {selectedSpecialty && SPECIALTY_FILTERS[selectedSpecialty] && (
                 <button
@@ -765,11 +829,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
             </button>
           </div>
         ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
-            gap: '16px'
-          }}>
+          <div className="vials-cards-grid">
             {filteredVials.map(vial => {
               const qty = getSelectedQuantity(vial.id);
               const inCartQty = cart[vial.id]?.quantity || 0;
@@ -1368,18 +1428,21 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                           {formErrors.name && <span style={{ fontSize: '0.72rem', color: '#ef4444' }}>{formErrors.name}</span>}
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <div className="vials-checkout-two-col">
                           <div>
                             <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>
                               Email (for Payment Link) *
                             </label>
                             <input
                               type="email"
+                              inputMode="email"
+                              autoComplete="email"
                               value={formData.email}
                               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                               placeholder="doctor@clinic.com"
                               style={{
                                 width: '100%',
+                                minHeight: '42px',
                                 padding: '10px 12px',
                                 borderRadius: '8px',
                                 border: formErrors.email ? '1px solid #ef4444' : '1px solid #cbd5e1',
@@ -1394,19 +1457,12 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                             <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>
                               WhatsApp / Phone *
                             </label>
-                            <input
-                              type="tel"
+                            <InternationalPhoneInput
                               value={formData.phone}
-                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                              placeholder="+1 555 0192 / +34 600..."
-                              style={{
-                                width: '100%',
-                                padding: '10px 12px',
-                                borderRadius: '8px',
-                                border: formErrors.phone ? '1px solid #ef4444' : '1px solid #cbd5e1',
-                                fontSize: '0.85rem',
-                                boxSizing: 'border-box'
-                              }}
+                              onChange={(val) => setFormData({ ...formData, phone: typeof val === 'string' ? val : '' })}
+                              countryHint={isEs ? 'ES' : 'AE'}
+                              lang={isEs ? 'es' : 'en'}
+                              placeholder={isEs ? '600 123 456' : '50 123 4567'}
                             />
                             {formErrors.phone && <span style={{ fontSize: '0.72rem', color: '#ef4444' }}>{formErrors.phone}</span>}
                           </div>
@@ -1499,6 +1555,174 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                 )}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Mobile Filter Bottom Sheet (Google Cloud UX) ── */}
+      {mobileFiltersOpen && (
+        <div
+          onClick={() => setMobileFiltersOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.45)',
+            zIndex: 1200,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '520px',
+              maxHeight: '82vh',
+              overflowY: 'auto',
+              background: '#ffffff',
+              borderRadius: '18px 18px 0 0',
+              padding: '16px 18px 24px',
+              boxShadow: '0 -8px 28px rgba(15, 23, 42, 0.2)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
+              <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                {isEs ? 'Filtros y Colecciones' : 'Filters & Collections'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(false)}
+                aria-label="Close filters"
+                style={{ border: 'none', background: '#f1f5f9', borderRadius: '999px', width: '34px', height: '34px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#334155' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
+                {isEs ? 'Colección Clínica' : 'Clinical Collection'}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {COLLECTIONS_LIST.map((col) => {
+                  const isSelected = activeCollection === col.id;
+                  return (
+                    <button
+                      key={col.id}
+                      type="button"
+                      onClick={() => handleSwitchCollection(col.id)}
+                      style={{
+                        minHeight: '40px',
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        fontSize: '0.80rem',
+                        fontWeight: 700,
+                        border: isSelected ? '1.5px solid #003666' : '1px solid #cbd5e1',
+                        background: isSelected ? '#003666' : '#ffffff',
+                        color: isSelected ? '#ffffff' : '#334155',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {col.icon} {col.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
+                {isEs ? 'Objetivo Terapéutico' : 'Therapeutic Goal'}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {GOAL_OPTIONS.map((opt) => {
+                  const isActive = selectedGoal === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setSelectedGoal(opt.id)}
+                      style={{
+                        minHeight: '40px',
+                        padding: '6px 12px',
+                        borderRadius: '999px',
+                        fontSize: '0.80rem',
+                        fontWeight: 600,
+                        border: isActive ? '1.5px solid #003666' : '1px solid #cbd5e1',
+                        background: isActive ? '#003666' : '#ffffff',
+                        color: isActive ? '#ffffff' : '#334155',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {!isPatientView && (
+              <div>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
+                  {isEs ? 'Especialidad Médica' : 'Medical Specialty'}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSpecialty(null)}
+                    style={{
+                      minHeight: '40px',
+                      padding: '6px 12px',
+                      borderRadius: '999px',
+                      fontSize: '0.80rem',
+                      fontWeight: 600,
+                      border: !selectedSpecialty ? '1.5px solid #0d9488' : '1px solid #cbd5e1',
+                      background: !selectedSpecialty ? '#f0fdfa' : '#ffffff',
+                      color: !selectedSpecialty ? '#0f766e' : '#334155',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {isEs ? 'Todas' : 'All'}
+                  </button>
+                  {Object.entries(SPECIALTY_FILTERS).map(([key, spec]) => {
+                    const isActive = selectedSpecialty === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setSelectedSpecialty(key)}
+                        style={{
+                          minHeight: '40px',
+                          padding: '6px 12px',
+                          borderRadius: '999px',
+                          fontSize: '0.80rem',
+                          fontWeight: 600,
+                          border: isActive ? '1.5px solid #0d9488' : '1px solid #cbd5e1',
+                          background: isActive ? '#f0fdfa' : '#ffffff',
+                          color: isActive ? '#0f766e' : '#334155',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {spec.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setMobileFiltersOpen(false)}
+              className="gcp-btn-primary"
+              style={{ width: '100%', minHeight: '44px', fontSize: '0.88rem', fontWeight: 700, justifyContent: 'center' }}
+            >
+              {isEs ? `Ver ${filteredVials.length} referencias` : `Show ${filteredVials.length} formulations`}
+            </button>
           </div>
         </div>
       )}

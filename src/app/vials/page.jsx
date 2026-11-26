@@ -5,6 +5,7 @@ import VialsCatalogClient from './VialsCatalogClient';
 import { isAdminServerSession } from '@/lib/serverAdminAuth';
 import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
 import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
+import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -43,74 +44,53 @@ export async function generateMetadata({ searchParams }) {
     },
   };
   const specMeta = SPECIALTY_META[specialtyKey] || null;
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
+  const lang = normalizeMetaLang(resolvedSearch);
+  const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || 'EUR').toUpperCase();
+  const validCur = ['EUR', 'USD', 'AED'].includes(rawCur) ? rawCur : 'EUR';
+  const ogTopic = collectionKey === 'bloodo' ? 'bloodo' : collectionKey === 'colway' ? 'colway' : 'peptides';
 
   if (isPatientView) {
-    return {
-      title: `${colMeta.name || 'Peptide'} Patient Guide Directory • Reconstitution & Care`,
-      description: 'Patient-friendly peptide reconstitution, storage, and administration reference guides.',
-      openGraph: {
-        title: `${colMeta.name || 'Peptide'} Patient Guide Directory`,
-        description: 'Patient-friendly peptide reconstitution, storage, and administration reference guides.',
-        type: 'website',
-        siteName: 'Patient Peptide Guide',
-        url: `${appUrl}/vials?collection=${collectionKey}&view=patient`,
-        locale: 'en_US',
-        images: [
-          {
-            url: `${appUrl}/og-catalog.png`,
-            width: 1200,
-            height: 630,
-            alt: `${colMeta.name} Patient Guide`,
-            type: 'image/png',
-          },
-        ],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: `${colMeta.name || 'Peptide'} Patient Guide Directory`,
+    return buildBilingualMetadata({
+      lang,
+      topic: ogTopic,
+      path: `/vials?collection=${collectionKey}&view=patient`,
+      siteName: 'Atlas Health Services',
+      en: {
+        title: `${colMeta.name || 'Peptide'} Patient Guide Directory • Reconstitution & Care`,
         description: 'Patient-friendly peptide reconstitution, storage, and administration reference guides.',
       },
-    };
+      es: {
+        title: `Guía para Pacientes (${colMeta.name || 'Péptidos'}) • Reconstitución y Uso`,
+        description: 'Guías clínicas paso a paso para pacientes: reconstitución, conservación y administración segura.',
+      },
+    });
   }
 
-  const resolvedTitle = specMeta
-    ? `${specMeta.title} • Physician & Clinic Direct Supply`
-    : `${colMeta.title} • Physician & Clinic Direct Supply`;
-  const resolvedDesc = specMeta
+  const resolvedTitleEn = specMeta
+    ? `${specMeta.title} • Physician & Clinic Direct Supply (${validCur})`
+    : `${colMeta.title} • Physician & Clinic Direct Supply (${validCur})`;
+  const resolvedDescEn = specMeta
     ? specMeta.description
     : `${colMeta.description} Direct institutional terms, verified batch quality & expedited dispatch.`;
-  const resolvedUrl = specMeta
-    ? `${appUrl}/vials?specialty=${encodeURIComponent(specialtyKey)}`
-    : `${appUrl}/vials?collection=${collectionKey}`;
+  const resolvedPath = specMeta
+    ? `/vials?specialty=${encodeURIComponent(specialtyKey)}`
+    : `/vials?collection=${collectionKey}`;
 
-  return {
-    title: resolvedTitle,
-    description: resolvedDesc,
-    openGraph: {
-      title: resolvedTitle,
-      description: resolvedDesc,
-      type: 'website',
-      siteName: 'Atlas Physician Clinical Formulations',
-      url: resolvedUrl,
-      locale: 'en_US',
-      images: [
-        {
-          url: `${appUrl}/og-catalog.png`,
-          width: 1200,
-          height: 630,
-          alt: specMeta ? specMeta.title : colMeta.name,
-          type: 'image/png'
-        }
-      ]
+  return buildBilingualMetadata({
+    lang,
+    topic: ogTopic,
+    currency: validCur,
+    path: resolvedPath,
+    siteName: 'Atlas Health Services',
+    en: {
+      title: resolvedTitleEn,
+      description: resolvedDescEn,
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: resolvedTitle,
-      description: resolvedDesc
-    }
-  };
+    es: {
+      title: `${colMeta.title} • Catálogo Clínico B2B y Suministro Directo (${validCur})`,
+      description: `Catálogo clínico oficial en ${validCur}: viales liofilizados estériles ≥99,0% HPLC, calidad de lote verificada y envío ágil para clínicas y médicos.`,
+    },
+  });
 }
 
 /**
@@ -122,6 +102,9 @@ export default async function VialsPublicPage({ searchParams }) {
   const rawCollection = String(resolvedSearch?.collection || resolvedSearch?.c || 'vials').toLowerCase();
   const collection = rawCollection === 'ultraperson' ? 'ultraman' : (SUPPORTED_COLLECTIONS[rawCollection] ? rawCollection : 'vials');
   const isPatientView = String(resolvedSearch?.view || '').toLowerCase() === 'patient';
+  const initialLang = normalizeMetaLang(resolvedSearch);
+  const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || 'EUR').toUpperCase();
+  const initialCurrency = ['EUR', 'USD', 'AED'].includes(rawCur) ? rawCur : 'EUR';
   
   const rawRef = resolvedSearch?.ref || resolvedSearch?.referral || null;
   const isPartnerAlias = !rawRef || ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482', 'nikolas', 'partner-7482'].includes(String(rawRef).toLowerCase());
@@ -164,6 +147,8 @@ export default async function VialsPublicPage({ searchParams }) {
       <VialsCatalogClient
         initialVials={initialProducts}
         initialCollection={collection}
+        initialLang={initialLang}
+        initialCurrency={initialCurrency}
         referralInfo={referralInfo}
         isPatientView={isPatientView}
       />
