@@ -857,7 +857,7 @@ export default function SupplierShowcaseClient({
                 type="text"
                 value={customPartnerDraft}
                 onChange={(e) => setCustomPartnerDraft(e.target.value)}
-                placeholder={isEs ? 'Ej. Runge Pharma, Norma Hellas...' : 'e.g. Runge Pharma, Norma Hellas...'}
+                placeholder={isEs ? 'Ej. European Pharma Lab...' : 'e.g. European Pharma Lab...'}
                 style={{
                   flex: '1 1 180px',
                   minHeight: '38px',

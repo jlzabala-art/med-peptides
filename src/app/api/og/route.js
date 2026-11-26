@@ -490,6 +490,38 @@ const TOPIC_CONFIG = {
       ],
     },
   },
+  doctors: {
+    accent: '#0d9488',
+    accentSoft: '#2dd4bf',
+    en: {
+      badge: 'PHYSICIAN & CLINIC PARTNER HUB',
+      title1: 'Precision Longevity & BHRT',
+      title2: 'Clinical Operating System',
+      subtitle: 'EU GMP Formularies · Interactive Guides · Private Patient QR & BUD Reminders',
+      pills: ['16+ Clinical Schedules', 'Trocar & Dosing Guides', 'Patient QR Refills', 'Atlas AI + PubMed'],
+      cardTitle: 'Clinic Enablement',
+      cardLines: [
+        { k: 'Formulary', v: 'Pellets · Peptides · BHRT · DNA' },
+        { k: 'Patient UX', v: 'Private QR Guide · Zero Prices' },
+        { k: 'Retention', v: 'Automated BUD Refill Alerts' },
+        { k: 'Activation', v: 'Clinic Live in 15 Minutes' },
+      ],
+    },
+    es: {
+      badge: 'PORTAL PARA MÉDICOS Y CLÍNICAS',
+      title1: 'Longevidad y BHRT',
+      title2: 'Sistema Clínico Unificado',
+      subtitle: 'Formularios EU GMP · Guías Interactivas · QR Privado de Paciente y Avisos BUD',
+      pills: ['16+ Tarifas Clínicas', 'Guías Trócar y Dosis', 'Recompra QR Paciente', 'Atlas AI + PubMed'],
+      cardTitle: 'Valor en Consulta',
+      cardLines: [
+        { k: 'Formulario', v: 'Pellets · Péptidos · BHRT · ADN' },
+        { k: 'Paciente', v: 'Guía QR Privada · Sin Precios' },
+        { k: 'Retención', v: 'Avisos Automáticos BUD' },
+        { k: 'Activación', v: 'Clínica Activa en 15 Minutos' },
+      ],
+    },
+  },
 };
 
 export async function GET(request) {
