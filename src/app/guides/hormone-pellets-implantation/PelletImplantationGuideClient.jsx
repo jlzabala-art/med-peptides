@@ -25,7 +25,10 @@ import {
   ClipboardCheck,
   FileText,
   Sparkles,
-  RotateCcw
+  RotateCcw,
+  Calendar,
+  Calculator,
+  FlaskConical
 } from '@/lib/icons';
 
 // ── Clinical Planner Matrix (2025/26 BHRT Consensus) ─────────────────────────
@@ -204,6 +207,64 @@ const COMPLICATIONS_DATA = [
   },
 ];
 
+const CONTRAINDICATIONS_DATA = [
+  {
+    level: 'red',
+    badgeEn: 'Absolute Contraindication',
+    badgeEs: 'Contraindicación Absoluta',
+    itemsEn: [
+      'Active or suspected hormone-sensitive malignancy (breast, endometrial, or prostate cancer)',
+      'Pregnancy, breastfeeding, or active desire for near-term male spermatogenesis (without hCG co-therapy)',
+      'Acute venous thromboembolism (DVT/PE) or untreated severe thrombophilia',
+      'Baseline Hematocrit > 54% or uncontrolled severe polycythemia',
+    ],
+    itemsEs: [
+      'Neoplasia hormono-dependiente activa o sospechada (mama, endometrio o próstata)',
+      'Embarazo, lactancia o deseo activo de espermatogénesis a corto plazo (sin co-terapia hCG)',
+      'Tromboembolismo venoso agudo (TVP/TEP) o trombofilia grave no tratada',
+      'Hematocrito basal > 54% o policitemia severa no controlada',
+    ],
+  },
+  {
+    level: 'amber',
+    badgeEn: 'Precaution · Evaluate First',
+    badgeEs: 'Precaución · Evaluar Antes',
+    itemsEn: [
+      'Intact uterus without concurrent micronized progesterone protection (100–200 mg nightly)',
+      'Untreated Obstructive Sleep Apnea (OSA) in men — screen before high-dose Testosterone',
+      'PSA > 4.0 ng/mL or abnormal DRE — require urological clearance prior to TRT',
+      'Active anticoagulants / antiplatelets — extend hemostasis wait & monitor hematoma',
+    ],
+    itemsEs: [
+      'Útero intacto sin cobertura simultánea con progesterona micronizada (100–200 mg/noche)',
+      'Apnea obstructiva del sueño (SAOS) no tratada en varones — cribar antes de TRT alta',
+      'PSA > 4.0 ng/mL o tacto anómalo — requiere valoración urológica previa a TRT',
+      'Anticoagulación o antiagregación activa — prolongar espera de hemostasia y vigilar hematoma',
+    ],
+  },
+];
+
+const FOLLOWUP_MATRIX = [
+  {
+    id: 'female_labs',
+    titleEn: 'Female BHRT · Week 4–6 Peak Targets',
+    titleEs: 'Mujer BHRT · Objetivos Analíticos Pico (Sem 4–6)',
+    targetsEn: 'Estradiol (E2): 80–150 pg/mL · Total T: 120–200 ng/dL · Free T: upper-normal physiologic',
+    targetsEs: 'Estradiol (E2): 80–150 pg/mL · T Total: 120–200 ng/dL · T Libre: tercio superior fisiológico',
+    adjustEn: 'If vasomotor symptoms persist & E2 < 70 pg/mL → step up E2 by +6.25 to +12.5 mg next cycle. If mild acne/oily skin → reduce T by 25 mg or add Spironolactone/Saw Palmetto.',
+    adjustEs: 'Si persisten sofocos y E2 < 70 pg/mL → subir E2 +6.25 a +12.5 mg en el siguiente ciclo. Si acné leve → reducir T 25 mg en próximo ciclo o valorar Espironolactona/Saw Palmetto.',
+  },
+  {
+    id: 'male_labs',
+    titleEn: 'Male TRT · Week 4–6 Peak Targets',
+    titleEs: 'Hombre TRT · Objetivos Analíticos Pico (Sem 4–6)',
+    targetsEn: 'Total T: 800–1,100 ng/dL · Free T: 20–30 pg/mL · Hematocrit < 52% · PSA stable',
+    targetsEs: 'T Total: 800–1,100 ng/dL · T Libre: 20–30 pg/mL · Hematocrito < 52% · PSA estable',
+    adjustEn: 'If Hct > 52–54% → order therapeutic phlebotomy & reduce next pellet load by 200 mg. Treat E2 only if symptomatic (mastodynia/edema) with DIM 200 mg before micro-dose AI.',
+    adjustEs: 'Si Hto > 52–54% → indicar flebotomía/donación y reducir carga total 200 mg en próximo ciclo. Tratar E2 solo si hay clínica (mastodinia/edema) con DIM 200 mg antes que IA.',
+  },
+];
+
 export default function PelletImplantationGuideClient() {
   const workspace = usePublicWorkspace();
   const [localLang, setLocalLang] = useState('en');
@@ -218,7 +279,11 @@ export default function PelletImplantationGuideClient() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState('female_meno');
   const [selectedHabitusId, setSelectedHabitusId] = useState('normal');
-  const [opsTab, setOpsTab] = useState('checklist'); // 'checklist' | 'complications' | 'patient'
+  const [patientWeightKg, setPatientWeightKg] = useState(68);
+  const [cycleStage, setCycleStage] = useState('initial'); // 'initial' | 'maintenance'
+  const [implantDate, setImplantDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [copiedReminder, setCopiedReminder] = useState(false);
+  const [opsTab, setOpsTab] = useState('checklist'); // 'checklist' | 'followup' | 'contraindications' | 'complications' | 'patient'
   const [checkedItems, setCheckedItems] = useState({});
   const [copiedPatientCare, setCopiedPatientCare] = useState(false);
 
@@ -232,6 +297,75 @@ export default function PelletImplantationGuideClient() {
     () => BODY_HABITUS.find((h) => h.id === selectedHabitusId) || BODY_HABITUS[0],
     [selectedHabitusId]
   );
+
+  const titrationSuggestion = useMemo(() => {
+    const w = Math.max(40, Math.min(150, Number(patientWeightKg) || 68));
+    const isMaint = cycleStage === 'maintenance';
+    if (selectedProfileId === 'male_trt') {
+      const baseMg = w < 75 ? 650 : w <= 95 ? 800 : 950;
+      const targetMg = isMaint ? baseMg + 50 : baseMg - 50;
+      const pellets200 = Math.max(3, Math.round(targetMg / 200));
+      const totalRounded = pellets200 * 200;
+      const tracks = pellets200 <= 4 ? 2 : 3;
+      return {
+        doseLabel: `${totalRounded} mg Testosterone`,
+        comboEn: `${pellets200} × 200 mg pellets (or ${pellets200 * 2} × 100 mg) across ${tracks} radial fan tracks`,
+        comboEs: `${pellets200} × pellets de 200 mg (o ${pellets200 * 2} × 100 mg) en ${tracks} túneles radiales`,
+        kitEn: '4.5 mm CE Sterile Trocar Kit + 2 mL Buffered Lidocaine (9:1) + Steri-Strips & Tegaderm',
+        kitEs: 'Kit Trócar Estéril CE 4.5 mm + 2 mL Lidocaína Amortiguada (9:1) + Steri-Strips & Tegaderm',
+      };
+    }
+    if (selectedProfileId === 'female_androgen') {
+      const tMg = w < 60 && !isMaint ? 50 : 75;
+      return {
+        doseLabel: `${tMg} mg Testosterone`,
+        comboEn: tMg === 50 ? '1 × 50 mg T pellet (single 3.5 cm track)' : '1 × 50 mg + 1 × 25 mg T pellets (single 3.5 cm track)',
+        comboEs: tMg === 50 ? '1 × pellet T 50 mg (1 túnel de 3.5 cm)' : '1 × 50 mg + 1 × 25 mg T (1 túnel de 3.5 cm)',
+        kitEn: '3.2 mm CE Sterile Trocar Kit + 2 mL Buffered Lidocaine (9:1) + Steri-Strips & Tegaderm',
+        kitEs: 'Kit Trócar Estéril CE 3.2 mm + 2 mL Lidocaína Amortiguada (9:1) + Steri-Strips & Tegaderm',
+      };
+    }
+    const e2Mg = selectedProfileId === 'female_peri' ? 12.5 : 25;
+    const tMg = w < 58 && !isMaint ? 37.5 : 50;
+    return {
+      doseLabel: `${e2Mg} mg E2 + ${tMg} mg T`,
+      comboEn: `1 × ${e2Mg} mg Estradiol + ${tMg === 50 ? '1 × 50 mg' : '1 × 37.5 mg'} Testosterone (1 linear track)`,
+      comboEs: `1 × ${e2Mg} mg Estradiol + ${tMg === 50 ? '1 × 50 mg' : '1 × 37.5 mg'} Testosterona (1 túnel lineal)`,
+      kitEn: '3.2 mm CE Sterile Trocar Kit + Oral Micronized Progesterone (if intact uterus) + Tegaderm',
+      kitEs: 'Kit Trócar Estéril CE 3.2 mm + Progesterona Micronizada Oral (si útero intacto) + Tegaderm',
+    };
+  }, [selectedProfileId, patientWeightKg, cycleStage]);
+
+  const followUpSchedule = useMemo(() => {
+    const base = implantDate ? new Date(`${implantDate}T12:00:00`) : new Date();
+    const safeBase = Number.isNaN(base.getTime()) ? new Date() : base;
+    const addDays = (d) => {
+      const copy = new Date(safeBase);
+      copy.setDate(copy.getDate() + d);
+      return copy.toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    };
+    const isMale = selectedProfileId === 'male_trt';
+    return {
+      labStart: addDays(28),
+      labEnd: addDays(42),
+      reimplantStart: addDays(isMale ? 135 : 105),
+      reimplantEnd: addDays(isMale ? 180 : 135),
+    };
+  }, [implantDate, selectedProfileId, isEs]);
+
+  const handleCopyFollowUpReminder = async () => {
+    const msg = isEs
+      ? `📅 *Atlas Health Services — Calendario de Seguimiento de Pellets (BHRT)*\n• *Analítica de control en pico (Sem 4–6)*: entre el *${followUpSchedule.labStart}* y el *${followUpSchedule.labEnd}*.\n• *Ventana estimada de renovación de ciclo*: entre el *${followUpSchedule.reimplantStart}* y el *${followUpSchedule.reimplantEnd}*.`
+      : `📅 *Atlas Health Services — Hormone Pellet Follow-Up Schedule (BHRT)*\n• *Peak Serum Lab Panel (Wk 4–6)*: between *${followUpSchedule.labStart}* and *${followUpSchedule.labEnd}*.\n• *Estimated Next Cycle Window*: between *${followUpSchedule.reimplantStart}* and *${followUpSchedule.reimplantEnd}*.`;
+    try {
+      await navigator.clipboard.writeText(msg);
+      setCopiedReminder(true);
+      toast.success(isEs ? 'Recordatorio de seguimiento copiado ✓' : 'Follow-up schedule copied ✓');
+      setTimeout(() => setCopiedReminder(false), 2500);
+    } catch {
+      toast.error(isEs ? 'No se pudo copiar al portapapeles' : 'Could not copy to clipboard');
+    }
+  };
 
   const completedChecklistCount = Object.values(checkedItems).filter(Boolean).length;
 
@@ -301,10 +435,7 @@ export default function PelletImplantationGuideClient() {
           margin-bottom: 1.5rem;
         }
         @media (max-width: 900px) {
-          .pellet-guide-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        }
-        @media (max-width: 520px) {
-          .pellet-guide-kpi-grid { grid-template-columns: 1fr; }
+          .pellet-guide-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
         }
         .pellet-guide-planner-grid {
           display: grid;
@@ -314,6 +445,33 @@ export default function PelletImplantationGuideClient() {
         @media (max-width: 860px) {
           .pellet-guide-planner-grid { grid-template-columns: 1fr; }
         }
+        .pellet-guide-complications-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+        @media (max-width: 720px) {
+          .pellet-guide-complications-grid { grid-template-columns: 1fr; }
+        }
+        .pellet-guide-monographs-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+        }
+        @media (max-width: 1024px) {
+          .pellet-guide-monographs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 540px) {
+          .pellet-guide-monographs-grid { grid-template-columns: 1fr; }
+        }
+        .pellet-ops-tabs-scroll {
+          display: flex;
+          gap: 4px;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
+        }
+        .pellet-ops-tabs-scroll::-webkit-scrollbar { display: none; }
         .pellet-guide-pill-btn {
           padding: 7px 12px;
           border-radius: 6px;
@@ -324,6 +482,17 @@ export default function PelletImplantationGuideClient() {
           font-weight: 600;
           cursor: pointer;
           transition: all 0.15s ease;
+        }
+        @media (max-width: 768px) {
+          .pellet-guide-pill-btn {
+            min-height: 44px;
+            padding: 8px 12px;
+          }
+          .pellet-ops-tabs-scroll {
+            -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+            mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+            padding-right: 22px;
+          }
         }
         .pellet-guide-pill-btn:hover {
           background: #f1f5f9;
@@ -352,6 +521,7 @@ export default function PelletImplantationGuideClient() {
       {/* ── SINGLE 100% PUBLIC GOOGLE CLOUD CONSOLE HEADER (ZERO ADMIN CHROME) ── */}
       <PublicUnifiedHeader
         purePublic={true}
+        hideAiButton={false}
         lang={lang}
         onLangChange={handleLangChange}
         copyUrl={shareUrl}
@@ -740,6 +910,122 @@ export default function PelletImplantationGuideClient() {
                 <ArrowRight size={13} />
               </Link>
             </div>
+
+            {/* Value-Add Physician Tools: Titration Load Estimator + Re-Implant Calendar */}
+            <div className="pellet-guide-complications-grid" style={{ paddingTop: '4px' }}>
+              {/* Tool A: Weight & Cycle Titration Estimator + Ready-for-Consult Kit */}
+              <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                  <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#003666', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Calculator size={15} color="#1a73e8" />
+                    <span>{isEs ? 'Calculadora Orientativa de Carga & Kit de Consulta' : 'Pellet Load Estimator & Ready-to-Use Consult Kit'}</span>
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 700, color: '#475569' }}>
+                    <span>{isEs ? 'Peso (kg):' : 'Weight (kg):'}</span>
+                    <input
+                      type="number"
+                      min={40}
+                      max={150}
+                      value={patientWeightKg}
+                      onChange={(e) => setPatientWeightKg(e.target.value)}
+                      style={{ width: '68px', minHeight: '36px', padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.80rem', fontWeight: 700, color: '#0f172a' }}
+                    />
+                  </label>
+
+                  <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '2px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                    {[
+                      { id: 'initial', en: '1st Implant (Conservative)', es: '1.º Implante (Conservador)' },
+                      { id: 'maintenance', en: 'Re-Implant / Titrated', es: 'Re-implante / Ajuste' },
+                    ].map((st) => (
+                      <button
+                        key={st.id}
+                        type="button"
+                        onClick={() => setCycleStage(st.id)}
+                        style={{
+                          padding: '5px 9px',
+                          minHeight: '32px',
+                          borderRadius: '5px',
+                          border: 'none',
+                          fontSize: '0.72rem',
+                          fontWeight: cycleStage === st.id ? 700 : 600,
+                          background: cycleStage === st.id ? '#ffffff' : 'transparent',
+                          color: cycleStage === st.id ? '#003666' : '#475569',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {isEs ? st.es : st.en}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px', fontSize: '0.77rem', color: '#1e293b', lineHeight: 1.45 }}>
+                  <div style={{ fontWeight: 800, color: '#1a73e8', marginBottom: '2px' }}>
+                    {titrationSuggestion.doseLabel}
+                  </div>
+                  <div>{isEs ? titrationSuggestion.comboEs : titrationSuggestion.comboEn}</div>
+                  <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed #cbd5e1', color: '#475569', fontSize: '0.74rem' }}>
+                    <strong>{isEs ? 'Material necesario:' : 'Consult Tray:'}</strong> {isEs ? titrationSuggestion.kitEs : titrationSuggestion.kitEn}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tool B: Peak Lab & Next Cycle Date Calculator + 1-Click WhatsApp */}
+              <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#003666', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Calendar size={15} color="#16a34a" />
+                    <span>{isEs ? 'Calendario de Analítica Pico & Re-implante' : 'Peak Bloodwork & Re-Implant Date Planner'}</span>
+                  </span>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.73rem', fontWeight: 700, color: '#475569' }}>
+                    <span>{isEs ? 'Fecha implante:' : 'Implant date:'}</span>
+                    <input
+                      type="date"
+                      value={implantDate}
+                      onChange={(e) => setImplantDate(e.target.value)}
+                      style={{ minHeight: '34px', padding: '3px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.76rem', color: '#0f172a' }}
+                    />
+                  </label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '9px 10px' }}>
+                    <div style={{ fontSize: '0.67rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>
+                      {isEs ? 'Analítica Pico (Sem 4–6)' : 'Peak Labs (Wk 4–6)'}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                      {followUpSchedule.labStart} – {followUpSchedule.labEnd}
+                    </div>
+                  </div>
+                  <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '9px 10px' }}>
+                    <div style={{ fontSize: '0.67rem', fontWeight: 800, color: '#15803d', textTransform: 'uppercase' }}>
+                      {isEs ? 'Próximo Re-implante' : 'Next Cycle Window'}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                      {followUpSchedule.reimplantStart} – {followUpSchedule.reimplantEnd}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginTop: 'auto' }}>
+                  <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                    {isEs ? 'Fideliza al paciente agendando su control antes de salir.' : 'Boost clinic retention by scheduling follow-up at discharge.'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyFollowUpReminder}
+                    className="gcp-btn-secondary"
+                    style={{ padding: '6px 11px', minHeight: '36px', fontSize: '0.74rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}
+                  >
+                    {copiedReminder ? <Check size={13} /> : <Copy size={13} />}
+                    <span>{copiedReminder ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Fechas WhatsApp' : 'Copy WhatsApp Dates')}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -895,9 +1181,11 @@ export default function PelletImplantationGuideClient() {
             background: '#f8fafc',
             borderBottom: '1px solid #e2e8f0',
           }}>
-            <div style={{ display: 'flex', gap: '4px', overflowX: 'auto' }} role="tablist">
+            <div className="pellet-ops-tabs-scroll" role="tablist">
               {[
-                { id: 'checklist', icon: ClipboardCheck, en: `Pre-Op Sterile Checklist (${completedChecklistCount}/${PREOP_CHECKLIST.length})`, es: `Checklist Pre-Quirúrgico (${completedChecklistCount}/${PREOP_CHECKLIST.length})` },
+                { id: 'checklist', icon: ClipboardCheck, en: `Pre-Op Checklist (${completedChecklistCount}/${PREOP_CHECKLIST.length})`, es: `Checklist Pre-Op (${completedChecklistCount}/${PREOP_CHECKLIST.length})` },
+                { id: 'followup', icon: FlaskConical, en: 'Wk 4–6 Labs & Titration', es: 'Analítica 4–6s & Ajuste' },
+                { id: 'contraindications', icon: ShieldCheck, en: 'Contraindications Screening', es: 'Cribado Contraindicaciones' },
                 { id: 'complications', icon: AlertTriangle, en: 'Complications & Red Flags', es: 'Complicaciones & Manejo' },
                 { id: 'patient', icon: FileText, en: 'Patient Post-Op Handout', es: 'Hoja Post-Implante Paciente' },
               ].map((t) => {
@@ -915,6 +1203,7 @@ export default function PelletImplantationGuideClient() {
                       alignItems: 'center',
                       gap: '6px',
                       padding: '12px 14px',
+                      minHeight: '44px',
                       background: 'transparent',
                       border: 'none',
                       borderBottom: active ? '2.5px solid #1a73e8' : '2.5px solid transparent',
@@ -1020,9 +1309,72 @@ export default function PelletImplantationGuideClient() {
               </div>
             )}
 
-            {/* TAB 2: COMPLICATIONS & RED FLAGS */}
+            {/* TAB: WEEK 4-6 LAB FOLLOW-UP & 2ND CYCLE TITRATION */}
+            {opsTab === 'followup' && (
+              <div className="pellet-guide-complications-grid">
+                {FOLLOWUP_MATRIX.map((row) => (
+                  <div
+                    key={row.id}
+                    style={{
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      padding: '14px',
+                      background: '#ffffff',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#003666' }}>
+                      {isEs ? row.titleEs : row.titleEn}
+                    </div>
+                    <div style={{ fontSize: '0.76rem', color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '7px 10px', borderRadius: '6px', fontWeight: 700 }}>
+                      {isEs ? row.targetsEs : row.targetsEn}
+                    </div>
+                    <div style={{ fontSize: '0.77rem', color: '#1e293b', background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', lineHeight: 1.45 }}>
+                      <strong>{isEs ? 'Regla de titulación (2.º ciclo):' : '2nd-Cycle Titration Rule:'}</strong>{' '}
+                      {isEs ? row.adjustEs : row.adjustEn}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* TAB: CONTRAINDICATIONS TRAFFIC LIGHT */}
+            {opsTab === 'contraindications' && (
+              <div className="pellet-guide-complications-grid">
+                {CONTRAINDICATIONS_DATA.map((block) => {
+                  const isRed = block.level === 'red';
+                  return (
+                    <div
+                      key={block.level}
+                      style={{
+                        border: isRed ? '1px solid #fecaca' : '1px solid #fde68a',
+                        borderRadius: '8px',
+                        padding: '14px',
+                        background: isRed ? '#fef2f2' : '#fffbeb',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                      }}
+                    >
+                      <div style={{ fontSize: '0.82rem', fontWeight: 800, color: isRed ? '#b91c1c' : '#92400e', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                        {isEs ? block.badgeEs : block.badgeEn}
+                      </div>
+                      <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.77rem', color: '#1e293b', lineHeight: 1.45 }}>
+                        {(isEs ? block.itemsEs : block.itemsEn).map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* TAB: COMPLICATIONS & RED FLAGS (Symmetric 2x2 GCP Grid on Desktop) */}
             {opsTab === 'complications' && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+              <div className="pellet-guide-complications-grid">
                 {COMPLICATIONS_DATA.map((c) => {
                   const pillColors = c.severity === 'low'
                     ? { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' }
@@ -1121,7 +1473,7 @@ export default function PelletImplantationGuideClient() {
           </div>
         </section>
 
-        {/* ── BLOCK 6: PHARMAPOLIS EU GMP PELLETS CATALOG SHORTCUTS ── */}
+        {/* ── BLOCK 6: EU GMP PELLETS CATALOG SHORTCUTS ── */}
         <section id="catalog-pellets" className="pellet-guide-section">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
             <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#003666', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1137,7 +1489,7 @@ export default function PelletImplantationGuideClient() {
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+          <div className="pellet-guide-monographs-grid">
             {[
               { href: '/p/estradiol-12-5mg-pellet', tag: 'Estradiol (E2)', color: '#0284c7', title: '17β-Estradiol 12.5 mg', subEs: 'Perimenopausia / Iniciación · Trócar 3.2 mm', subEn: 'Perimenopause / Initiation · 3.2 mm Trocar' },
               { href: '/p/estradiol-25mg-pellet', tag: 'Estradiol (E2)', color: '#db2777', title: '17β-Estradiol 25 mg', subEs: 'Estándar Menopausia · Trócar 3.2 mm', subEn: 'Menopause Standard · 3.2 mm Trocar' },

@@ -69,6 +69,13 @@ export default function CatalogPricingBridgeBar({
         {/* Left: Category Tracks (scrollbar hidden across Safari/Chrome/Firefox) */}
         <style>{`
           .atlas-bridge-tracks-scroll::-webkit-scrollbar { display: none; }
+          @media (max-width: 767px) {
+            .atlas-bridge-tracks-scroll {
+              -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+              mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+              padding-right: 24px;
+            }
+          }
         `}</style>
         <div
           className="atlas-bridge-tracks-scroll"

@@ -582,14 +582,14 @@ export default function PeptidesPriceListClient({
             .gcp-kpis-summary-block { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
             .mobile-nav-drawer-trigger { display: inline-flex !important; }
             .mobile-only-category-selector { display: block !important; }
-            .peptides-mobile-category-strip { display: flex !important; align-items: center; gap: 6px; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+            .peptides-mobile-category-strip { display: flex !important; align-items: center; gap: 6px; overflow-x: auto; padding: 2px 22px 6px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%); mask-image: linear-gradient(to right, #000 88%, transparent 100%); }
             .peptides-mobile-category-strip::-webkit-scrollbar { display: none; }
-            .peptides-mob-cat-pill { display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; min-height: 34px; border-radius: 999px; border: 1px solid #dadce0; background: #ffffff; color: #3c4043; font-size: 0.74rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; cursor: pointer; }
+            .peptides-mob-cat-pill { display: inline-flex; align-items: center; gap: 5px; padding: 8px 12px; min-height: 40px; border-radius: 999px; border: 1px solid #dadce0; background: #ffffff; color: #3c4043; font-size: 0.75rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; cursor: pointer; }
             .peptides-mob-cat-pill.active { background: #e8f0fe; border-color: #1a73e8; color: #1a73e8; }
             .peptides-mob-cat-count { font-size: 0.65rem; background: #f1f5f9; color: #475569; padding: 1px 6px; border-radius: 999px; font-variant-numeric: tabular-nums; }
             .peptides-mob-cat-pill.active .peptides-mob-cat-count { background: #1a73e8; color: #ffffff; }
             .peptides-mobile-quick-filters-rail { display: grid !important; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
-            .peptides-mob-rail-chip { display: inline-flex; align-items: center; justify-content: space-between; gap: 5px; padding: 7px 10px; min-height: 38px; border-radius: 8px; border: 1px solid #dadce0; background: #ffffff; color: #3c4043; font-size: 0.74rem; font-weight: 700; cursor: pointer; min-width: 0; }
+            .peptides-mob-rail-chip { display: inline-flex; align-items: center; justify-content: space-between; gap: 5px; padding: 8px 11px; min-height: 44px; border-radius: 8px; border: 1px solid #dadce0; background: #ffffff; color: #3c4043; font-size: 0.75rem; font-weight: 700; cursor: pointer; min-width: 0; }
             .peptides-mob-rail-chip.active { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; }
             .peptides-kpis-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
             .gcp-table-block { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }

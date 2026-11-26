@@ -301,7 +301,8 @@ export default function GlobalBottomStickyBar() {
   const isCatalogOrPricingRoute =
     pathname.startsWith('/pricing') ||
     pathname.startsWith('/collection') ||
-    pathname.startsWith('/vials');
+    pathname.startsWith('/vials') ||
+    pathname.startsWith('/guides');
 
   if (
     pathname?.startsWith('/labels') ||
