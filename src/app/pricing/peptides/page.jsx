@@ -26,7 +26,7 @@ export async function generateMetadata({ searchParams }) {
     siteName: 'Atlas Health Services',
     images: [
       {
-        url: `${appUrl}/og-catalog.png`,
+        url: `${appUrl}/og-peptides.png`,
         width: 1200,
         height: 630,
         alt: `Clinical Peptides Price Schedule (${currency})`,

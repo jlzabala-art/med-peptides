@@ -108,7 +108,7 @@ export async function generateMetadata({ searchParams }) {
     siteName: 'Atlas Health Services',
     images: [
       {
-        url: `${appUrl}/images/products/bloodo/nad.jpg`,
+        url: `${appUrl}/og-bloodo.png`,
         width: 1200,
         height: 630,
         alt: 'Bloodo™ Capillary Diagnostics B2B Price Schedule',

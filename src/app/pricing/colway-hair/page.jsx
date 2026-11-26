@@ -10,7 +10,7 @@ export async function generateMetadata({ searchParams }) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
   const resolvedSearch = await searchParams;
   const lang = normalizeMetaLang(resolvedSearch);
-  const ogImageUrl = `${appUrl}/images/products/colway/colway-dermatology-clinic-hero-v2.jpg`;
+  const ogImageUrl = `${appUrl}/og-colway.png`;
 
   return buildBilingualMetadata({
     lang,

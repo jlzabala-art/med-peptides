@@ -27,7 +27,7 @@ export async function generateMetadata({ searchParams }) {
     siteName: 'Atlas Health Services',
     images: [
       {
-        url: `${appUrl}/og-catalog.png`,
+        url: `${appUrl}/og-pellets.png`,
         width: 1200,
         height: 630,
         alt: lang === 'es'
