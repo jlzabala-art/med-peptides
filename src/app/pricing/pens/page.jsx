@@ -19,9 +19,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'pens',
+    currency: validCurrency,
     path: '/pricing/pens',
     siteName: 'Atlas Health Services',
-    images: [{ url: `${appUrl}/og-pens.png`, width: 1200, height: 630, alt: `Pre-filled Peptide Pens (${validCurrency})` }],
     en: {
       title: `Pre-filled Multi-Dose Peptide Pens Portfolio • Clinical Dosing & Protocols (${validCurrency})`,
       description: `Official Atlas Health Services B2B portfolio for pre-filled 3 mL multi-dose peptide pens in ${validCurrency}. Complete click-dial dosing protocols, HPLC ≥99.2% purity, cold-chain standards, and direct clinic ordering.`,

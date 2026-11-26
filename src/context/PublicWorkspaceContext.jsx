@@ -326,6 +326,7 @@ export function PublicWorkspaceProvider({ children }) {
   return (
     <PublicWorkspaceContext.Provider
       value={{
+        hydrated,
         currency: state.currency,
         lang: state.lang,
         isSpanish,

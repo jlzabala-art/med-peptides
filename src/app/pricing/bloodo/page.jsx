@@ -104,16 +104,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'bloodo',
+    currency,
     path: '/pricing/bloodo',
     siteName: 'Atlas Health Services',
-    images: [
-      {
-        url: `${appUrl}/og-bloodo.png`,
-        width: 1200,
-        height: 630,
-        alt: 'Bloodo™ Capillary Diagnostics B2B Price Schedule',
-      },
-    ],
     en: {
       title: `Bloodo™ Capillary Blood Diagnostics • Official B2B Price Schedule (${currency})`,
       description:

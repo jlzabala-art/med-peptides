@@ -18,9 +18,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'bhrt',
+    currency: 'EUR',
     path: '/pricing/bhrt',
     siteName: 'Atlas Health Services',
-    images: [{ url: `${appUrl}/og-hormones.png`, width: 1200, height: 630, alt: 'EU GMP Bioidentical HRT Schedule' }],
     en: {
       title: 'EU GMP Bioidentical HRT (BHRT, Capsules, Creams & Pellets) • Official Schedule',
       description:

@@ -17,9 +17,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'fillers',
+    currency: validCurrency,
     path: '/pricing/fillers',
     siteName: 'Atlas Health Services',
-    images: [{ url: `${appUrl}/og-fillers.png`, width: 1200, height: 630, alt: `Dermal Fillers & Skin Boosters (${validCurrency})` }],
     en: {
       title: `Dermal Fillers & Skin Boosters • Wholeseller B2B Catalog (${validCurrency})`,
       description: `Direct Wholeseller pricing for 40 CE-marked originals across 8 leading brands (Juvéderm, Restylane, Belotero, Profhilo, Sculptra, Radiesse, PhilArt, Aqualyx). Local stock in Dubai · Fast dispatch & live PDF.`

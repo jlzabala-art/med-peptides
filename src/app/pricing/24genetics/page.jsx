@@ -16,9 +16,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'genomics',
+    currency: 'EUR',
     path: '/pricing/24genetics',
     siteName: 'Atlas Health Services',
-    images: [{ url: `${appUrl}/og-genomics.png`, width: 1200, height: 630, alt: '24Genetics DNA Panels Price Schedule' }],
     en: {
       title: '24Genetics Clinical DNA Panels • Official B2B & Clinic Price Schedule',
       description: 'Official wholesale and clinical price schedule for 24Genetics CE-IVD saliva genomic panels: All-in-One, Pharmacogenetics, Nutrigenetics, Health, Skin, Sport, Microbiome, and AI Connect.',

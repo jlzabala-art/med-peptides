@@ -14,9 +14,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'colway-hair',
+    currency: 'AED',
     path: '/pricing/colway-hair',
     siteName: 'Atlas Health Services',
-    images: [{ url: ogImageUrl, width: 1200, height: 630, alt: 'Colway Clinical Hair & Trichology Line' }],
     en: {
       title: 'Colway Clinical Hair & Trichology Line • Official UAE Wholesale Price Schedule',
       description: 'Official UAE B2B price schedule for Colway Trichology strengthening shampoo and conditioner. Baicapil™ 2%, native biologically active fish tropocollagen, and micronized diosmin for follicular anchoring.',

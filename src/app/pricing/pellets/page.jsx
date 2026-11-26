@@ -23,18 +23,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'pellets',
+    currency: validCurrency,
     path: profile ? `/pricing/pellets?profile=${encodeURIComponent(profile)}` : '/pricing/pellets',
     siteName: 'Atlas Health Services',
-    images: [
-      {
-        url: `${appUrl}/og-pellets.png`,
-        width: 1200,
-        height: 630,
-        alt: lang === 'es'
-          ? `Pellets Hormonales Subcutáneos EU GMP (${validCurrency})`
-          : `EU GMP Subcutaneous Hormone Pellets (${validCurrency})`,
-      },
-    ],
     en: isFemaleProfile ? {
       title: `Female Bioidentical Hormone Pellets • Gynecology & Menopause Formulary (${validCurrency})`,
       description: `Pre-filtered EU GMP sterile hormone pellets for gynecology & female BHRT (17β-Estradiol, Bi-Est, Progesterone, female-dosed Testosterone) and 3.2 mm trocar kits in ${validCurrency}.`,

@@ -17,9 +17,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'hormones',
+    currency: 'EUR',
     path: '/pricing/hormones',
     siteName: 'Atlas Health Services',
-    images: [{ url: `${appUrl}/og-hormones.png`, width: 1200, height: 630, alt: 'Compounded Hormones & BHRT Schedule' }],
     en: {
       title: 'Compounded Hormones (TRT, BHRT & Subcutaneous Pellets) • Official B2B Schedule',
       description:

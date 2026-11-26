@@ -12,9 +12,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'colway-hair',
+    currency: 'USD',
     path: '/pricing/colway-qatar',
     siteName: 'Atlas Health Services',
-    images: [{ url: `${appUrl}/og-colway.png`, width: 1200, height: 630, alt: 'Colway Trichology Hair Care Qatar' }],
     en: {
       title: 'Colway Trichology Hair Care • Official Qatar Distributor Price Schedule',
       description: 'Exclusive B2B commercial schedule and landed cost breakdown for Colway Hair Strengthening Shampoo & Conditioner in Qatar.',

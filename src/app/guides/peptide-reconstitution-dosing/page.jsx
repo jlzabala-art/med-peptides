@@ -11,6 +11,7 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'recon-guide',
     path: '/guides/peptide-reconstitution-dosing',
     siteName: 'Atlas Health Services',
     en: {

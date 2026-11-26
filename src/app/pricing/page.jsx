@@ -14,6 +14,7 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'pricing',
     path: '/pricing',
     siteName: 'Atlas Health Services',
     en: {

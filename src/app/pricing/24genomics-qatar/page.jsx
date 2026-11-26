@@ -12,9 +12,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'genomics',
+    currency: 'USD',
     path: '/pricing/24genomics-qatar',
     siteName: 'Atlas Health Services',
-    images: [{ url: `${appUrl}/og-genomics.png`, width: 1200, height: 630, alt: '24Genomics Nutrition Clinical DNA Schedule' }],
     en: {
       title: '24Genomics Nutrition • Clinical DNA, Precision Nutrigenomics & Compounding Schedule',
       description: 'Official B2B schedule for 24Genomics Nutrition saliva DNA testing kits, clinical nutrition reports, personalized 3-capsule compounding protocols and ongoing clinical consultations.',

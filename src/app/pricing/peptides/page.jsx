@@ -22,16 +22,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'peptides',
+    currency,
     path: '/pricing/peptides',
     siteName: 'Atlas Health Services',
-    images: [
-      {
-        url: `${appUrl}/og-peptides.png`,
-        width: 1200,
-        height: 630,
-        alt: `Clinical Peptides Price Schedule (${currency})`,
-      },
-    ],
     en: {
       title: `Clinical Lyophilized Peptides • Official B2B Price Schedule (${currency})`,
       description: `Official institutional and wholesale price schedule in ${currency} for sterile lyophilized bioactive peptide vials (10R). ≥99.0% HPLC purity, cGMP certified, with Pack ×10 volume savings.`,

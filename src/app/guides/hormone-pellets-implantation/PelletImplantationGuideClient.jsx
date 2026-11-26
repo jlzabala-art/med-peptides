@@ -265,10 +265,10 @@ const FOLLOWUP_MATRIX = [
   },
 ];
 
-export default function PelletImplantationGuideClient() {
+export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
   const workspace = usePublicWorkspace();
-  const [localLang, setLocalLang] = useState('en');
-  const lang = workspace?.lang || localLang;
+  const [localLang, setLocalLang] = useState(initialLang === 'es' ? 'es' : 'en');
+  const lang = workspace?.hydrated ? (workspace?.lang || localLang) : localLang;
   const isEs = lang === 'es';
 
   const handleLangChange = (nextLang) => {

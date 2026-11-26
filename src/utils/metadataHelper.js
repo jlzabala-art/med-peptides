@@ -18,6 +18,8 @@ export function buildBilingualMetadata({
   es,
   url,
   path,
+  topic,
+  currency,
   siteName = 'Atlas Health Services',
   images,
   type = 'website',
@@ -33,9 +35,13 @@ export function buildBilingualMetadata({
   const title = copy?.title || 'Atlas Health Services';
   const description = copy?.description || 'Institutional clinical intelligence and pharmaceutical reference.';
 
+  const dynamicOgUrl = topic
+    ? `${DEFAULT_BASE_URL}/api/og?topic=${encodeURIComponent(topic)}&lang=${isEs ? 'es' : 'en'}${currency ? `&cur=${encodeURIComponent(currency)}` : ''}`
+    : `${DEFAULT_BASE_URL}/api/og?topic=pricing&lang=${isEs ? 'es' : 'en'}`;
+
   const defaultImages = [
     {
-      url: `${DEFAULT_BASE_URL}/og-catalog.png`,
+      url: dynamicOgUrl,
       width: 1200,
       height: 630,
       alt: title,

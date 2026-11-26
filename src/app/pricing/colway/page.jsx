@@ -14,9 +14,10 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'colway',
+    currency: 'AED',
     path: '/pricing/colway',
     siteName: 'Atlas Health Services',
-    images: [{ url: ogImageUrl, width: 1200, height: 630, alt: 'Colway Medical & Cellular Derma' }],
     en: {
       title: 'Colway Medical & Cellular Derma • Official UAE Wholesale Price Schedule',
       description: 'Official UAE B2B price list and landed cost breakdown for Colway native biologically active collagen, trichology hair strengthening systems, and cellular cosmeceuticals.',

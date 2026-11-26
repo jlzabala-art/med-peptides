@@ -42,9 +42,12 @@ export default function MobileConnectedStepper({
           display: flex;
           flex-direction: column;
           gap: 10px;
-          padding: 12px 14px;
+          padding: 14px 16px;
           background: #f8fafc;
           border-bottom: 1px solid #e2e8f0;
+          box-sizing: border-box;
+          width: 100%;
+          max-width: 100%;
         }
         .gcp-mobile-stepper--mobile-only {
           display: none;
@@ -59,23 +62,38 @@ export default function MobileConnectedStepper({
           align-items: center;
           justify-content: space-between;
           width: 100%;
+          padding: 2px 4px;
+          box-sizing: border-box;
         }
         .gcp-mobile-node {
-          width: 32px;
-          height: 32px;
-          min-width: 32px;
-          border-radius: 50%;
+          position: relative;
+          width: 30px !important;
+          height: 30px !important;
+          min-width: 30px !important;
+          min-height: 30px !important;
+          max-width: 30px !important;
+          max-height: 30px !important;
+          aspect-ratio: 1 / 1;
+          border-radius: 9999px;
           border: 1.5px solid #cbd5e1;
           background: #ffffff;
           color: #475569;
           font-size: 0.78rem;
           font-weight: 800;
+          line-height: 1;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          padding: 0;
+          padding: 0 !important;
+          margin: 0;
+          box-sizing: border-box;
           transition: all 0.15s ease;
           flex-shrink: 0;
+        }
+        .gcp-mobile-node::after {
+          content: '';
+          position: absolute;
+          inset: -7px;
         }
         .gcp-mobile-node.is-clickable {
           cursor: pointer;
@@ -94,8 +112,10 @@ export default function MobileConnectedStepper({
         .gcp-mobile-connector {
           flex: 1;
           height: 2px;
+          min-width: 8px;
           background: #cbd5e1;
           margin: 0 4px;
+          border-radius: 1px;
           transition: background-color 0.2s ease;
         }
         .gcp-mobile-connector.is-completed {
@@ -105,11 +125,12 @@ export default function MobileConnectedStepper({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 8px;
+          gap: 10px;
           background: #ffffff;
           border: 1px solid #dadce0;
+          border-left: 3px solid #1a73e8;
           border-radius: 8px;
-          padding: 8px 12px;
+          padding: 9px 12px;
         }
         .gcp-mobile-active-kicker {
           font-size: 0.70rem;
@@ -120,10 +141,11 @@ export default function MobileConnectedStepper({
           white-space: nowrap;
         }
         .gcp-mobile-active-name {
-          font-size: 0.82rem;
+          font-size: 0.84rem;
           font-weight: 700;
           color: #003666;
           text-align: right;
+          line-height: 1.25;
         }
       `}</style>
 

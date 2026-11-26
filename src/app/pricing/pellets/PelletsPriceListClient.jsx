@@ -340,8 +340,8 @@ export default function PelletsPriceListClient({
   const workspace = usePublicWorkspace();
   const { is } = useRoleAccess();
   const isAdmin = is('admin');
-  const currency = workspace?.currency || initialCurrency || 'USD';
-  const lang = workspace?.lang || initialLang || 'en';
+  const currency = workspace?.hydrated ? (workspace?.currency || initialCurrency || 'USD') : (initialCurrency || 'USD');
+  const lang = workspace?.hydrated ? (workspace?.lang || initialLang || 'en') : (initialLang || 'en');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');

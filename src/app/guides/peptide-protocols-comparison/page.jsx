@@ -11,6 +11,7 @@ export async function generateMetadata({ searchParams }) {
 
   return buildBilingualMetadata({
     lang,
+    topic: 'compare-guide',
     path: '/guides/peptide-protocols-comparison',
     siteName: 'Atlas Health Services',
     en: {
