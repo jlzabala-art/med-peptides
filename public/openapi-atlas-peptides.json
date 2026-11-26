@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Atlas Health Services — Clinical Peptides & Formularies API",
-    "description": "Public read-only clinical peptide directory for ChatGPT GPT Actions and AI assistants. Returns sanitized cGMP peptide vial specifications, categories, B2B reference pricing, and official monograph URLs.",
-    "version": "1.0.0"
+    "title": "Atlas Health Services — Clinical Peptides, Protocols & Dosing Calculator API",
+    "description": "Public read-only clinical peptide directory, protocol explorer, and deterministic U-100 / click-dial dosing calculator for ChatGPT GPT Actions and AI assistants.",
+    "version": "1.1.0"
   },
   "servers": [
     {
@@ -40,34 +40,68 @@
         ],
         "responses": {
           "200": {
-            "description": "Matching clinical peptide specifications and monograph links",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "provider": { "type": "string" },
-                    "website": { "type": "string" },
-                    "count": { "type": "integer" },
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "name": { "type": "string" },
-                          "sku": { "type": "string" },
-                          "category": { "type": "string" },
-                          "dosage": { "type": "string" },
-                          "presentation": { "type": "string" },
-                          "wholesalePriceEur": { "type": "number" },
-                          "url": { "type": "string" }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Matching clinical peptide specifications and monograph links"
+          }
+        }
+      }
+    },
+    "/api/public/protocols-directory": {
+      "get": {
+        "operationId": "searchClinicalProtocols",
+        "summary": "Search published clinical peptide and longevity protocols",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Protocol name, goal, or pathway keyword",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of protocols to return (1-50)",
+            "schema": { "type": "integer", "default": 20 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Published clinical protocol summaries and URLs"
+          }
+        }
+      }
+    },
+    "/api/public/peptide-calculator": {
+      "get": {
+        "operationId": "calculatePeptideDosing",
+        "summary": "Calculate exact U-100 insulin syringe units, draw volume (mL), and 3 mL click-dial clicks",
+        "parameters": [
+          {
+            "name": "vialMg",
+            "in": "query",
+            "required": true,
+            "description": "Total peptide mass in the vial or pen cartridge (mg), e.g., 10",
+            "schema": { "type": "number", "default": 10 }
+          },
+          {
+            "name": "diluentMl",
+            "in": "query",
+            "required": true,
+            "description": "Bacteriostatic water or cartridge volume (mL), e.g., 2",
+            "schema": { "type": "number", "default": 2 }
+          },
+          {
+            "name": "targetDoseMcg",
+            "in": "query",
+            "required": true,
+            "description": "Desired single dose in micrograms (mcg), e.g., 250",
+            "schema": { "type": "number", "default": 250 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exact concentration, draw volume (mL), U-100 units, and doses per container"
           }
         }
       }

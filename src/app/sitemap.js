@@ -21,6 +21,8 @@ const STATIC_PUBLIC_ROUTES = [
   { path: '/protocol-finder', changeFrequency: 'weekly', priority: 0.85 },
   { path: '/guides/hormone-pellets-implantation', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/guides/peptide-reconstitution-dosing', changeFrequency: 'monthly', priority: 0.85 },
+  { path: '/guides/peptide-protocols-comparison', changeFrequency: 'monthly', priority: 0.85 },
+  { path: '/tools/peptide-calculator', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/import-partner', changeFrequency: 'monthly', priority: 0.8 },
 ];
 

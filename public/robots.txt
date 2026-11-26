@@ -6,7 +6,10 @@ Allow: /proto
 Allow: /p/
 Allow: /raw/
 Allow: /guides/
+Allow: /tools/
 Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /.well-known/ai-plugin.json
 
 # Explicit AI Search & Answer Engine Crawlers (ChatGPT Search, Perplexity, Claude, Google AI)
 User-agent: OAI-SearchBot

@@ -15,10 +15,13 @@ const CORE_URLS = [
   `https://${HOST}/pricing/24genetics`,
   `https://${HOST}/pricing/fillers`,
   `https://${HOST}/guides/peptide-reconstitution-dosing`,
+  `https://${HOST}/guides/peptide-protocols-comparison`,
   `https://${HOST}/guides/hormone-pellets-implantation`,
+  `https://${HOST}/tools/peptide-calculator`,
   `https://${HOST}/proto`,
   `https://${HOST}/import-partner`,
   `https://${HOST}/llms.txt`,
+  `https://${HOST}/llms-full.txt`,
 ];
 
 export async function POST() {
