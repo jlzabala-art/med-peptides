@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, Check, Filter, RefreshCw } from '@/lib/icons';
 
 /**
@@ -16,9 +17,9 @@ export default function MobileFiltersSheet({
   activeFilters = [],
   onResetAll
 }) {
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -28,7 +29,7 @@ export default function MobileFiltersSheet({
           inset: 0,
           backgroundColor: 'rgba(15, 23, 42, 0.6)',
           backdropFilter: 'blur(4px)',
-          zIndex: 10001,
+          zIndex: 100040,
           animation: 'fadeIn 0.15s ease-out'
         }}
       />
@@ -44,7 +45,8 @@ export default function MobileFiltersSheet({
           backgroundColor: '#ffffff',
           borderTopLeftRadius: '24px',
           borderTopRightRadius: '24px',
-          zIndex: 10002,
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          zIndex: 100050,
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 -10px 30px rgba(0,0,0,0.2)',
@@ -241,6 +243,7 @@ export default function MobileFiltersSheet({
           to { transform: translateY(0); }
         }
       `}</style>
-    </>
+    </>,
+    document.body
   );
 }

@@ -784,7 +784,7 @@ export default function PeptidesPriceListClient({
                   sortable={true}
                   stickyTopOffset={64}
                   lang={lang}
-                  mobileView="scroll"
+                  mobileView="cards"
                   groupByKey={groupByCategory ? 'categoryKey' : null}
                   renderGroupHeader={(catKey, firstRow, count) => {
                     const meta = CATEGORY_MAP[catKey] || firstRow?.categoryMeta || CATEGORY_MAP.general_health;

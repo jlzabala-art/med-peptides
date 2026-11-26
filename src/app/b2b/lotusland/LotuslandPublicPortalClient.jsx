@@ -1503,7 +1503,7 @@ export default function LotuslandPublicPortalClient() {
 
         {/* Tab 3: Corporate & Banking Registry */}
         {activeTab === 'corporate' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
             {/* Supplier Details */}
             <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
