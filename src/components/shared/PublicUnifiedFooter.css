@@ -240,8 +240,8 @@
 /* ── Mobile Responsive Overhaul (Google Cloud Mobile UX) ── */
 @media (max-width: 767px) {
   .public-unified-footer {
-    /* Extra clearance so fixed PublicStickyActionBar never occludes content */
-    padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)) !important;
+    /* Single source of truth: reserve clearance once for fixed bottom bars (sticky bar + mobile nav) */
+    padding-bottom: calc(var(--atlas-sticky-bar-height, 76px) + 56px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .public-footer-container {

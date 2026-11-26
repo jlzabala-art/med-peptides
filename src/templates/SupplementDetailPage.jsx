@@ -1266,7 +1266,7 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
             justify-content: space-between;
           }
           .sdp-desktop-only-btn { display: none !important; }
-          .sdp-main-wrapper { padding-bottom: 120px !important; }
+          .sdp-main-wrapper { padding-bottom: 24px !important; }
         }
       ` }} />
     </div>

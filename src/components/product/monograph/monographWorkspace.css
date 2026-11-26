@@ -1006,7 +1006,7 @@
 /* ── 6. Responsive Breakpoints: Mobile Phones (< 768px) ── */
 @media (max-width: 767px) {
   .pds-monograph-workspace-root {
-    padding-bottom: 7rem;
+    padding-bottom: 1.5rem;
   }
 
   .pds-monograph-top-strip {

@@ -35,7 +35,7 @@ export default function PeptideDetailStyles() {
         display: flex;
         flex-direction: column;
         gap: 2rem;
-        padding-bottom: 120px; /* Space for Floating Action Bar */
+        padding-bottom: 24px;
       }
 
       /* Hero image with glow */

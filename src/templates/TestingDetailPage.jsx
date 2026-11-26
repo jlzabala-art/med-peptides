@@ -427,7 +427,7 @@ export default function TestingDetailPage({ onAddToCart, region }) {
             padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
             justify-content: space-between;
           }
-          .sdp-main-wrapper { padding-bottom: 120px !important; }
+          .sdp-main-wrapper { padding-bottom: 24px !important; }
         }
       ` }} />
     </div>

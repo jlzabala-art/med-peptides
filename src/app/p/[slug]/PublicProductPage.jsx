@@ -187,8 +187,8 @@ const PUBLIC_STYLES = `
     border: 1.5px solid #bfdbfe !important;
   }
 
-  /* ── Padding para no quedar bajo el bottom bar ── */
-  [data-public-mode] .container { padding-bottom: 5rem !important; }
+  /* ── Padding ligero antes del footer global (el clearance vive en PublicUnifiedFooter) ── */
+  [data-public-mode] .container { padding-bottom: 1.5rem !important; }
 
   /* ── @media print: hoja de impresión limpia ── */
   @media print {
