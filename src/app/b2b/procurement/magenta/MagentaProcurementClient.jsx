@@ -29,6 +29,8 @@ import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import UniversalShareDrawer from '@/components/ui/UniversalShareDrawer';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
+import { buildNormaHellasStatementPdfBlob } from '@/lib/pdf/normaHellasStatementPdf';
 import {
   NORMA_HELLAS_METADATA,
   NORMA_HELLAS_IMPORTS,
@@ -41,7 +43,19 @@ export default function MagentaProcurementClient() {
   const [searchQuery, setSearchFilter] = useState('');
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [copiedSummary, setCopiedSummary] = useState(false);
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
+  const [pdfBlob, setPdfBlob] = useState(null);
   const stats = useMemo(() => getNormaHellasProcurementStats(), []);
+
+  const handleOpenPdfPreview = () => {
+    try {
+      const blob = buildNormaHellasStatementPdfBlob({ isEs });
+      setPdfBlob(blob);
+      setIsPdfPreviewOpen(true);
+    } catch {
+      toast.error(isEs ? 'Error al generar el PDF' : 'Error generating PDF');
+    }
+  };
 
   const shareUrl = typeof window !== 'undefined'
     ? window.location.href
@@ -223,6 +237,15 @@ export default function MagentaProcurementClient() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <button
               type="button"
+              onClick={handleOpenPdfPreview}
+              className="gcp-btn-secondary"
+              style={{ padding: '7px 12px', fontSize: '0.76rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <FileText size={14} />
+              <span>{isEs ? 'Vista Previa PDF / Descargar' : 'PDF Preview & Download'}</span>
+            </button>
+            <button
+              type="button"
               onClick={handleCopyWhatsAppSummary}
               className="gcp-btn-secondary"
               style={{ padding: '7px 12px', fontSize: '0.76rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
@@ -343,6 +366,16 @@ export default function MagentaProcurementClient() {
         title={isEs ? 'Compartir Conciliación con Magenta' : 'Share Reconciliation with Magenta'}
         subtitle="Testosterone Enanthate Imports 1-7 Statement"
         itemName="Norma Hellas Imports Statement"
+      />
+
+      <DocumentPreviewModal
+        isOpen={isPdfPreviewOpen}
+        onClose={() => setIsPdfPreviewOpen(false)}
+        pdfBlob={pdfBlob}
+        downloadName="Norma_Hellas_Imports_Reconciliation_Magenta.pdf"
+        title={isEs ? 'Conciliación Oficial de Importaciones · Norma Hellas' : 'Official Procurement Reconciliation · Norma Hellas'}
+        subtitle={isEs ? 'Vista previa institucional antes de descargar o imprimir' : 'Official PDF statement preview before download or print'}
+        printable={true}
       />
 
       <PublicUnifiedFooter />
