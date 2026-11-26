@@ -518,6 +518,15 @@ export default function PeptidesPriceListClient({
     });
   }, [lang, currency, setSearchQuery]);
 
+  // Listen to bottom navigation dock 'Filters' button event
+  useEffect(() => {
+    const handleOpenFilters = () => {
+      setIsCategorySheetOpen(true);
+    };
+    window.addEventListener('atlas-open-page-filters', handleOpenFilters);
+    return () => window.removeEventListener('atlas-open-page-filters', handleOpenFilters);
+  }, []);
+
   return (
     <div className="colway-price-root atlas-page-bg peptides-b2b-portal">
       {/* ── Unified Atlas Public Header (Same shell across all 5 clinical & pricing screens) ── */}
@@ -600,30 +609,19 @@ export default function PeptidesPriceListClient({
           @media (max-width: 768px) {
             .mobile-hide, .desktop-only-utilities, .desktop-only-currency { display: none !important; }
             .mobile-only-header-actions, .mobile-only-sticky-bar { display: inline-flex !important; }
+            .peptides-page-header { display: none !important; }
+            .peptides-mobile-category-strip { display: none !important; }
+            .peptides-mobile-quick-filters-rail { display: none !important; }
+            .peptides-secondary-filters-subbar { display: none !important; }
+            .gcp-kpis-summary-block { display: none !important; }
             .peptides-b2b-portal .peptides-nav-container { padding: 6px 12px !important; gap: 8px !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: space-between !important; height: 48px !important; }
             .peptides-b2b-portal .peptides-nav-left { width: auto !important; flex: 0 1 auto !important; min-width: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; }
             .peptides-b2b-portal .peptides-nav-actions { width: auto !important; flex: 0 0 auto !important; display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: flex-end !important; gap: 6px !important; }
-            .peptides-main-container { padding: 0.5rem 0.75rem 6.5rem 0.75rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
-            .peptides-page-header { padding: 0.68rem 0.85rem !important; margin-bottom: 0.65rem !important; }
-            .peptides-hero-btn { min-height: 36px !important; height: 36px !important; padding: 0 10px !important; font-size: 0.75rem !important; }
-            .peptides-secondary-filters-subbar.mobile-secondary-collapsed { display: none !important; }
-            .peptides-secondary-filters-subbar.mobile-secondary-expanded { display: flex !important; width: 100% !important; margin-bottom: 8px !important; }
-            .gcp-search-and-category-block { order: 1 !important; margin-bottom: 0.6rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
-            .gcp-kpis-summary-block { order: 2 !important; padding: 0.5rem 0.65rem !important; margin-bottom: 0.55rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
-            .mobile-kpi-summary-strip { display: flex !important; width: 100% !important; min-width: 0 !important; }
-            .peptides-kpis-grid.mobile-kpi-collapsed { display: none !important; }
-            .peptides-kpis-grid.mobile-kpi-expanded { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; margin-top: 8px !important; width: 100% !important; min-width: 0 !important; }
-            .peptide-mobile-tiles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
-            .gcp-table-block { order: 3 !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .peptides-main-container { padding: 0.5rem 0.5rem 6.5rem 0.5rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
+            .gcp-search-and-category-block { order: 1 !important; margin-bottom: 0.4rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .gcp-table-block { order: 2 !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; }
+            .gcp-table-block table { min-width: 650px !important; }
             .ptr-container { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
-            .data-table-mobile-cards { width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
-            .peptides-kpi-card { padding: 0.55rem 0.65rem !important; min-height: 86px !important; }
-            .peptides-scope-bar { display: flex !important; align-items: center !important; justify-content: space-between !important; width: 100% !important; gap: 8px !important; }
-            .peptides-scope-bar.mobile-scope-hidden { display: none !important; }
-            .peptides-scope-count-badge { display: none !important; }
-            .peptides-scope-left { width: 100% !important; }
-            .peptides-scope-switcher-group { width: 100% !important; display: flex !important; justify-content: stretch !important; margin-top: 2px !important; }
-            .peptides-scope-switcher-group button { flex: 1 1 50% !important; text-align: center !important; padding: 6px 8px !important; font-size: 0.72rem !important; }
           }
         ` }} />
 
@@ -729,6 +727,7 @@ export default function PeptidesPriceListClient({
                   sortable={true}
                   stickyTopOffset={64}
                   lang={lang}
+                  mobileView="scroll"
                   groupByKey={groupByCategory ? 'categoryKey' : null}
                   renderGroupHeader={(catKey, firstRow, count) => {
                     const meta = CATEGORY_MAP[catKey] || firstRow?.categoryMeta || CATEGORY_MAP.general_health;
@@ -840,7 +839,7 @@ export default function PeptidesPriceListClient({
         isEs={isEs}
       />
 
-      {/* Bottom Sheets (Category & FDA Status for Mobile) */}
+      {/* Bottom Sheets (Category, FDA Status, Shipping Corridor & Dosage for Mobile) */}
       <PeptidesFilterSheets
         isCategorySheetOpen={isCategorySheetOpen}
         setIsCategorySheetOpen={setIsCategorySheetOpen}
@@ -850,7 +849,14 @@ export default function PeptidesPriceListClient({
         setSelectedCategory={setSelectedCategory}
         selectedFdaStatus={selectedFdaStatus}
         setSelectedFdaStatus={setSelectedFdaStatus}
+        shippingDest={shippingDest}
+        setShippingDest={handleShippingDestChange}
+        selectedStrength={selectedStrength}
+        setSelectedStrength={setSelectedStrength}
+        groupByCategory={groupByCategory}
+        setGroupByCategory={setGroupByCategory}
         processedProducts={processedProducts}
+        filteredCount={filteredProducts.length}
         isEs={isEs}
       />
 

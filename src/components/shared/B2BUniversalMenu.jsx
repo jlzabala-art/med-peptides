@@ -219,6 +219,12 @@ export default function B2BUniversalMenu({
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
           }
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('atlas-open-page-filters'));
+          }
+          if (pathname.startsWith('/pricing/') || pathname.startsWith('/catalog') || pathname.startsWith('/collection/')) {
+            return;
+          }
           setMobileSheetMode('related');
           setOpen(true);
         };

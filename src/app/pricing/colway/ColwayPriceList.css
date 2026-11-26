@@ -1441,3 +1441,19 @@
           .mobile-only-header-actions { display: none !important; }
           .mobile-nav-drawer-trigger  { display: inline-flex !important; }
         }
+
+
+/* ── Ultra-Compact Mobile Table-Only View for Pricing Pages (≤ 768px) ── */
+/* Hides hero cards, KPI bars, and filter chips on phone to maximize
+   the viewport for the actual DataTable. Filters are accessed via the
+   bottom dock "Filters" button which opens the unified bottom sheet. */
+@media (max-width: 768px) {
+  .colway-price-root .gcp-resource-page-header,
+  .colway-price-root .atlas-chip-rail,
+  .colway-price-root .atlas-kpi-strip {
+    display: none !important;
+  }
+  .colway-price-root .atlas-page-shell {
+    padding: 0.5rem 0.5rem 6.5rem !important;
+  }
+}

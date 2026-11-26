@@ -49,8 +49,8 @@ const CLINICAL_PROFILES = [
     durationEs: '3.5 – 4.5 meses',
     labWindowEn: 'Peak serum panel at 4–6 wks (E2, Free/Total T, FSH, SHBG)',
     labWindowEs: 'Analítica pico a 4–6 sem (E2, T Libre/Total, FSH, SHBG)',
-    safetyEn: 'Intact Uterus Rule: Mandatory oral micronized progesterone (100–200 mg nightly) for endometrial protection.',
-    safetyEs: 'Regla de Útero Intacto: Progesterona micronizada oral obligatoria (100–200 mg/noche) para protección endometrial.',
+    safetyEn: 'Intact Uterus Rule: Mandatory oral micronized progesterone (100–200 mg nightly) for endometrial protection. Hysterectomized patients may use estrogen-only pellets (or optional progesterone for sleep/neurosteroid support).',
+    safetyEs: 'Regla de Útero Intacto: Progesterona micronizada oral obligatoria (100–200 mg/noche) para protección endometrial. En pacientes histerectomizadas puede emplearse solo estradiol (o progesterona opcional para sueño/neuroprotección).',
     badgeColor: '#0284c7',
     badgeBg: '#e0f2fe',
   },
@@ -91,8 +91,8 @@ const CLINICAL_PROFILES = [
     durationEs: '3.5 – 4.5 meses',
     labWindowEn: 'Peak Total/Free T & DHT at 4–6 wks; monitor clinical androgenicity',
     labWindowEs: 'Pico T Total/Libre y DHT a 4–6 sem; vigilar signos androgénicos',
-    safetyEn: 'Monitor for mild acne or hirsutism if Free T exceeds upper female physiologic range; consider Spironolactone/Saw Palmetto if sensitive.',
-    safetyEs: 'Vigilar acné leve o hirsutismo si la T Libre supera el rango fisiológico femenino; valorar titulación conservadora en siguiente ciclo.',
+    safetyEn: 'Monitor for mild acne or hirsutism if Free T exceeds upper female physiologic range; consider Spironolactone 25–50 mg or Saw Palmetto if sensitive, and step down next cycle.',
+    safetyEs: 'Vigilar acné leve o hirsutismo si la T Libre supera el rango fisiológico femenino; valorar Espironolactona 25–50 mg/día o Saw Palmetto si hay sensibilidad y ajustar dosis en el siguiente ciclo.',
     badgeColor: '#15803d',
     badgeBg: '#f0fdf4',
   },
@@ -154,8 +154,8 @@ const PREOP_CHECKLIST = [
   { id: 'washout', group: 'patient', en: 'Confirmed 5–7 day washout of NSAIDs, Aspirin (if elective), Fish Oil / Vitamin E', es: 'Confirmada suspensión 5–7 días de AINEs, Omega-3 / Vitamina E (si electivo)' },
   { id: 'labs', group: 'labs', en: 'Baseline lab panel verified (E2, Total/Free T, FSH/LH, CBC/Hct, Thyroid, SHBG; PSA in men)', es: 'Analítica basal verificada (E2, T Total/Libre, FSH/LH, Hemograma/Hto, Tiroides, SHBG; PSA en varón)' },
   { id: 'antiseptic', group: 'tray', en: '2% Chlorhexidine / 70% Alcohol prep + sterile fenestrated drape + surgical marker', es: 'Clorhexidina 2% en alcohol 70% + paño fenestrado estéril + marcador quirúrgico' },
-  { id: 'anesthesia', group: 'tray', en: 'Buffered 9:1 Lidocaine 2% w/ Epi (1.8 mL) + 8.4% NaHCO₃ (0.2 mL) + 27G × 1.5" needle', es: 'Lidocaína 2% con Epi amortiguada 9:1 (1.8 mL + 0.2 mL Bicarbonato 8.4%) + aguja 27G × 1.5"' },
-  { id: 'trocar', group: 'tray', en: 'Single-use sterile disposable trocar kit (3.2 mm or 4.5 mm), #11 scalpel & non-toothed Adson forceps', es: 'Kit de trócar desechable estéril (3.2 mm o 4.5 mm), bisturí #11 y pinzas Adson sin dientes' },
+  { id: 'anesthesia', group: 'tray', en: 'Buffered 9:1 Lidocaine 2% w/ Epi (1.8 mL) + 8.4% NaHCO₃ (0.2 mL) · Wait 3–5 min for full vasoconstriction', es: 'Lidocaína 2% con Epi amortiguada 9:1 (1.8 mL + 0.2 mL NaHCO₃ 8.4%) · Esperar 3–5 min para vasoconstricción completa' },
+  { id: 'trocar', group: 'tray', en: 'Single-use sterile disposable trocar kit (3.2 mm or 4.5 mm), #11 scalpel (2–3 mm stab, 0° horizontal subcutaneous plane) & Adson forceps', es: 'Kit de trócar desechable estéril (3.2 mm o 4.5 mm), bisturí #11 (incisión 2–3 mm, plano subcutáneo horizontal a 0°) y pinzas Adson sin dientes' },
   { id: 'pellets', group: 'tray', en: 'EU GMP sterile pellet vials verified (lot #, BUD, strength & quantity)', es: 'Viales estériles de pellets EU GMP verificados (lote, caducidad, dosis y unidades)' },
   { id: 'closure', group: 'tray', en: 'Steri-Strips, waterproof Tegaderm dressing (+ optional Dermabond adhesive) & sterile gauze', es: 'Steri-Strips, apósito impermeable Tegaderm (+ opcional Dermabond) y gasas estériles' },
 ];
@@ -287,7 +287,9 @@ export default function PelletImplantationGuideClient() {
   const [checkedItems, setCheckedItems] = useState({});
   const [copiedPatientCare, setCopiedPatientCare] = useState(false);
 
-  const shareUrl = 'https://www.atlashealth-services.com/guides/hormone-pellets-implantation';
+  const shareUrl = isEs
+    ? 'https://www.atlashealth-services.com/guides/hormone-pellets-implantation?lang=es'
+    : 'https://www.atlashealth-services.com/guides/hormone-pellets-implantation';
 
   const activeProfile = useMemo(
     () => CLINICAL_PROFILES.find((p) => p.id === selectedProfileId) || CLINICAL_PROFILES[1],
@@ -436,6 +438,9 @@ export default function PelletImplantationGuideClient() {
         }
         @media (max-width: 900px) {
           .pellet-guide-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        }
+        @media (max-width: 768px) {
+          .pellet-guide-kpi-grid { display: none !important; }
         }
         .pellet-guide-planner-grid {
           display: grid;

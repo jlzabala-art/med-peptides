@@ -742,3 +742,15 @@
     padding-bottom: 0.4rem;
   }
 }
+
+/* ── Ultra-Compact Mobile Table-Only View (≤ 768px) ── */
+@media (max-width: 768px) {
+  .pellets-price-page .gcp-resource-page-header,
+  .pellets-price-page .pellets-kpi-bar,
+  .pellets-mobile-cats-strip {
+    display: none !important;
+  }
+  .pellets-price-container {
+    padding: 0.5rem 0.5rem 6.5rem !important;
+  }
+}

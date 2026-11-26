@@ -1010,6 +1010,7 @@ export default function PelletsPriceListClient({
       <main className="pellets-price-container">
         {/* ── UNIFIED COMPACT GCP RESOURCE HERO (Consistent across all platform screens) ── */}
         <PageHeroCard
+          className="mobile-hide"
           brandRight="EU GMP CERTIFIED"
           badges={[
             isEs ? 'E-Beam SAL 10⁻⁶ · POM' : 'E-Beam SAL 10⁻⁶ · POM',
