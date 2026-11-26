@@ -2980,6 +2980,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               display: none;
             }
             @media (max-width: 900px) {
+              .public-sticky-action-bar {
+                display: none !important;
+              }
               .rx-patient-mobile-bar {
                 position: fixed;
                 left: 0;
@@ -3017,6 +3020,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               .rx-patient-mobile-btn.is-active {
                 background: #eff6ff;
                 color: #1d4ed8;
+                border-top: 2px solid #1a73e8;
               }
               .rx-dossier-main-wrapper {
                 padding-bottom: 76px;

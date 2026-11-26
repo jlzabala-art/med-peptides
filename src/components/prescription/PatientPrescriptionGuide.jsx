@@ -723,7 +723,7 @@ export default function PatientPrescriptionGuide({
         <details style={{ borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
           <summary style={{ fontSize: '0.75rem', fontWeight: 650, color: '#5f6368', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', listStyle: 'none' }}>
             <span>{isEs ? 'Ver historial de 7 días, tarjeta PDF y recordatorios' : 'Quick Dose Log (Last 7 Days), PDF card & reminders'}</span>
-            <span style={{ color: '#1a73e8', fontSize: '0.72rem' }}>{isEs ? 'Abrir ▾' : 'Open ▾'}</span>
+            <span style={{ color: '#1a73e8', fontSize: '0.72rem' }}>{loggedCount7d}/7 · {isEs ? 'Ver ›' : 'Open ›'}</span>
           </summary>
           <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -1202,14 +1202,14 @@ export default function PatientPrescriptionGuide({
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '5px',
-                        padding: '6px 11px',
-                        minHeight: '34px',
+                        gap: '4px',
+                        padding: '4px 9px',
+                        minHeight: '30px',
                         borderRadius: '6px',
-                        border: '1px solid #dadce0',
-                        background: '#ffffff',
-                        color: '#3c4043',
-                        fontSize: '0.74rem',
+                        border: '1px solid #e2e8f0',
+                        background: '#f8fafc',
+                        color: '#5f6368',
+                        fontSize: '0.72rem',
                         fontWeight: 600,
                         textDecoration: 'none',
                         whiteSpace: 'nowrap',
@@ -1351,7 +1351,7 @@ export default function PatientPrescriptionGuide({
                       <div style={{ fontSize: '0.70rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5f6368', marginBottom: '4px' }}>
                         {isEs ? 'Cómo tomarlo' : 'How to take it'}
                       </div>
-                      <div style={{ fontSize: '16px', fontWeight: 600, color: '#202124', lineHeight: 1.5 }}>
+                      <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.45 }}>
                         {rawDirection}
                       </div>
                     </div>

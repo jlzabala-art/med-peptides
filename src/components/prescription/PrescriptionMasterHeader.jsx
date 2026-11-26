@@ -168,7 +168,7 @@ export default function PrescriptionMasterHeader({
             <div style={{ fontSize: '0.74rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span>
                 {isPatientView
-                  ? (isEs ? 'Tu guía personal de tratamiento' : 'Your personal treatment guide')
+                  ? null
                   : (isEs
                       ? 'Dossier clínico digital · Pauta posológica · Grado EU GMP'
                       : 'Digital clinical dossier · Posology regimen · EU GMP Standards')}
@@ -432,7 +432,7 @@ export default function PrescriptionMasterHeader({
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isPatientView ? (isEs ? 'Cómo tomarlo' : 'How to take') : (isEs ? 'Vía & Frecuencia' : 'Route & Frequency')}
               </div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <Syringe size={13} color="#5f6368" style={{ flexShrink: 0 }} />
                 <span>{cleanRouteText}</span>
               </div>
@@ -441,7 +441,7 @@ export default function PrescriptionMasterHeader({
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isPatientView ? (isEs ? 'Formato' : 'Formats') : (isEs ? 'Dispositivo / Formato' : 'Device / Presentation')}
               </div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <Pill size={13} color="#5f6368" style={{ flexShrink: 0 }} />
                 <span>{cleanDeviceText}</span>
               </div>
@@ -450,7 +450,7 @@ export default function PrescriptionMasterHeader({
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isPatientView ? (isEs ? 'Conservación' : 'Storage') : (isEs ? 'Almacenamiento' : 'Storage Standard')}
               </div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: (rxType.isPen || rxType.isInjectable) ? '#0284c7' : '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ fontSize: '0.86rem', fontWeight: 700, color: (rxType.isPen || rxType.isInjectable) ? '#0284c7' : '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <Snowflake size={13} color={(rxType.isPen || rxType.isInjectable) ? '#0284c7' : '#5f6368'} style={{ flexShrink: 0 }} />
                 <span>{cleanStorageText}</span>
               </div>
@@ -459,7 +459,7 @@ export default function PrescriptionMasterHeader({
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isPatientView ? (isEs ? 'Duración' : 'Duration') : (isEs ? 'Ciclo Clínico' : 'Clinical Duration')}
               </div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <Calendar size={13} color="#5f6368" style={{ flexShrink: 0 }} />
                 <span>{cleanDurationText}</span>
               </div>
