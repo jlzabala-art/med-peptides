@@ -546,7 +546,7 @@ export default function AdminQuotationsTab() {
 
         <div class="section">
           <h3 style="font-size: 14px; margin-bottom: 0;">Prescribed Items & Formulations</h3>
-          <table>
+          <table role="presentation">
             <thead>
               <tr>
                 <th>Compound / Item</th>

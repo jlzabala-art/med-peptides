@@ -25,7 +25,7 @@ import {
   getRelatedRoutes,
   getActiveDomainId
 } from '@/constants/b2bNavigationGraph';
-import { useActiveClinicalStore } from '@/store/useActiveClinicalStore';
+import { useActiveClinicalStore } from '@/stores/useActiveClinicalStore';
 import { useSurfacePolicy } from '@/hooks/useSurfacePolicy';
 
 /**

@@ -10,7 +10,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import RxQuickViewDrawer from '@/components/shared/RxQuickViewDrawer';
 import ImportPrescriptionModal from '@/features/prescriptions/components/ImportPrescriptionModal';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
-import { useActiveClinicalStore } from '@/store/useActiveClinicalStore';
+import { useActiveClinicalStore } from '@/stores/useActiveClinicalStore';
 import '@/styles/themes/roles.css';
 import '@/styles/publicDesignSystem.css';
 

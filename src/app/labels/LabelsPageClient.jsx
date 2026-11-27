@@ -24,7 +24,7 @@ import { useLabelsPrescriptionActions } from './hooks/useLabelsPrescriptionActio
 import { LabelsWorkspaceProvider } from './context/LabelsWorkspaceContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
-import { useActiveClinicalStore } from '@/store/useActiveClinicalStore';
+import { useActiveClinicalStore } from '@/stores/useActiveClinicalStore';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PharmacyOpsWorkspaceBar from '@/components/shared/PharmacyOpsWorkspaceBar';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';

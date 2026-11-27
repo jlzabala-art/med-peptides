@@ -366,7 +366,7 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
           </div>
         </div>
 
-        <table>
+        <table role="presentation">
           <thead>
             <tr>
               <th>Order Code</th>

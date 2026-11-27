@@ -5,7 +5,7 @@ import Link from 'next/link';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PharmacyOpsWorkspaceBar from '@/components/shared/PharmacyOpsWorkspaceBar';
-import { useActiveClinicalStore } from '@/store/useActiveClinicalStore';
+import { useActiveClinicalStore } from '@/stores/useActiveClinicalStore';
 import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
 import AlgoliaEntityPicker from '@/components/shared/AlgoliaEntityPicker';
 import FormatPickerCards from '@/components/reconstitution/FormatPickerCards';

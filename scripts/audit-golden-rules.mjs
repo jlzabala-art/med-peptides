@@ -80,6 +80,8 @@ for (const file of srcFiles) {
       nativeDialogs.push(`${rel}:${ln}`);
     }
     if (
+      !trimmed.startsWith('//') &&
+      !trimmed.startsWith('*') &&
       /<table[\s>]/.test(line) &&
       !line.includes('role="presentation"') &&
       !(lines[i - 1] && lines[i - 1].includes('no-restricted-syntax')) &&
