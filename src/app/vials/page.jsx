@@ -1,4 +1,5 @@
 import React from 'react';
+import { redirect } from 'next/navigation';
 import { fetchCollectionProductsAction, trackReferralVisitAction } from '@/actions/vialsCatalogActions';
 import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
 import VialsCatalogClient from './VialsCatalogClient';
@@ -102,6 +103,22 @@ export default async function VialsPublicPage({ searchParams }) {
   const rawCollection = String(resolvedSearch?.collection || resolvedSearch?.c || 'vials').toLowerCase();
   const collection = rawCollection === 'ultraperson' ? 'ultraman' : (SUPPORTED_COLLECTIONS[rawCollection] ? rawCollection : 'vials');
   const isPatientView = String(resolvedSearch?.view || '').toLowerCase() === 'patient';
+
+  // Consolidate B2B price schedule routes into their canonical GCP UX pricing pages
+  // while preserving /vials?view=patient (patient reconstitution guides) and collections without dedicated pricing pages.
+  if (!isPatientView && (collection === 'vials' || collection === 'bloodo' || collection === 'colway')) {
+    const forward = new URLSearchParams();
+    const passThroughKeys = ['specialty', 'ref', 'referral', 'code', 'lang', 'dest', 'region', 'q', 'tc', 'track', 'sid', 'margin', 'tier'];
+    for (const k of passThroughKeys) {
+      if (resolvedSearch?.[k]) forward.set(k, String(resolvedSearch[k]));
+    }
+    const rawCurParam = resolvedSearch?.currency || resolvedSearch?.cur || resolvedSearch?.curr;
+    if (rawCurParam) forward.set('currency', String(rawCurParam).toUpperCase());
+    const qs = forward.toString() ? `?${forward.toString()}` : '';
+    const targetPath = collection === 'bloodo' ? '/pricing/bloodo' : collection === 'colway' ? '/pricing/colway' : '/pricing/peptides';
+    redirect(`${targetPath}${qs}`);
+  }
+
   const initialLang = normalizeMetaLang(resolvedSearch);
   const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || 'USD').toUpperCase();
   const initialCurrency = ['EUR', 'USD', 'AED'].includes(rawCur) ? rawCur : 'USD';

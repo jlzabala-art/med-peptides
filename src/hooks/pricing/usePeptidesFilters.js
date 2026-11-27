@@ -5,6 +5,7 @@ import {
   CATEGORY_MAP,
   CATEGORY_ORDER,
   DOSAGE_STRENGTHS,
+  MEDICAL_SPECIALTIES,
   SHIPPING_DESTINATIONS,
   FDA_FILTERS,
   resolveProductFda,
@@ -26,6 +27,7 @@ export function usePeptidesFilters({
   initialLang = 'en',
   initialCurrency = 'USD',
   initialDest = 'EU',
+  initialSpecialty = 'all',
   setOrderForm
 }) {
   const [currency, setCurrency] = useState(initialCurrency || 'USD');
@@ -36,6 +38,9 @@ export function usePeptidesFilters({
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedFdaStatus, setSelectedFdaStatus] = useState('all');
   const [selectedStrength, setSelectedStrength] = useState('all');
+  const [selectedSpecialty, setSelectedSpecialty] = useState(
+    initialSpecialty && MEDICAL_SPECIALTIES[initialSpecialty] ? initialSpecialty : 'all'
+  );
   const [scopeMode, setScopeMode] = useState('filtered');
   const [priceDriftNotice, setPriceDriftNotice] = useState(null);
 
@@ -62,6 +67,9 @@ export function usePeptidesFilters({
 
       const pStrength = url.searchParams.get('strength');
       if (pStrength) setSelectedStrength(pStrength);
+
+      const pSpec = (url.searchParams.get('specialty') || '').toLowerCase();
+      if (pSpec && MEDICAL_SPECIALTIES[pSpec]) setSelectedSpecialty(pSpec);
 
       const pQuery = url.searchParams.get('q');
       if (pQuery) {
@@ -124,13 +132,18 @@ export function usePeptidesFilters({
     } else {
       url.searchParams.delete('strength');
     }
+    if (selectedSpecialty && selectedSpecialty !== 'all' && MEDICAL_SPECIALTIES[selectedSpecialty]) {
+      url.searchParams.set('specialty', selectedSpecialty);
+    } else {
+      url.searchParams.delete('specialty');
+    }
     if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
       url.searchParams.set('q', debouncedSearchQuery.trim());
     } else {
       url.searchParams.delete('q');
     }
     window.history.replaceState({}, '', url.toString());
-  }, [selectedCategory, selectedFdaStatus, selectedStrength, debouncedSearchQuery]);
+  }, [selectedCategory, selectedFdaStatus, selectedStrength, selectedSpecialty, debouncedSearchQuery]);
 
   const isEs = lang === 'es';
 
@@ -162,8 +175,17 @@ export function usePeptidesFilters({
         onRemove: () => setSelectedStrength('all')
       });
     }
+    if (selectedSpecialty !== 'all' && MEDICAL_SPECIALTIES[selectedSpecialty]) {
+      const specObj = MEDICAL_SPECIALTIES[selectedSpecialty];
+      list.push({
+        key: 'specialty',
+        label: isEs ? 'Especialidad' : 'Specialty',
+        value: isEs ? specObj.labelEs : specObj.labelEn,
+        onRemove: () => setSelectedSpecialty('all')
+      });
+    }
     return list;
-  }, [selectedCategory, selectedFdaStatus, selectedStrength, isEs]);
+  }, [selectedCategory, selectedFdaStatus, selectedStrength, selectedSpecialty, isEs]);
 
   const handleLanguageChange = (nextLang) => {
     setLang(nextLang);
@@ -331,9 +353,12 @@ export function usePeptidesFilters({
         }
       }
 
-      return matchesSearch && matchesCat && matchesFda && matchesStrength;
+      const specCfg = selectedSpecialty !== 'all' ? MEDICAL_SPECIALTIES[selectedSpecialty] : null;
+      const matchesSpecialty = !specCfg || specCfg.keywords.some((kw) => (p.productName || '').toLowerCase().includes(kw));
+
+      return matchesSearch && matchesCat && matchesFda && matchesStrength && matchesSpecialty;
     });
-  }, [processedProducts, debouncedSearchQuery, selectedCategory, selectedFdaStatus, selectedStrength]);
+  }, [processedProducts, debouncedSearchQuery, selectedCategory, selectedFdaStatus, selectedStrength, selectedSpecialty]);
 
   return {
     lang,
@@ -352,6 +377,8 @@ export function usePeptidesFilters({
     setSelectedFdaStatus,
     selectedStrength,
     setSelectedStrength,
+    selectedSpecialty,
+    setSelectedSpecialty,
     scopeMode,
     setScopeMode,
     priceDriftNotice,

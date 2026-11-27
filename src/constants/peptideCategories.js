@@ -40,6 +40,55 @@ export const DOSAGE_STRENGTHS = [
   { id: '20mg_plus', label: '15–20 mg+' }
 ];
 
+export const MEDICAL_SPECIALTIES = {
+  gynecology: {
+    id: 'gynecology',
+    labelEn: "Gynecology & Women's Health",
+    labelEs: 'Ginecología y Salud Femenina',
+    keywords: [
+      'kisspeptin', 'pt-141', 'bremelanotide', 'oxytocin',
+      'bpc-157', 'tb-500', 'ghk-cu', 'epitalon', 'epithalon', 'nad',
+      'tirzepatide', 'semaglutide', 'retatrutide', 'aod-9604', 'glutathione'
+    ]
+  },
+  dermatology: {
+    id: 'dermatology',
+    labelEn: 'Dermatology & Trichology',
+    labelEs: 'Dermatología y Tricología',
+    keywords: [
+      'ghk-cu', 'bpc-157', 'tb-500', 'epitalon', 'epithalon', 'glutathione',
+      'melanotan', 'nad', 'thymulin', 'ahk'
+    ]
+  },
+  longevity: {
+    id: 'longevity',
+    labelEn: 'Longevity & Cellular Medicine',
+    labelEs: 'Longevidad y Medicina Celular',
+    keywords: [
+      'epitalon', 'epithalon', 'nad', 'ss-31', 'mots-c', 'foxo4',
+      'thymosin', 'ghk-cu', 'bpc-157', 'glutathione', 'selank', 'semax'
+    ]
+  },
+  metabolic: {
+    id: 'metabolic',
+    labelEn: 'Metabolic & Endocrinology',
+    labelEs: 'Metabolismo y Endocrinología',
+    keywords: [
+      'tirzepatide', 'semaglutide', 'retatrutide', 'aod-9604',
+      'tesamorelin', 'cjc-1295', 'ipamorelin', 'mots-c', '5-amino'
+    ]
+  },
+  urology: {
+    id: 'urology',
+    labelEn: 'Urology & Andrology',
+    labelEs: 'Urología y Andrología',
+    keywords: [
+      'pt-141', 'kisspeptin', 'oxytocin', 'gonadorelin',
+      'bpc-157', 'nad'
+    ]
+  }
+};
+
 export const SHIPPING_DESTINATIONS = [
   {
     id: 'EU',

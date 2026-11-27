@@ -15,6 +15,7 @@ import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import {
   CATEGORY_MAP,
   FDA_FILTERS,
+  MEDICAL_SPECIALTIES,
   getCategoryIcon
 } from '@/constants/peptideCategories';
 
@@ -53,6 +54,7 @@ export default function PeptidesPriceListClient({
   initialLang = 'en',
   initialCurrency = 'USD',
   initialDest = 'EU',
+  initialSpecialty = 'all',
   trackingCode = null
 }) {
   // Modal / Drawer UI state
@@ -87,6 +89,7 @@ export default function PeptidesPriceListClient({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
   const [copied, setCopied] = useState(false);
+  const [copiedPitch, setCopiedPitch] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(null);
   const [selectedSpecsProduct, setSelectedSpecsProduct] = useState(null);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
@@ -140,6 +143,8 @@ export default function PeptidesPriceListClient({
     setSelectedFdaStatus,
     selectedStrength,
     setSelectedStrength,
+    selectedSpecialty,
+    setSelectedSpecialty,
     scopeMode,
     setScopeMode,
     priceDriftNotice,
@@ -158,6 +163,7 @@ export default function PeptidesPriceListClient({
     initialLang,
     initialCurrency,
     initialDest,
+    initialSpecialty,
     setOrderForm
   });
 
@@ -382,6 +388,39 @@ export default function PeptidesPriceListClient({
     }
   };
 
+  const handleCopyWhatsAppPitch = async () => {
+    if (typeof window === 'undefined') return;
+    const specObj = selectedSpecialty && selectedSpecialty !== 'all' ? MEDICAL_SPECIALTIES[selectedSpecialty] : null;
+    const specTitle = specObj
+      ? (isEs ? specObj.labelEs : specObj.labelEn)
+      : (isEs ? 'Péptidos Clínicos Liofilizados' : 'Clinical Lyophilized Peptides');
+    const url = window.location.href;
+    const pitch = isEs
+      ? `Buenos días Dr./Dra.,\n\nComparto el enlace directo a nuestra tarifa oficial B2B para clínicas de ${specTitle} (${currency}):\n\n• Tarifario ${specTitle}:\n${url}\n\nIncluye viales liofilizados estériles (10R) con pureza analítica ≥99,0% HPLC, ahorro por volumen en Pack ×10, ficha técnica y CoA por lote.\n\nQuedo a su disposición para cualquier consulta o proforma.`
+      : `Good morning Dr.,\n\nI am sharing a direct link to our official physician & clinic B2B schedule for ${specTitle} (${currency}):\n\n• ${specTitle} Schedule:\n${url}\n\nIncludes sterile 10R lyophilized peptide vials (≥99.0% HPLC verified), Pack ×10 volume pricing, clinical monographs, and batch CoAs.\n\nPlease let me know if you need any CoAs or proforma coordination.`;
+    try {
+      await navigator.clipboard.writeText(pitch);
+      setCopiedPitch(true);
+      toast.success(isEs ? 'Mensaje para WhatsApp copiado ✓' : 'WhatsApp physician pitch copied ✓');
+      setTimeout(() => setCopiedPitch(false), 2500);
+    } catch {
+      toast.error(isEs ? 'No se pudo copiar el mensaje' : 'Could not copy pitch');
+    }
+  };
+
+  const handleOpenPatientQr = () => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent('open-global-qr-modal', {
+      detail: {
+        url: `${window.location.origin}/vials?view=patient${isEs ? '&lang=es' : ''}`,
+        title: isEs ? 'QR Guía para Pacientes' : 'Patient Directory QR Code',
+        subtitle: isEs
+          ? 'Guía compartible para pacientes: reconstitución y uso (sin precios B2B)'
+          : 'Shareable patient-only peptide & reconstitution guides (no B2B pricing)',
+      },
+    }));
+  };
+
   const handleSubmitOrder = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (Object.keys(cartItems).length === 0) {
@@ -576,10 +615,13 @@ export default function PeptidesPriceListClient({
           isDistributor={isDistributor}
           isEs={isEs}
           copied={copied}
+          copiedPitch={copiedPitch}
           setInquiryProductContext={setInquiryProductContext}
           setIsInquiryDrawerOpen={setIsInquiryDrawerOpen}
           setIsPdfPreviewOpen={setIsPdfPreviewOpen}
           handleShareSchedule={handleShareSchedule}
+          handleCopyWhatsAppPitch={handleCopyWhatsAppPitch}
+          handleOpenPatientQr={handleOpenPatientQr}
         />
 
         {/* Responsive Layout Styles (Google Cloud Mobile UX Standard) */}
@@ -684,6 +726,8 @@ export default function PeptidesPriceListClient({
               handleShippingDestChange={handleShippingDestChange}
               selectedStrength={selectedStrength}
               setSelectedStrength={setSelectedStrength}
+              selectedSpecialty={selectedSpecialty}
+              setSelectedSpecialty={setSelectedSpecialty}
               groupByCategory={groupByCategory}
               setGroupByCategory={setGroupByCategory}
               currency={currency}
@@ -921,6 +965,8 @@ export default function PeptidesPriceListClient({
         setShippingDest={handleShippingDestChange}
         selectedStrength={selectedStrength}
         setSelectedStrength={setSelectedStrength}
+        selectedSpecialty={selectedSpecialty}
+        setSelectedSpecialty={setSelectedSpecialty}
         groupByCategory={groupByCategory}
         setGroupByCategory={setGroupByCategory}
         processedProducts={processedProducts}

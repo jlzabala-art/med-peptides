@@ -7,6 +7,7 @@ import {
   CATEGORY_ORDER,
   CATEGORY_MAP,
   FDA_FILTERS,
+  MEDICAL_SPECIALTIES,
   SHIPPING_DESTINATIONS,
   DOSAGE_STRENGTHS
 } from '@/constants/peptideCategories';
@@ -35,6 +36,8 @@ export default function PeptidesFilterToolbar({
   handleShippingDestChange,
   selectedStrength = 'all',
   setSelectedStrength,
+  selectedSpecialty = 'all',
+  setSelectedSpecialty,
   groupByCategory = true,
   setGroupByCategory,
   onExportCsv,
@@ -92,7 +95,22 @@ export default function PeptidesFilterToolbar({
       onChange: (val) => {
         setSelectedStrength && setSelectedStrength(val);
       }
-    }
+    },
+    ...(setSelectedSpecialty
+      ? [{
+          key: 'specialty',
+          label: isEs ? 'Especialidad' : 'Specialty',
+          value: selectedSpecialty,
+          options: [
+            { label: isEs ? 'Todas las especialidades' : 'All Specialties', value: 'all' },
+            ...Object.values(MEDICAL_SPECIALTIES).map((sp) => ({
+              label: isEs ? sp.labelEs : sp.labelEn,
+              value: sp.id
+            }))
+          ],
+          onChange: (val) => setSelectedSpecialty(val || 'all')
+        }]
+      : [])
   ];
 
   return (

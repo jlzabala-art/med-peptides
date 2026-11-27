@@ -5,6 +5,7 @@ import PeptidesPriceListClient from './PeptidesPriceListClient';
 import { isAdminServerSession } from '@/lib/serverAdminAuth';
 import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
 import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
+import { MEDICAL_SPECIALTIES } from '@/constants/peptideCategories';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -22,10 +23,13 @@ export async function generateMetadata({ searchParams }) {
   const destLabel = rawDest === 'US' ? 'USA' : rawDest === 'AE' ? 'UAE / GCC' : 'EU';
   const rawRef = String(resolvedSearch?.ref || '').toLowerCase();
   const isWholesaler = rawRef.includes('whole');
+  const rawSpecialty = String(resolvedSearch?.specialty || '').toLowerCase();
+  const specMeta = MEDICAL_SPECIALTIES[rawSpecialty] || null;
 
   const ogParams = new URLSearchParams();
   if (currency) ogParams.set('currency', currency);
   if (['EU', 'US', 'AE'].includes(rawDest)) ogParams.set('dest', rawDest);
+  if (specMeta) ogParams.set('specialty', specMeta.id);
   const resolvedOgPath = `/pricing/peptides${ogParams.toString() ? `?${ogParams.toString()}` : ''}`;
 
   return buildBilingualMetadata({
@@ -35,13 +39,17 @@ export async function generateMetadata({ searchParams }) {
     path: resolvedOgPath,
     siteName: 'Atlas Health Services',
     en: {
-      title: isWholesaler
+      title: specMeta
+        ? `${specMeta.labelEn} Peptides • Official B2B Price Schedule (${currency})`
+        : isWholesaler
         ? `Clinical Lyophilized Peptides • ${destLabel} Wholesale Price Schedule (${currency})`
         : `Clinical Lyophilized Peptides • Official B2B Price Schedule (${currency})`,
       description: `Official ${destLabel} wholesale & clinic price schedule in ${currency} for sterile lyophilized peptide vials (10R). ≥99.0% RP-HPLC purity, third-party CoA, cold-pack dispatch & Pack ×10 volume savings.`,
     },
     es: {
-      title: isWholesaler
+      title: specMeta
+        ? `Péptidos ${specMeta.labelEs} • Tarifa Oficial B2B (${currency})`
+        : isWholesaler
         ? `Péptidos Clínicos Liofilizados • Tarifa Mayorista ${destLabel} (${currency})`
         : `Péptidos Clínicos Liofilizados • Tarifa Oficial B2B (${currency})`,
       description: `Tarifa oficial mayorista y para clínicas (${destLabel}) en ${currency} para viales de péptidos liofilizados estériles (10R). Pureza analítica ≥99,0% HPLC, CoA por lote y ahorro en Pack ×10.`,
@@ -56,6 +64,8 @@ export default async function PeptidesPricingPage({ searchParams }) {
   const initialCurrency = normalizeCurrency(resolvedSearch?.currency || resolvedSearch?.cur || resolvedSearch?.curr);
   const rawDest = String(resolvedSearch?.dest || resolvedSearch?.region || '').toUpperCase();
   const initialDest = ['EU', 'US', 'AE'].includes(rawDest) ? rawDest : 'EU';
+  const rawSpecialty = String(resolvedSearch?.specialty || '').toLowerCase();
+  const initialSpecialty = MEDICAL_SPECIALTIES[rawSpecialty] ? rawSpecialty : 'all';
   const trackingCode = resolvedSearch?.tc || resolvedSearch?.track || resolvedSearch?.sid || null;
 
   const isDistributor = String(rawRef || '').toLowerCase().includes('distrib') || resolvedSearch?.margin === '15';
@@ -108,6 +118,7 @@ export default async function PeptidesPricingPage({ searchParams }) {
         initialLang={initialLang}
         initialCurrency={initialCurrency}
         initialDest={initialDest}
+        initialSpecialty={initialSpecialty}
         trackingCode={trackingCode}
       />
     </>

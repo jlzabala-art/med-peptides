@@ -6,6 +6,8 @@ import {
   FileText,
   Check,
   Share2,
+  QrCode,
+  MessageSquare,
 } from 'lucide-react';
 import PageHeroCard from '@/components/ui/PageHeroCard';
 
@@ -18,10 +20,13 @@ export default function PeptidesPageHeader({
   isDistributor = false,
   isEs = false,
   copied = false,
+  copiedPitch = false,
   setInquiryProductContext,
   setIsInquiryDrawerOpen,
   setIsPdfPreviewOpen,
-  handleShareSchedule
+  handleShareSchedule,
+  handleCopyWhatsAppPitch,
+  handleOpenPatientQr
 }) {
   const title = isDistributor
     ? (isEs ? 'Tarifa Oficial de Péptidos · Distribuidor B2B' : 'Official Peptide Price Schedule · Distributor')
@@ -67,6 +72,31 @@ export default function PeptidesPageHeader({
             {copied ? <Check size={14} color="#1a73e8" /> : <Share2 size={14} color="#5f6368" />}
             <span>{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
           </button>
+
+          {handleCopyWhatsAppPitch && (
+            <button
+              type="button"
+              onClick={handleCopyWhatsAppPitch}
+              className="gcp-btn-secondary peptides-hero-btn"
+              style={copiedPitch ? { borderColor: '#1a73e8', background: '#e8f0fe', color: '#1a73e8' } : undefined}
+              title={isEs ? 'Copiar mensaje listo para WhatsApp a médicos' : 'Copy ready-to-send WhatsApp physician pitch'}
+            >
+              {copiedPitch ? <Check size={14} color="#1a73e8" /> : <MessageSquare size={14} color="#5f6368" />}
+              <span>{copiedPitch ? (isEs ? 'Pitch Copiado' : 'Pitch Copied') : (isEs ? 'Pitch WA' : 'WA Pitch')}</span>
+            </button>
+          )}
+
+          {handleOpenPatientQr && (
+            <button
+              type="button"
+              onClick={handleOpenPatientQr}
+              className="gcp-btn-secondary peptides-hero-btn"
+              title={isEs ? 'QR de guía para pacientes (sin precios B2B)' : 'Shareable patient reconstitution guide QR (no B2B pricing)'}
+            >
+              <QrCode size={14} color="#5f6368" />
+              <span>{isEs ? 'QR Paciente' : 'Patient QR'}</span>
+            </button>
+          )}
 
           <button
             type="button"

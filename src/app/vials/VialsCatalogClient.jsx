@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { BookOpen, FlaskConical, Droplets, Sparkles, Leaf, Microscope, RotateCcw } from 'lucide-react';
 import { Search, ShoppingCart, Package, Check, CheckCircle2, ShieldCheck, ArrowRight, X, Plus, Minus, Globe, QrCode, SlidersHorizontal } from '@/lib/icons';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import CopyableId from '@/components/ui/CopyableId';
@@ -17,11 +18,11 @@ import PageHeroCard from '@/components/ui/PageHeroCard';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 
 const COLLECTIONS_LIST = [
-  { id: 'vials', label: 'Peptides (Vials)', icon: '🧪' },
-  { id: 'bloodo', label: 'Bloodo™ Diagnostics', icon: '🩸' },
-  { id: 'colway', label: 'Colway® Dermocosmetics', icon: '✨' },
-  { id: 'ultraman', label: 'UltraPerson™ Supplements', icon: '🌿' },
-  { id: 'teletest', label: 'TeleTest® Lab Panels', icon: '🔬' }
+  { id: 'vials', label: 'Peptides (Vials)', Icon: FlaskConical },
+  { id: 'bloodo', label: 'Bloodo™ Diagnostics', Icon: Droplets },
+  { id: 'colway', label: 'Colway® Dermocosmetics', Icon: Sparkles },
+  { id: 'ultraman', label: 'UltraPerson™ Supplements', Icon: Leaf },
+  { id: 'teletest', label: 'TeleTest® Lab Panels', Icon: Microscope }
 ];
 
 const GOAL_OPTIONS = [
@@ -432,8 +433,10 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
               href={`/vials?collection=${encodeURIComponent(activeCollection)}&view=patient`}
               className="puh-btn puh-btn-ghost"
               style={{ textDecoration: 'none' }}
+              title={isEs ? 'Abrir vista para pacientes' : 'Open Patient View'}
             >
-              <span className="puh-btn-label">Patient View</span>
+              <BookOpen size={14} />
+              <span className="puh-btn-label">{isEs ? 'Vista Paciente' : 'Patient View'}</span>
             </Link>
             <button
               type="button"
@@ -498,7 +501,8 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
         @media (max-width: 768px) {
           .vials-hero-wrap,
           .vials-notice-banner,
-          .vials-desktop-filters {
+          .vials-desktop-filters,
+          .vials-desktop-count {
             display: none !important;
           }
           .vials-mobile-filter-bar {
@@ -544,6 +548,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
             {COLLECTIONS_LIST.map(col => {
               const isSelected = activeCollection === col.id;
+              const ColIcon = col.Icon;
               return (
                 <button
                   key={col.id}
@@ -553,19 +558,18 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    padding: '8px 16px',
+                    padding: '8px 14px',
                     borderRadius: '8px',
-                    fontSize: '0.85rem',
-                    fontWeight: isSelected ? 800 : 600,
+                    fontSize: '0.84rem',
+                    fontWeight: isSelected ? 700 : 500,
                     cursor: 'pointer',
-                    border: isSelected ? '1.5px solid #003666' : '1px solid #cbd5e1',
-                    backgroundColor: isSelected ? '#003666' : '#ffffff',
-                    color: isSelected ? '#ffffff' : '#334155',
-                    boxShadow: isSelected ? '0 2px 6px rgba(0, 54, 102, 0.2)' : 'none',
+                    border: isSelected ? '1px solid #1a73e8' : '1px solid #dadce0',
+                    backgroundColor: isSelected ? '#e8f0fe' : '#ffffff',
+                    color: isSelected ? '#1967d2' : '#3c4043',
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  <span>{col.icon}</span>
+                  {ColIcon && <ColIcon size={14} color={isSelected ? '#1967d2' : '#5f6368'} />}
                   <span>{col.label}</span>
                 </button>
               );
@@ -825,7 +829,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
         </div>
 
         {/* ── Product Grid ── */}
-        <div style={{ marginBottom: '16px', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+        <div className="vials-desktop-count" style={{ marginBottom: '16px', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
           Showing {filteredVials.length} verified formulation{filteredVials.length === 1 ? '' : 's'}
         </div>
 
@@ -1601,14 +1605,18 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
         </div>
       )}
 
-      {/* ── Mobile Filter Bottom Sheet (Google Cloud UX) ── */}
+      {/* ── Mobile Filter Bottom Sheet (100% Google Cloud UX: Sticky Header + Scroll Body + Sticky Reset/Apply Footer) ── */}
       {mobileFiltersOpen && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={isEs ? 'Filtros y Colecciones' : 'Filters & Collections'}
           onClick={() => setMobileFiltersOpen(false)}
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.45)',
+            backgroundColor: 'rgba(15, 23, 42, 0.50)',
+            backdropFilter: 'blur(2px)',
             zIndex: 10050,
             display: 'flex',
             alignItems: 'flex-end',
@@ -1619,152 +1627,213 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
             onClick={(e) => e.stopPropagation()}
             style={{
               width: '100%',
-              maxWidth: '520px',
-              maxHeight: '82vh',
-              overflowY: 'auto',
+              maxWidth: '560px',
+              maxHeight: '86vh',
               background: '#ffffff',
-              borderRadius: '18px 18px 0 0',
-              padding: '16px 18px 24px',
-              boxShadow: '0 -8px 28px rgba(15, 23, 42, 0.2)',
+              borderRadius: '16px 16px 0 0',
+              boxShadow: '0 -10px 30px rgba(15, 23, 42, 0.22)',
               display: 'flex',
               flexDirection: 'column',
-              gap: '16px',
+              overflow: 'hidden',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
-              <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+            {/* Drag Handle */}
+            <div style={{ padding: '8px 16px 0', display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: '36px', height: '4px', background: '#dadce0', borderRadius: '2px' }} />
+            </div>
+
+            {/* Sticky Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e8eaed', padding: '10px 18px 12px', flexShrink: 0 }}>
+              <span style={{ fontSize: '0.96rem', fontWeight: 700, color: '#202124' }}>
                 {isEs ? 'Filtros y Colecciones' : 'Filters & Collections'}
               </span>
               <button
                 type="button"
                 onClick={() => setMobileFiltersOpen(false)}
                 aria-label="Close filters"
-                style={{ border: 'none', background: '#f1f5f9', borderRadius: '999px', width: '34px', height: '34px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#334155' }}
+                style={{ border: 'none', background: '#f1f3f4', borderRadius: '999px', width: '36px', height: '36px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#5f6368' }}
               >
                 <X size={16} />
               </button>
             </div>
 
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
-                {isEs ? 'Colección Clínica' : 'Clinical Collection'}
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {COLLECTIONS_LIST.map((col) => {
-                  const isSelected = activeCollection === col.id;
-                  return (
-                    <button
-                      key={col.id}
-                      type="button"
-                      onClick={() => handleSwitchCollection(col.id)}
-                      style={{
-                        minHeight: '40px',
-                        padding: '6px 12px',
-                        borderRadius: '8px',
-                        fontSize: '0.80rem',
-                        fontWeight: 700,
-                        border: isSelected ? '1.5px solid #003666' : '1px solid #cbd5e1',
-                        background: isSelected ? '#003666' : '#ffffff',
-                        color: isSelected ? '#ffffff' : '#334155',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {col.icon} {col.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Scrollable Body */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              {!isPatientView && (
+                <div>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                    {isEs ? 'Colección Clínica' : 'Clinical Collection'}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {COLLECTIONS_LIST.map((col) => {
+                      const isSelected = activeCollection === col.id;
+                      const ColIcon = col.Icon;
+                      return (
+                        <button
+                          key={col.id}
+                          type="button"
+                          onClick={() => handleSwitchCollection(col.id)}
+                          style={{
+                            minHeight: '38px',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            fontSize: '0.80rem',
+                            fontWeight: isSelected ? 700 : 500,
+                            border: isSelected ? '1px solid #1a73e8' : '1px solid #dadce0',
+                            background: isSelected ? '#e8f0fe' : '#ffffff',
+                            color: isSelected ? '#1967d2' : '#3c4043',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}
+                        >
+                          {ColIcon && <ColIcon size={14} color={isSelected ? '#1967d2' : '#5f6368'} />}
+                          <span>{col.label}</span>
+                          {isSelected && <Check size={13} color="#1967d2" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
-                {isEs ? 'Objetivo Terapéutico' : 'Therapeutic Goal'}
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {GOAL_OPTIONS.map((opt) => {
-                  const isActive = selectedGoal === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => setSelectedGoal(opt.id)}
-                      style={{
-                        minHeight: '40px',
-                        padding: '6px 12px',
-                        borderRadius: '999px',
-                        fontSize: '0.80rem',
-                        fontWeight: 600,
-                        border: isActive ? '1.5px solid #003666' : '1px solid #cbd5e1',
-                        background: isActive ? '#003666' : '#ffffff',
-                        color: isActive ? '#ffffff' : '#334155',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {!isPatientView && (
-              <div>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  {isEs ? 'Especialidad Médica' : 'Medical Specialty'}
+              <div style={{ borderTop: !isPatientView ? '1px solid #e8eaed' : 'none', paddingTop: !isPatientView ? '14px' : 0 }}>
+                <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                  {isEs ? 'Objetivo Terapéutico' : 'Therapeutic Goal'}
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedSpecialty(null)}
-                    style={{
-                      minHeight: '40px',
-                      padding: '6px 12px',
-                      borderRadius: '999px',
-                      fontSize: '0.80rem',
-                      fontWeight: 600,
-                      border: !selectedSpecialty ? '1.5px solid #0d9488' : '1px solid #cbd5e1',
-                      background: !selectedSpecialty ? '#f0fdfa' : '#ffffff',
-                      color: !selectedSpecialty ? '#0f766e' : '#334155',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {isEs ? 'Todas' : 'All'}
-                  </button>
-                  {Object.entries(SPECIALTY_FILTERS).map(([key, spec]) => {
-                    const isActive = selectedSpecialty === key;
+                  {GOAL_OPTIONS.map((opt) => {
+                    const isActive = selectedGoal === opt.id;
                     return (
                       <button
-                        key={key}
+                        key={opt.id}
                         type="button"
-                        onClick={() => setSelectedSpecialty(key)}
+                        onClick={() => setSelectedGoal(opt.id)}
                         style={{
-                          minHeight: '40px',
+                          minHeight: '38px',
                           padding: '6px 12px',
-                          borderRadius: '999px',
+                          borderRadius: '8px',
                           fontSize: '0.80rem',
-                          fontWeight: 600,
-                          border: isActive ? '1.5px solid #0d9488' : '1px solid #cbd5e1',
-                          background: isActive ? '#f0fdfa' : '#ffffff',
-                          color: isActive ? '#0f766e' : '#334155',
+                          fontWeight: isActive ? 700 : 500,
+                          border: isActive ? '1px solid #1a73e8' : '1px solid #dadce0',
+                          background: isActive ? '#e8f0fe' : '#ffffff',
+                          color: isActive ? '#1967d2' : '#3c4043',
                           cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
                         }}
                       >
-                        {spec.label}
+                        {isActive && <Check size={13} color="#1967d2" />}
+                        <span>{opt.label}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
-            )}
 
-            <button
-              type="button"
-              onClick={() => setMobileFiltersOpen(false)}
-              className="gcp-btn-primary"
-              style={{ width: '100%', minHeight: '44px', fontSize: '0.88rem', fontWeight: 700, justifyContent: 'center' }}
-            >
-              {isEs ? `Ver ${filteredVials.length} referencias` : `Show ${filteredVials.length} formulations`}
-            </button>
+              {!isPatientView && (
+                <div style={{ borderTop: '1px solid #e8eaed', paddingTop: '14px' }}>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                    {isEs ? 'Especialidad Médica' : 'Medical Specialty'}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSpecialty(null)}
+                      style={{
+                        minHeight: '38px',
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        fontSize: '0.80rem',
+                        fontWeight: !selectedSpecialty ? 700 : 500,
+                        border: !selectedSpecialty ? '1px solid #1a73e8' : '1px solid #dadce0',
+                        background: !selectedSpecialty ? '#e8f0fe' : '#ffffff',
+                        color: !selectedSpecialty ? '#1967d2' : '#3c4043',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                      }}
+                    >
+                      {!selectedSpecialty && <Check size={13} color="#1967d2" />}
+                      <span>{isEs ? 'Todas' : 'All'}</span>
+                    </button>
+                    {Object.entries(SPECIALTY_FILTERS).map(([key, spec]) => {
+                      const isActive = selectedSpecialty === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => setSelectedSpecialty(key)}
+                          style={{
+                            minHeight: '38px',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            fontSize: '0.80rem',
+                            fontWeight: isActive ? 700 : 500,
+                            border: isActive ? '1px solid #1a73e8' : '1px solid #dadce0',
+                            background: isActive ? '#e8f0fe' : '#ffffff',
+                            color: isActive ? '#1967d2' : '#3c4043',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                          }}
+                        >
+                          {isActive && <Check size={13} color="#1967d2" />}
+                          <span>{spec.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sticky Footer: Reset + Apply CTA (Rule #24) */}
+            <div style={{
+              flexShrink: 0,
+              padding: '12px 18px max(14px, env(safe-area-inset-bottom))',
+              borderTop: '1px solid #e8eaed',
+              background: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedGoal('all');
+                  setSelectedSpecialty(null);
+                  setSearchQuery('');
+                }}
+                disabled={selectedGoal === 'all' && !selectedSpecialty && !searchQuery}
+                className="gcp-btn-secondary"
+                style={{
+                  minHeight: '42px',
+                  padding: '0 14px',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  opacity: (selectedGoal === 'all' && !selectedSpecialty && !searchQuery) ? 0.5 : 1,
+                }}
+              >
+                <RotateCcw size={13} />
+                <span>{isEs ? 'Limpiar' : 'Reset'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(false)}
+                className="gcp-btn-primary"
+                style={{ flex: 1, minHeight: '42px', fontSize: '0.86rem', fontWeight: 700, justifyContent: 'center' }}
+              >
+                {isEs ? `Ver ${filteredVials.length} referencias` : `Show ${filteredVials.length} formulations`}
+              </button>
+            </div>
           </div>
         </div>
       )}

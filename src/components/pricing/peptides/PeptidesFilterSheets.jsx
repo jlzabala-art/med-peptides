@@ -6,6 +6,7 @@ import {
   CATEGORY_ORDER,
   CATEGORY_MAP,
   FDA_FILTERS,
+  MEDICAL_SPECIALTIES,
   SHIPPING_DESTINATIONS,
   DOSAGE_STRENGTHS,
   getCategoryIcon
@@ -32,6 +33,8 @@ export default function PeptidesFilterSheets({
   setShippingDest,
   selectedStrength = 'all',
   setSelectedStrength,
+  selectedSpecialty = 'all',
+  setSelectedSpecialty,
   groupByCategory = true,
   setGroupByCategory,
   processedProducts = [],
@@ -77,6 +80,7 @@ export default function PeptidesFilterSheets({
     if (setSelectedCategory) setSelectedCategory('all');
     if (setSelectedFdaStatus) setSelectedFdaStatus('all');
     if (setSelectedStrength) setSelectedStrength('all');
+    if (setSelectedSpecialty) setSelectedSpecialty('all');
   };
 
   return (
@@ -86,7 +90,7 @@ export default function PeptidesFilterSheets({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1250,
+        zIndex: 10050,
         background: 'rgba(15, 23, 42, 0.55)',
         backdropFilter: 'blur(3px)',
         display: 'flex',
@@ -343,10 +347,7 @@ export default function PeptidesFilterSheets({
                 const isSelected = selectedFdaStatus === f.id;
                 const count = f.id === 'all'
                   ? processedProducts.length
-                  : processedProducts.filter((p) => {
-                      const s = p.compoundingStatus || p.fdaStatus || '';
-                      return s.toLowerCase().includes(f.id.toLowerCase());
-                    }).length;
+                  : processedProducts.filter((p) => p.fdaBucket === f.id).length;
 
                 return (
                   <button
@@ -402,12 +403,12 @@ export default function PeptidesFilterSheets({
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
                   {SHIPPING_DESTINATIONS.map((dest) => {
-                    const isSelected = shippingDest === dest.label || shippingDest === dest.id;
+                    const isSelected = shippingDest === dest.id;
                     return (
                       <button
                         key={dest.id}
                         type="button"
-                        onClick={() => setShippingDest && setShippingDest(dest.label)}
+                        onClick={() => setShippingDest && setShippingDest(dest.id)}
                         style={{
                           padding: '8px 10px',
                           borderRadius: '8px',
@@ -424,7 +425,8 @@ export default function PeptidesFilterSheets({
                         }}
                       >
                         <span style={{ fontSize: '1rem' }}>{dest.flag}</span>
-                        <span>{dest.label}</span>
+                        <span>{isEs ? dest.labelEs : dest.labelEn}</span>
+                        <span style={{ fontSize: '0.66rem', fontFamily: 'monospace', opacity: 0.85 }}>{dest.rateBadge}</span>
                       </button>
                     );
                   })}
@@ -461,6 +463,55 @@ export default function PeptidesFilterSheets({
                   })}
                 </div>
               </div>
+
+              {/* Medical Specialty */}
+              {setSelectedSpecialty && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 750, color: '#1e293b', marginBottom: '6px' }}>
+                    {isEs ? 'Especialidad Médica' : 'Medical Specialty'}
+                  </label>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSpecialty('all')}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        border: selectedSpecialty === 'all' ? '1px solid #1a73e8' : '1px solid #dadce0',
+                        background: selectedSpecialty === 'all' ? '#e8f0fe' : '#ffffff',
+                        color: selectedSpecialty === 'all' ? '#1967d2' : '#3c4043',
+                        fontSize: '0.74rem',
+                        fontWeight: selectedSpecialty === 'all' ? 700 : 500,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isEs ? 'Todas' : 'All'}
+                    </button>
+                    {Object.values(MEDICAL_SPECIALTIES).map((sp) => {
+                      const isSel = selectedSpecialty === sp.id;
+                      return (
+                        <button
+                          key={sp.id}
+                          type="button"
+                          onClick={() => setSelectedSpecialty(sp.id)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            border: isSel ? '1px solid #1a73e8' : '1px solid #dadce0',
+                            background: isSel ? '#e8f0fe' : '#ffffff',
+                            color: isSel ? '#1967d2' : '#3c4043',
+                            fontSize: '0.74rem',
+                            fontWeight: isSel ? 700 : 500,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {isEs ? sp.labelEs : sp.labelEn}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Grouping View */}
               {setGroupByCategory && (
