@@ -508,6 +508,9 @@ export default function PublicLabelsAppClient({
       // If user is actively searching a term/patient/code, do NOT filter out historical database matches
       if (searchQuery && searchQuery.trim().length >= 2) return true;
       if (!maxAgeMs) return true;
+      if (typeof item.importedAtMs === 'number' && item.importedAtMs > 0) {
+        return (mountTimestamp - item.importedAtMs) <= maxAgeMs;
+      }
       const raw = item.importedAt || item.createdAt || item.uploadedAt || item.date;
       if (!raw) return true;
       const ts = typeof raw === 'number' ? raw : raw?.seconds ? raw.seconds * 1000 : Date.parse(raw);
@@ -565,7 +568,8 @@ export default function PublicLabelsAppClient({
   }, [baseWorklistItems, printCountsMap]);
 
   const getImportTimestampMs = useCallback((item) => {
-    const raw = item?.importedAt || item?.createdAt || item?.uploadedAt || item?.updatedAt || item?.date;
+    if (typeof item?.importedAtMs === 'number' && item.importedAtMs > 0) return item.importedAtMs;
+    const raw = item?.importedAt || item?.createdAt || item?.uploadedAt || item?.date;
     if (!raw) return 0;
     if (typeof raw === 'number') return raw;
     if (typeof raw?.toDate === 'function') return raw.toDate().getTime();
@@ -1165,6 +1169,7 @@ export default function PublicLabelsAppClient({
           : 'Import a clinical prescription or Fagron test report directly into Label Studio to review and print labels.'}
         onImported={(created) => {
           setShowImport(false);
+          setWorklistPage(1);
           refreshWorklist?.();
           const first = Array.isArray(created) ? created[0] : null;
           if (first?.id || first?.code) handleSelectOrAddPatient(first.id || first.code, true);

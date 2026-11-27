@@ -175,39 +175,41 @@ export async function GET(request) {
       return null;
     };
 
-    // ── 1. If query is empty, return latest ingested prescriptions from Firestore ordered by importedAt / createTime ──
+    // ── 1. If query is empty, return latest ingested prescriptions from Firestore ordered by exact importedAt / createdAt ──
     if (!query) {
       if (adminDb) {
         try {
-          let snap;
-          try {
-            snap = await adminDb.collection('prescriptions')
-              .orderBy('importedAt', 'desc')
-              .limit(120)
-              .get();
-          } catch {
-            snap = await adminDb.collection('prescriptions')
-              .limit(400)
-              .get();
+          const [importedRes, createdRes] = await Promise.allSettled([
+            adminDb.collection('prescriptions').orderBy('importedAt', 'desc').limit(120).get(),
+            adminDb.collection('prescriptions').orderBy('createdAt', 'desc').limit(120).get(),
+          ]);
+
+          const docMap = new Map();
+          if (importedRes.status === 'fulfilled' && importedRes.value?.docs) {
+            for (const docSnap of importedRes.value.docs) docMap.set(docSnap.id, docSnap);
+          }
+          if (createdRes.status === 'fulfilled' && createdRes.value?.docs) {
+            for (const docSnap of createdRes.value.docs) {
+              if (!docMap.has(docSnap.id)) docMap.set(docSnap.id, docSnap);
+            }
+          }
+          if (docMap.size === 0) {
+            const fallbackSnap = await adminDb.collection('prescriptions').limit(400).get();
+            for (const docSnap of fallbackSnap.docs) docMap.set(docSnap.id, docSnap);
           }
 
-          const sortedDocs = [...snap.docs].sort((a, b) => {
-            const da = a.data();
-            const dbData = b.data();
-            const ta =
-              extractTimestampMs(da.importedAt) ||
-              extractTimestampMs(da.createdAt) ||
-              extractTimestampMs(da.uploadedAt) ||
-              extractTimestampMs(a.createTime) ||
-              extractTimestampMs(da.prescriptionDate || da.date);
-            const tb =
-              extractTimestampMs(dbData.importedAt) ||
-              extractTimestampMs(dbData.createdAt) ||
-              extractTimestampMs(dbData.uploadedAt) ||
-              extractTimestampMs(b.createTime) ||
-              extractTimestampMs(dbData.prescriptionDate || dbData.date);
-            return tb - ta;
-          });
+          const getDocImportMs = (docSnap) => {
+            const d = docSnap.data() || {};
+            return (
+              extractTimestampMs(d.importedAt) ||
+              extractTimestampMs(d.createdAt) ||
+              extractTimestampMs(d.uploadedAt) ||
+              extractTimestampMs(docSnap.createTime) ||
+              extractTimestampMs(d.prescriptionDate || d.date)
+            );
+          };
+
+          const sortedDocs = [...docMap.values()].sort((a, b) => getDocImportMs(b) - getDocImportMs(a));
 
           const seenPatientSignature = new Map();
 
@@ -218,6 +220,7 @@ export async function GET(request) {
             const patName = d.patientName || d.patient?.name || 'Patient';
             const patKey = `${patName.toLowerCase().trim()}::${normCode}`;
             const resolvedTitle = resolveRxTitle(d);
+            const importedAtMs = getDocImportMs(docSnap);
             const importedDateVal = extractDate(
               d.importedAt || d.createdAt || d.uploadedAt || docSnap.createTime || d.updatedAt
             );
@@ -275,6 +278,8 @@ export async function GET(request) {
                 partsCount,
                 date: dateVal,
                 importedAt: importedDateVal,
+                importedAtMs,
+                hasExplicitImport: Boolean(d.importedAt),
                 a4PrintCount: d.a4PrintCount || d.printCount || 0,
                 lastPrintedA4At: extractDate(d.lastPrintedA4At),
                 status: d.status || d.state || 'approved',
@@ -457,6 +462,8 @@ export async function GET(request) {
                 partsCount: resolvePartsCount(d),
                 date: extractDate(d.prescriptionDate || d.date || d.reportDate || d.dispensedDate || d.createdAt || d.created_at),
                 importedAt: extractDate(d.importedAt || d.createdAt || d.uploadedAt || docSnap.createTime || d.updatedAt),
+                importedAtMs: sortTs,
+                hasExplicitImport: Boolean(d.importedAt),
                 a4PrintCount: d.a4PrintCount || d.printCount || 0,
                 lastPrintedA4At: extractDate(d.lastPrintedA4At),
                 status: d.status || d.state || 'approved',

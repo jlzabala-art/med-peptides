@@ -1409,12 +1409,13 @@ export default function LabelsHomeView({
                   },
                   {
                     key: 'printStatus',
-                    label: isEs ? 'Impresión / Importado' : 'Print / Imported',
+                    label: isEs ? 'Impresión / Importado ↓' : 'Print / Imported ↓',
                     align: 'left',
-                    width: '14%',
+                    width: '15%',
                     render: (_val, p) => {
-                      const rawDate = p.importedAt || p.createdAt || p.uploadedAt || p.updatedAt || p.date;
+                      const rawDate = p.importedAtMs || p.importedAt || p.createdAt || p.uploadedAt || p.date;
                       const ms = (() => {
+                        if (typeof p.importedAtMs === 'number' && p.importedAtMs > 0) return p.importedAtMs;
                         if (!rawDate) return 0;
                         if (typeof rawDate === 'number') return rawDate;
                         if (typeof rawDate?.toDate === 'function') return rawDate.toDate().getTime();
@@ -1423,9 +1424,11 @@ export default function LabelsHomeView({
                         const t = Date.parse(String(rawDate));
                         return Number.isNaN(t) ? 0 : t;
                       })();
-                      const dateStr = formatResultDate(rawDate) || (ms > 0
-                        ? new Date(ms).toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                        : '');
+                      const dateObj = ms > 0 ? new Date(ms) : null;
+                      const hasPreciseTime = Boolean(dateObj && (dateObj.getUTCHours() !== 0 || dateObj.getUTCMinutes() !== 0));
+                      const dateStr = dateObj
+                        ? `${dateObj.toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short' })}${hasPreciseTime ? ` · ${dateObj.toLocaleTimeString(isEs ? 'es-ES' : 'en-GB', { hour: '2-digit', minute: '2-digit' })}` : ''}`
+                        : (formatResultDate(rawDate) || '');
                       const isRecentImport = ms > 0 && (Date.now() - ms) < 24 * 60 * 60 * 1000;
                       const hasShippingConfigured = Boolean(
                         p.shippingTitle ||
@@ -1439,8 +1442,11 @@ export default function LabelsHomeView({
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
                             {renderPrintStatusBadge(p.code, p.a4PrintCount)}
                             {isRecentImport && (
-                              <span style={{ fontSize: '0.60rem', fontWeight: 800, color: '#0f766e', background: '#ccfbf1', padding: '1px 5px', borderRadius: '4px' }}>
-                                NEW
+                              <span
+                                style={{ fontSize: '0.60rem', fontWeight: 750, color: '#1967d2', background: '#e8f0fe', border: '1px solid #d2e3fc', padding: '1px 5px', borderRadius: '4px' }}
+                                title={isEs ? 'Importada en las últimas 24 h' : 'Imported in the last 24h'}
+                              >
+                                {isEs ? 'Reciente' : 'Recent'}
                               </span>
                             )}
                             {hasShippingConfigured && (
