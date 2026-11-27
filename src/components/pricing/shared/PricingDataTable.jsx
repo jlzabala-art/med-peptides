@@ -16,7 +16,6 @@ export default function PricingDataTable({
   products = [],
   viewMode = 'table',
   skuPrefixPattern = /^SKU-COLWAY-/i,
-  loginRedirect = '/pricing/colway',
   currency = 'AED',
   fxRate = 1,
   formatPrice,
@@ -275,17 +274,13 @@ export default function PricingDataTable({
     currency,
     formatPrice,
     fxRate,
-    getWorkspaceQty,
     isAdmin,
     isClinicOrDoctor,
     isGuest,
-    isWholesaler,
-    loginRedirect,
     onSyncWorkspaceQuote,
     onSaveInlinePrice,
     router,
     showLandedCost,
-    skuPrefixPattern,
   ]);
 
   const renderExpandedDetail = (row) => {

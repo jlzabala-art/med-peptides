@@ -3,7 +3,7 @@
 import React from 'react';
 import { Globe, ShieldCheck } from 'lucide-react';
 import { usePricing } from '@/hooks/usePricing';
-import { PRICING_MARKETS } from '@/constants/roles';
+import { getPricingMarketMeta } from '@/constants/roles';
 
 const ROLE_DISPLAY = Object.freeze({
   admin: { en: 'Admin (All Tiers)', es: 'Admin (Todas las tarifas)' },
@@ -29,10 +29,7 @@ export default function ActivePricingContextBadge({
   const { pricingRole, market: sessionMarket, isSimulating } = usePricing();
   const isEs = lang === 'es';
   const activeMarket = marketOverride || sessionMarket || 'global';
-  const marketMeta =
-    PRICING_MARKETS.find((m) => m.id === activeMarket) ||
-    PRICING_MARKETS[0] ||
-    { id: 'global', labelEn: 'Global / EU', labelEs: 'Global / UE', badge: 'GLB' };
+  const marketMeta = getPricingMarketMeta(activeMarket);
   const roleMeta = ROLE_DISPLAY[pricingRole] || ROLE_DISPLAY.wholeseller;
 
   return (

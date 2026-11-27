@@ -61,6 +61,23 @@ export default function PeptidesPriceListClient({
   // Modal / Drawer UI state
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [viewMode, setViewMode] = useState(initialViewMode === 'cards' ? 'cards' : 'table');
+  const [copied, setCopied] = useState(false);
+  const [copiedPitch, setCopiedPitch] = useState(false);
+  const [selectedProtocol, setSelectedProtocol] = useState(null);
+  const [selectedSpecsProduct, setSelectedSpecsProduct] = useState(null);
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
+  const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
+  const [aiContextProduct, setAiContextProduct] = useState(null);
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [inquiryProductContext, setInquiryProductContext] = useState(null);
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+  const [isFdaSheetOpen, setIsFdaSheetOpen] = useState(false);
+  const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
+  const [isMobileMoreMenuOpen, setIsMobileMoreMenuOpen] = useState(false);
+  const [isCurrencySheetOpen, setIsCurrencySheetOpen] = useState(false);
+  const [isMobileKpiExpanded, setIsMobileKpiExpanded] = useState(false);
+  const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
+  const [groupByCategory, setGroupByCategory] = useState(true);
 
   const handleViewModeChange = useCallback((nextMode) => {
     const normalized = nextMode === 'cards' ? 'cards' : 'table';
@@ -106,23 +123,6 @@ export default function PeptidesPriceListClient({
       window.removeEventListener('open-public-atlas-ai', onOpenAtlasAi);
     };
   }, []);
-  const [copied, setCopied] = useState(false);
-  const [copiedPitch, setCopiedPitch] = useState(false);
-  const [selectedProtocol, setSelectedProtocol] = useState(null);
-  const [selectedSpecsProduct, setSelectedSpecsProduct] = useState(null);
-  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
-  const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
-  const [aiContextProduct, setAiContextProduct] = useState(null);
-  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
-  const [inquiryProductContext, setInquiryProductContext] = useState(null);
-  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
-  const [isFdaSheetOpen, setIsFdaSheetOpen] = useState(false);
-  const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
-  const [isMobileMoreMenuOpen, setIsMobileMoreMenuOpen] = useState(false);
-  const [isCurrencySheetOpen, setIsCurrencySheetOpen] = useState(false);
-  const [isMobileKpiExpanded, setIsMobileKpiExpanded] = useState(false);
-  const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
-  const [groupByCategory, setGroupByCategory] = useState(true);
 
   // Order submission & contact form state
   const [submittingOrder, setSubmittingOrder] = useState(false);

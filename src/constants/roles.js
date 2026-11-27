@@ -250,3 +250,8 @@ export function marketToCountryCode(market) {
   if (norm === 'us') return 'US';
   return 'EU';
 }
+
+export function getPricingMarketMeta(marketId) {
+  const norm = normalizePricingMarket(marketId);
+  return PRICING_MARKETS.find((m) => m.id === norm) || PRICING_MARKETS[0];
+}

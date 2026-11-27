@@ -6,27 +6,26 @@ import { normalizePricingMarket } from '@/constants/roles';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SharedPricingLinkRedirectPage({ params }) {
-  const { token } = await params;
-  const cleanToken = String(token || '').trim();
-
+async function resolveShareGrant(cleanToken) {
   if (!cleanToken || !adminDb) {
-    return <ExpiredLinkView reason="This private schedule link is invalid or unavailable." />;
+    return { ok: false, reason: 'This private schedule link is invalid or unavailable.' };
   }
 
-  let data = null;
   try {
     const ref = adminDb.collection('shared_pricing_links').doc(cleanToken);
     const snap = await ref.get();
     if (!snap.exists) {
-      return <ExpiredLinkView reason="This private schedule link does not exist or has been removed." />;
+      return { ok: false, reason: 'This private schedule link does not exist or has been removed.' };
     }
-    data = snap.data() || {};
+    const data = snap.data() || {};
     if (data.revoked) {
-      return <ExpiredLinkView reason="This private schedule link has been revoked by Atlas Health Services." />;
+      return { ok: false, reason: 'This private schedule link has been revoked by Atlas Health Services.' };
     }
     if (data.expiresAt && new Date(data.expiresAt).getTime() < Date.now()) {
-      return <ExpiredLinkView reason="This private schedule link has expired. Please request a fresh link from your Atlas representative." />;
+      return {
+        ok: false,
+        reason: 'This private schedule link has expired. Please request a fresh link from your Atlas representative.',
+      };
     }
 
     // Track view asynchronously (non-blocking)
@@ -37,11 +36,24 @@ export default async function SharedPricingLinkRedirectPage({ params }) {
       },
       { merge: true }
     ).catch(() => {});
+
+    return { ok: true, data };
   } catch (err) {
     console.error('[s/[token]] lookup error:', err);
-    return <ExpiredLinkView reason="Unable to verify this schedule link right now." />;
+    return { ok: false, reason: 'Unable to verify this schedule link right now.' };
+  }
+}
+
+export default async function SharedPricingLinkRedirectPage({ params }) {
+  const { token } = await params;
+  const cleanToken = String(token || '').trim();
+  const result = await resolveShareGrant(cleanToken);
+
+  if (!result.ok) {
+    return <ExpiredLinkView reason={result.reason} />;
   }
 
+  const data = result.data;
   const baseRoute = String(data.route || '/pricing/peptides').startsWith('/')
     ? String(data.route || '/pricing/peptides')
     : '/pricing/peptides';

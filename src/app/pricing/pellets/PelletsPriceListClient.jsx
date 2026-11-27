@@ -342,6 +342,12 @@ export default function PelletsPriceListClient({
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const [copiedPelletUrl, setCopiedPelletUrl] = useState(false);
   const [copiedPelletWhatsApp, setCopiedPelletWhatsApp] = useState(false);
+  const [cartItems, setCartItems] = useState({}); // { [id]: { single: number, pack10: number } }
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
+  const [scopeMode, setScopeMode] = useState('all'); // 'all' | 'filtered'
+  const [showMobileSpecs, setShowMobileSpecs] = useState(false);
+  const [isMobileKpiExpanded, setIsMobileKpiExpanded] = useState(false);
 
   // Hydrate initial search/category/profile from URL query params (?q=..., ?category=..., ?profile=...)
   useEffect(() => {
@@ -359,12 +365,6 @@ export default function PelletsPriceListClient({
       setScopeMode('filtered');
     }
   }, []);
-  const [cartItems, setCartItems] = useState({}); // { [id]: { single: number, pack10: number } }
-  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
-  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
-  const [scopeMode, setScopeMode] = useState('all'); // 'all' | 'filtered'
-  const [showMobileSpecs, setShowMobileSpecs] = useState(false);
-  const [isMobileKpiExpanded, setIsMobileKpiExpanded] = useState(false);
 
   const isEs = lang === 'es';
 

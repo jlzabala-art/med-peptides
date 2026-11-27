@@ -34,10 +34,13 @@ export default function AtlasAiFooterBar({
   const [domTitle, setDomTitle] = useState('');
 
   useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const h1 = document.querySelector('main h1, h1')?.textContent?.trim();
-    const cleanedDocTitle = (document.title || '').split('|')[0].split('·')[0].trim();
-    setDomTitle(h1 || cleanedDocTitle || '');
+    if (typeof document === 'undefined' || typeof window === 'undefined') return undefined;
+    const rafId = window.requestAnimationFrame(() => {
+      const h1 = document.querySelector('main h1, h1')?.textContent?.trim();
+      const cleanedDocTitle = (document.title || '').split('|')[0].split('·')[0].trim();
+      setDomTitle(h1 || cleanedDocTitle || '');
+    });
+    return () => window.cancelAnimationFrame(rafId);
   }, [pathname]);
 
   const contextTitle = useMemo(() => {

@@ -49,7 +49,6 @@ export function resolveFallbackContextTitle(pathname = '/', domTitle = '', isEs 
 export function getContextualAtlasChips({
   pathname = '/',
   screenContext = null,
-  pricingRole = 'wholeseller',
   market = 'global',
   lang = 'en',
 } = {}) {

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
-import { PRICING_MARKETS } from '../../../constants/roles';
+import { PRICING_MARKETS, getPricingMarketMeta } from '../../../constants/roles';
 import { Users, ChevronDown, Eye, X, Globe, Share2, Check } from '@/lib/icons';
 import toast from 'react-hot-toast';
 
@@ -46,7 +46,7 @@ export default function RoleSimulationDropdown() {
   };
 
   const activeRoleData = ALL_ROLES.find((r) => r.id === simulatedRole);
-  const activeMarketData = PRICING_MARKETS.find((m) => m.id === simulatedMarket);
+  const activeMarketData = simulatedMarket ? getPricingMarketMeta(simulatedMarket) : null;
   const hasSimulation = Boolean(simulatedRole || simulatedMarket);
 
   // Close dropdown on outside click

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAdminRoleSimulation } from '@/hooks/admin/useAdminRoleSimulation';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, X, ShieldAlert, LogOut } from '@/lib/icons';
-import { normalizeRole, ROLE_METADATA, PRICING_MARKETS } from '@/constants/roles';
+import { normalizeRole, ROLE_METADATA, getPricingMarketMeta } from '@/constants/roles';
 
 export default function ImpersonationBanner() {
   const pathname = usePathname();
@@ -39,7 +39,7 @@ export default function ImpersonationBanner() {
 
   const canonicalRoleKey = normalizeRole(simulatedRole);
   const roleLabel = ROLE_METADATA[canonicalRoleKey]?.label || simulatedRole?.toUpperCase() || 'PREVIEW';
-  const marketMeta = PRICING_MARKETS.find((m) => m.id === simulatedMarket);
+  const marketMeta = simulatedMarket ? getPricingMarketMeta(simulatedMarket) : null;
 
   return (
     <div

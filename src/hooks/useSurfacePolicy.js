@@ -19,7 +19,8 @@ export function useSurfacePolicy() {
   const [hasShareGrant, setHasShareGrant] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return undefined;
+    let active = true;
     const urlHasToken = new URLSearchParams(window.location.search).has('share_token');
     let storageHasGrant = false;
     try {
@@ -27,7 +28,14 @@ export function useSurfacePolicy() {
     } catch {
       // ignore storage errors
     }
-    setHasShareGrant(!user && (urlHasToken || storageHasGrant));
+    Promise.resolve().then(() => {
+      if (active) {
+        setHasShareGrant(!user && (urlHasToken || storageHasGrant));
+      }
+    });
+    return () => {
+      active = false;
+    };
   }, [user]);
 
   return useMemo(

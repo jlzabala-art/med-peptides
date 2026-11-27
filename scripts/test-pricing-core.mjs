@@ -20,6 +20,7 @@ import {
   resolvePriceForSession,
 } from '../src/lib/pricing/pricingCore.js';
 import { convertCurrency, FX_RATES_FROM_EUR } from '../src/constants/fxRates.js';
+import { getPricingMarketMeta } from '../src/constants/roles.js';
 
 const sampleProduct = {
   id: 'test-prod-1',
@@ -96,4 +97,15 @@ const sampleProduct = {
   assert.equal(ATLAS_MARGIN_RATES.WHOLESELLER_COMPOUND, 1.3225);
 }
 
-console.log('✅ All 6 Atlas Pricing Core invariants PASSED (15%+15% wholeseller, global isolation, regional overrides, simulation precedence, FX).');
+// 7. getPricingMarketMeta always returns safe object with labelEn and badge
+{
+  for (const input of ['qatar', 'QA', null, 'unknown']) {
+    const meta = getPricingMarketMeta(input);
+    assert.ok(meta && typeof meta.labelEn === 'string' && meta.labelEn.length > 0);
+    assert.ok(typeof meta.badge === 'string' && meta.badge.length > 0);
+  }
+  assert.equal(getPricingMarketMeta('QA').id, 'qatar');
+  assert.equal(getPricingMarketMeta(null).id, 'global');
+}
+
+console.log('✅ All 7 Atlas Pricing Core invariants PASSED (15%+15% wholeseller, global isolation, regional overrides, simulation precedence, FX, safe market metadata).');

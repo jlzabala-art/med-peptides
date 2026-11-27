@@ -127,7 +127,7 @@ export default async function BloodoPricingPage({ searchParams }) {
   const rawCurrency = String(resolvedSearch?.currency || 'EUR').toUpperCase();
   const initialCurrency = ['EUR', 'USD', 'AED'].includes(rawCurrency) ? rawCurrency : 'EUR';
 
-  let products = [];
+  const products = [];
   if (adminDb) {
     try {
       const snap = await adminDb.collection('products').get();

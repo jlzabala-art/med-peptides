@@ -39,19 +39,34 @@ export function usePricing({ currency = 'EUR', fxRate = 1, market: marketOverrid
     let active = true;
     const params = new URLSearchParams(window.location.search);
     const urlToken = params.get('share_token');
+    let cachedMatch = null;
     try {
       const cachedRaw = sessionStorage.getItem('atlas_share_pricing_grant');
       if (cachedRaw) {
         const parsed = JSON.parse(cachedRaw);
         if (parsed && (!urlToken || parsed.token === urlToken)) {
-          setShareGrant(parsed);
-          if (!urlToken) return undefined;
+          cachedMatch = parsed;
         }
       }
     } catch {
       // ignore storage errors
     }
-    if (!urlToken) return undefined;
+
+    if (cachedMatch) {
+      Promise.resolve().then(() => {
+        if (active) setShareGrant(cachedMatch);
+      });
+      if (!urlToken) {
+        return () => {
+          active = false;
+        };
+      }
+    }
+    if (!urlToken) {
+      return () => {
+        active = false;
+      };
+    }
 
     fetch(`/api/shares/pricing-link?token=${encodeURIComponent(urlToken)}`)
       .then((res) => (res.ok ? res.json() : null))

@@ -19,7 +19,6 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
 import CopyableId from '@/components/ui/CopyableId';
 import Breadcrumb from '@/components/ui/Breadcrumb';
@@ -38,18 +37,8 @@ export default function MagentaQuotationClient() {
     selectedQuoteId === 'QT-MAG-20261127'
       ? MAGENTA_OFFICIAL_QUOTATION_20261127
       : MAGENTA_OFFICIAL_QUOTATION_202611;
-  const [copied, setCopied] = useState(false);
   const [showInternalAudit, setShowInternalAudit] = useState(false);
   const showAudit = Boolean(canSeeCostTier && showInternalAudit);
-
-  const handleCopyLink = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      toast.success('Official quotation link copied to clipboard');
-      setTimeout(() => setCopied(false), 2500);
-    }
-  };
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {

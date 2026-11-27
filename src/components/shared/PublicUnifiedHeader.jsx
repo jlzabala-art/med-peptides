@@ -302,6 +302,9 @@ export default function PublicUnifiedHeader({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [anchorTabs, controlledActiveAnchorId]);
 
+  // Currency selector state & handler (EUR / USD / AED)
+  const [internalCurrency, setInternalCurrency] = useState(currency || workspace?.currency || 'USD');
+
   const effectiveLang = workspace?.lang || lang || 'en';
   const effectiveCurrency = currency || workspace?.currency || internalCurrency || 'USD';
 
@@ -316,9 +319,6 @@ export default function PublicUnifiedHeader({
     }
   };
 
-  // Currency selector state & handler (EUR / USD / AED)
-  const [internalCurrency, setInternalCurrency] = useState(currency || workspace?.currency || 'USD');
-
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
@@ -331,7 +331,9 @@ export default function PublicUnifiedHeader({
           ? storedCur
           : (currency || workspace?.currency || 'USD');
       setInternalCurrency(resolved);
-    } catch (_e) {}
+    } catch {
+      /* ignore storage access errors */
+    }
   }, [currency, workspace?.currency]);
 
   const handleCurrencyChange = (nextCurrency) => {

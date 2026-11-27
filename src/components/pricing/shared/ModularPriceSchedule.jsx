@@ -8,7 +8,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { usePricing } from '@/hooks/usePricing';
-import { PRICING_MARKETS } from '@/constants/roles';
+import { getPricingMarketMeta } from '@/constants/roles';
 import { useCurrencyConverter } from '@/hooks/pricing/useCurrencyConverter';
 import { useBrandPriceSchedule } from '@/hooks/pricing/useBrandPriceSchedule';
 import { updateProductSchedulePriceAction } from '@/actions/pricingActions';
@@ -49,7 +49,6 @@ export default function ModularPriceSchedule({
     storageNamespace = 'colway_uae_pricing',
     exportBrandTitle = 'Colway UAE',
     exportFilePrefix = 'Colway_UAE_Price_Schedule',
-    whatsappHeader = '*COLWAY CLINICAL DERMA — OFFICIAL UAE B2B WHOLESALE SCHEDULE*',
     persistInlineEdits = true,
   } = config;
 
@@ -171,7 +170,6 @@ export default function ModularPriceSchedule({
 
   const getSchedulePdfBlob = useCallback(() => {
     const showClinic = !isGuest && isClinicOrDoctor;
-    const showRetail = !isGuest;
 
     const head = isAdmin
       ? ['#', 'SKU', 'Product', `Cost (${currency})`, `Wholeseller (${currency})`, `Distributor (${currency})`, `Clinic (${currency})`, `Retail MSRP (${currency})`]
@@ -217,10 +215,7 @@ export default function ModularPriceSchedule({
       rightAlignCols.push(i);
     }
 
-    const marketMeta =
-      PRICING_MARKETS.find((m) => m.id === sessionMarket) ||
-      PRICING_MARKETS[0] ||
-      { id: 'global', labelEn: 'Global / EU', badge: 'GLB' };
+    const marketMeta = getPricingMarketMeta(sessionMarket);
     const tierLabel = isAdmin
       ? 'Admin Master Schedule'
       : pricingRole === 'distributor'
@@ -277,24 +272,6 @@ export default function ModularPriceSchedule({
     ].join('\n');
     navigator.clipboard.writeText(pitch);
     toast.success(t('WhatsApp Pitch (no prices) copied!', '¡Pitch de WhatsApp (sin precios) copiado!'));
-  };
-
-  const handleWhatsAppShare = () => {
-    const shareUrl =
-      typeof window !== 'undefined'
-        ? window.location.href
-        : `https://www.atlashealth-services.com${loginRedirect}`;
-    const text = encodeURIComponent(
-      `${whatsappHeader}\n\n` +
-        processedProducts
-          .map(
-            (p) =>
-              `• ${p.name} (${p.volume || 'Unit'}): ${formatPrice(p.calculatedWholesale)}`
-          )
-          .join('\n') +
-        `\n\nFull verified catalog:\n${shareUrl}`
-    );
-    window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
   const handleSyncWorkspaceQuote = useCallback((product, nextQty) => {
