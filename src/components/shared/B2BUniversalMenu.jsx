@@ -26,6 +26,7 @@ import {
   getActiveDomainId
 } from '@/constants/b2bNavigationGraph';
 import { useActiveClinicalStore } from '@/store/useActiveClinicalStore';
+import { useSurfacePolicy } from '@/hooks/useSurfacePolicy';
 
 /**
  * B2BUniversalMenu
@@ -43,6 +44,7 @@ export default function B2BUniversalMenu({
   hideMobileBar = false
 }) {
   const pathname = usePathname() || '/';
+  const { canSeeB2BDrawer } = useSurfacePolicy();
   const [isPatientRoute, setIsPatientRoute] = useState(false);
   const [internalOpen, setInternalOpen] = useState(false);
 
@@ -80,6 +82,7 @@ export default function B2BUniversalMenu({
   );
 
   useEffect(() => {
+    if (!canSeeB2BDrawer) return undefined;
     const onKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
         e.preventDefault();
@@ -100,7 +103,7 @@ export default function B2BUniversalMenu({
     }
   };
 
-  if (isPatientRoute) {
+  if (!canSeeB2BDrawer || isPatientRoute) {
     return null;
   }
 

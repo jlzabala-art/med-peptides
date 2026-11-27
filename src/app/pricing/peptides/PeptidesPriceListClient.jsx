@@ -99,7 +99,12 @@ export default function PeptidesPriceListClient({
       }
     };
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    const onOpenAtlasAi = () => setIsAtlasAiOpen(true);
+    window.addEventListener('open-public-atlas-ai', onOpenAtlasAi);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('open-public-atlas-ai', onOpenAtlasAi);
+    };
   }, []);
   const [copied, setCopied] = useState(false);
   const [copiedPitch, setCopiedPitch] = useState(false);

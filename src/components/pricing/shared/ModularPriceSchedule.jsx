@@ -17,6 +17,7 @@ import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import ClinicalFormatSwitcher from './ClinicalFormatSwitcher';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import PricingKpiStrip from './PricingKpiStrip';
+import ActivePricingContextBadge from './ActivePricingContextBadge';
 import PricingDataTable from './PricingDataTable';
 import PricingExportModal from './PricingExportModal';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
@@ -344,6 +345,7 @@ export default function ModularPriceSchedule({
           ]}
           actions={
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <ActivePricingContextBadge currency={currency} lang={workspace?.lang || 'en'} />
               <button type="button" className="gcp-btn-secondary" onClick={() => setIsPdfPreviewOpen(true)} style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650 }}>
                 {t('Preview PDF', 'Vista Previa PDF')}
               </button>

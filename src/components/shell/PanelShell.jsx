@@ -11,6 +11,7 @@ import IOSPushBanner from '../ui/IOSPushBanner';
 import OfflineSyncProvider from '../shared/OfflineSyncProvider';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import AtlasAIDrawer from '../shared/AtlasAIDrawer';
+import AtlasAiFooterBar from '../shared/AtlasAiFooterBar';
 
 const GlobalQuickCreateHandler = dynamic(() => import('../shared/GlobalQuickCreateHandler'), { ssr: false });
 const PushNotificationPrompt = dynamic(() => import('../ui/PushNotificationPrompt'), { ssr: false });
@@ -126,6 +127,22 @@ export default function PanelShell({
         >
           {children}
         </PortalLayout>
+        <AtlasAiFooterBar
+          compact={true}
+          portalContextTitle={pageContext || portalTitle || 'Atlas Portal'}
+          onOpenPortalDrawer={(initialPrompt) => {
+            setIsAiDrawerOpen(true);
+            if (initialPrompt && typeof window !== 'undefined') {
+              setTimeout(() => {
+                window.dispatchEvent(
+                  new CustomEvent('open-atlas-ai', {
+                    detail: { query: initialPrompt, initialPrompt },
+                  })
+                );
+              }, 80);
+            }
+          }}
+        />
         <GlobalQuickCreateHandler />
       </div>
     </OfflineSyncProvider>

@@ -85,6 +85,7 @@ export function AtlasContextProvider({ children }) {
   }, []);
 
   const openAtlasAi = useCallback((overrideCtx = null) => {
+    const initialPrompt = overrideCtx?.initialPrompt || null;
     if (overrideCtx) {
       setScreenContext((prev) => ({ ...(prev || {}), ...overrideCtx, updatedAt: Date.now() }));
       if (typeof window !== 'undefined') {
@@ -92,8 +93,9 @@ export function AtlasContextProvider({ children }) {
       }
     }
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
-      window.dispatchEvent(new CustomEvent('open-atlas-ai'));
+      const detail = initialPrompt ? { initialPrompt, context: overrideCtx } : (overrideCtx || null);
+      window.dispatchEvent(new CustomEvent('open-public-atlas-ai', { detail }));
+      window.dispatchEvent(new CustomEvent('open-atlas-ai', { detail }));
     }
   }, []);
 

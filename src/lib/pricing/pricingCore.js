@@ -10,7 +10,7 @@
  *   3. Admin                   -> Always exposes all 3 prices: Cost, Wholeseller, Distributor
  */
 
-import { marketToCountryCode, normalizePricingMarket } from '@/constants/roles';
+import { marketToCountryCode, normalizePricingMarket } from '../../constants/roles.js';
 
 export const ATLAS_MARGIN_RATES = Object.freeze({
   DISTRIBUTOR_MARKUP: 0.15,      // +15% over cost (× 1.15)

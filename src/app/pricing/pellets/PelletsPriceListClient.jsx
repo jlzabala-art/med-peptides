@@ -44,20 +44,9 @@ import { usePricing } from '@/hooks/usePricing';
 import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import { FX_RATES_FROM_EUR, CURRENCY_SYMBOLS } from '@/constants/fxRates';
 
 import './PelletsPriceList.css';
-
-const FX_RATES_FROM_EUR = {
-  EUR: 1.0,
-  USD: 1.087,
-  AED: 3.992
-};
-
-const CURRENCY_SYMBOLS = {
-  EUR: '€',
-  USD: '$',
-  AED: 'AED '
-};
 
 /**
  * PelletMobileCard — Symmetric 2-Zone Stripe / GCP Mobile Product Card

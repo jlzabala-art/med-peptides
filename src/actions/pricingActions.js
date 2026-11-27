@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { FX_RATES_FROM_EUR } from '@/constants/fxRates';
 
 function isComboProduct(p) {
   const id = String(p.id || '').toLowerCase();
@@ -23,7 +24,7 @@ function isComboProduct(p) {
 
 function normalizeProductDoc(id, d, fallback = {}) {
   const pricingUae = d.pricing_uae || {};
-  const derivedAedFromEur = d.costPriceEur ? Number((Number(d.costPriceEur) * 3.98).toFixed(4)) : 0;
+  const derivedAedFromEur = d.costPriceEur ? Number((Number(d.costPriceEur) * FX_RATES_FROM_EUR.AED).toFixed(4)) : 0;
   const landedCostAed = Number(
     d.landedCostAed ?? pricingUae.landedCostAed ?? d.cost ?? (derivedAedFromEur || fallback.landedCostAed || 0)
   );
@@ -52,19 +53,35 @@ function normalizeProductDoc(id, d, fallback = {}) {
     strengthTiers: d.strengthTiers || fallback.strengthTiers || null,
     allStrengths: Array.isArray(d.allStrengths) ? d.allStrengths : fallback.allStrengths || [],
     landedCostAed,
+    distributorPriceAed: Number(
+      d.distributorPriceAed ??
+        pricingUae.distributorPriceAed ??
+        fallback.distributorPriceAed ??
+        Number((landedCostAed * 1.15).toFixed(2))
+    ),
     wholesalePriceAed: Number(
       d.wholesalePriceAed ??
         pricingUae.wholesalePriceAed ??
         d.wholesale_price ??
         fallback.wholesalePriceAed ??
-        Number((landedCostAed * 1.15).toFixed(2))
+        Number((landedCostAed * 1.3225).toFixed(2))
     ),
     clinicPriceAed: Number(
-      d.clinicPriceAed ?? pricingUae.clinicPriceAed ?? fallback.clinicPriceAed ?? Number((landedCostAed * 1.3225).toFixed(2))
+      d.clinicPriceAed ??
+        pricingUae.clinicPriceAed ??
+        fallback.clinicPriceAed ??
+        Number((landedCostAed * 1.3225 * 1.15).toFixed(2))
     ),
     retailPriceAed: Number(
-      d.retailPriceAed ?? pricingUae.retailPriceAed ?? d.price ?? fallback.retailPriceAed ?? Number((landedCostAed * 1.55).toFixed(2))
+      d.retailPriceAed ??
+        pricingUae.retailPriceAed ??
+        d.price ??
+        fallback.retailPriceAed ??
+        Number((landedCostAed * 1.3225 * 1.15 * 1.30).toFixed(2))
     ),
+    pricing: d.pricing || fallback.pricing || null,
+    byMarket: d.byMarket || d.pricing?.byMarket || fallback.byMarket || null,
+    byCountry: d.byCountry || d.pricing?.byCountry || fallback.byCountry || null,
     variants: Array.isArray(d.variants) ? d.variants : fallback.variants || [],
     image: d.heroImage || d.imageUrl || d.image || fallback.image || '',
     stockStatus: d.stockStatus || fallback.stockStatus || 'In Stock (EU / International)',

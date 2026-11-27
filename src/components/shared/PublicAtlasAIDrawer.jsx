@@ -435,8 +435,9 @@ export default function PublicAtlasAIDrawer({
         return;
       }
       setInternalIsOpen(true);
-      if (e.detail?.initialQuery) {
-        setMessage(e.detail.initialQuery);
+      const incomingPrompt = e.detail?.initialQuery || e.detail?.initialPrompt || e.detail?.query;
+      if (incomingPrompt) {
+        setMessage(incomingPrompt);
         setActiveTab('chat');
       }
     };

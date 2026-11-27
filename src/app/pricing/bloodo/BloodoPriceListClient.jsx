@@ -30,22 +30,12 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
+import ActivePricingContextBadge from '@/components/pricing/shared/ActivePricingContextBadge';
 import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
 import { usePricing } from '@/hooks/usePricing';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
-
-const FX_RATES_FROM_EUR = {
-  EUR: 1.0,
-  USD: 1.087,
-  AED: 3.992,
-};
-
-const CURRENCY_SYMBOLS = {
-  EUR: '€',
-  USD: '$',
-  AED: 'AED ',
-};
+import { FX_RATES_FROM_EUR, CURRENCY_SYMBOLS } from '@/constants/fxRates';
 
 export default function BloodoPriceListClient({
   initialProducts = [],
@@ -378,6 +368,7 @@ export default function BloodoPriceListClient({
           }
           actions={
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <ActivePricingContextBadge currency={currency} lang={lang} />
               <button type="button" className="gcp-btn-secondary" onClick={() => setIsPdfPreviewOpen(true)}>
                 <FileText size={14} />
                 <span>{isEs ? 'Tarifa PDF' : 'Download PDF'}</span>

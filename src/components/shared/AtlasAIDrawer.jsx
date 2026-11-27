@@ -9,6 +9,9 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { useScreenAIContext } from '../../hooks/useScreenAIContext';
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore';
 import notifier from '@/services/NotificationService';
+import { getContextualAtlasChips } from '@/constants/atlasAiContextChips';
+import { usePricing } from '@/hooks/usePricing';
+import '@/styles/atlasAiDrawerGcp.css';
 
 function renderFormattedMessage(text, router, onClose) {
   if (!text) return null;
@@ -196,17 +199,24 @@ export default function AtlasAIDrawer({ isOpen, onClose }) {
     }
   }, [messages, isOpen]);
 
-  // Screen-tailored suggested prompts
-  const suggestedPrompts = screenAI.suggestedPrompts || [
-    'How do I calculate reconstitution units for a 5mg vial?',
-    'What synergistic supplements pair well with BPC-157?',
-  ];
+  const { pricingRole, market } = usePricing();
+  // Screen-tailored suggested prompts (unified Google Cloud UX contextual chips)
+  const contextualChips = getContextualAtlasChips({
+    pathname,
+    pricingRole,
+    market,
+    lang: 'en',
+  });
+  const suggestedPrompts =
+    screenAI.suggestedPrompts && screenAI.suggestedPrompts.length > 0
+      ? screenAI.suggestedPrompts
+      : contextualChips.map((c) => c.prompt);
 
   const handleSendMessageRef = useRef(null);
 
   useEffect(() => {
     const handleOpenAI = (e) => {
-      const q = e.detail?.query;
+      const q = e.detail?.query || e.detail?.initialPrompt || e.detail?.initialQuery;
       if (q && typeof q === 'string') {
         setTimeout(() => {
           handleSendMessageRef.current?.(q);

@@ -13,6 +13,13 @@ import {
   resolveAllPrices,
   resolvePriceForSession,
 } from '@/lib/pricing/pricingCore';
+import {
+  FX_RATES_FROM_EUR,
+  CURRENCY_SYMBOLS,
+  MARKET_DEFAULT_CURRENCY,
+  convertCurrency,
+  formatCurrency,
+} from '@/constants/fxRates';
 
 /**
  * usePricing — Hook único de precios por Rol + Mercado para toda la plataforma.
@@ -79,11 +86,16 @@ export function usePricing({ currency = 'EUR', fxRate = 1, market: marketOverrid
     pricingRole,
     market,
     countryCode,
+    defaultCurrencyForMarket: MARKET_DEFAULT_CURRENCY[market] || 'EUR',
     setSimulatedMarket,
     rates: ATLAS_MARGIN_RATES,
+    fxRates: FX_RATES_FROM_EUR,
+    currencySymbols: CURRENCY_SYMBOLS,
     resolve,
     resolveAllPrices,
     extractCost,
+    convertCurrency,
+    formatCurrency,
     format,
   };
 }

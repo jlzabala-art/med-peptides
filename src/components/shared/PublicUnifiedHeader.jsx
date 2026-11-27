@@ -18,6 +18,7 @@ import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, LayoutGrid, 
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
+import { useSurfacePolicy } from '../../hooks/useSurfacePolicy';
 import { usePublicWorkspace } from '../../context/PublicWorkspaceContext';
 import { useAtlasContext } from '../../context/AtlasContextProvider';
 import PublicInstitutionalInquiryDrawer from './PublicInstitutionalInquiryDrawer';
@@ -123,6 +124,7 @@ export default function PublicUnifiedHeader({
   purePublic = false
 }) {
   const pathname = usePathname();
+  const surfacePolicy = useSurfacePolicy();
   const isPublicProductOrCatalogPage =
     pathname?.startsWith('/p/') ||
     pathname?.startsWith('/product/') ||
@@ -500,7 +502,7 @@ export default function PublicUnifiedHeader({
                   <ArrowLeft size={19} color="#ffffff" strokeWidth={2.2} />
                 </Link>
               )}
-              {!whiteLabel && !hideAppSwitcher && (
+              {surfacePolicy.canSeeAppSwitcher && !whiteLabel && !hideAppSwitcher && (
                 <div className="puh-desktop-only-switcher">
                   <AtlasAppSwitcher
                   isSpanish={isSpanish}
@@ -576,10 +578,14 @@ export default function PublicUnifiedHeader({
                     {partnerName}
                   </span>
                 </div>
-              ) : (
+              ) : surfacePolicy.canNavigateBrandHome ? (
                 <Link href={brandHref || "/c/CAT-MU9L9GBN"} className="puh-brand-link" title={brandTitle || "Atlas Health Services Clinical & Healthcare Intelligence"}>
                   <BrandLogo variant="light" size="compact" />
                 </Link>
+              ) : (
+                <div className="puh-brand-link" title={brandTitle || "Atlas Health Services Clinical & Healthcare Intelligence"}>
+                  <BrandLogo variant="light" size="compact" />
+                </div>
               )}
 
               {/* Rule #74: Single-row Mobile Contextual Title + 1-line Subtitle (replaces 2nd-row breadcrumb on ≤768px) */}
@@ -622,7 +628,7 @@ export default function PublicUnifiedHeader({
             {/* Right: Actions & Tools */}
             <div className="puh-actions-group">
               {/* Quick Datasheet Search Trigger (Algolia Spotlight Switcher) */}
-              {!hideSearchButton && (
+              {surfacePolicy.canSeeGlobalSearch && !hideSearchButton && (
                 <button
                   type="button"
                   className="puh-btn puh-btn-search"
@@ -899,7 +905,7 @@ export default function PublicUnifiedHeader({
                         {effectiveBreadcrumb.map((crumb, idx) => (
                           <React.Fragment key={idx}>
                             {idx > 0 && <span className="puh-breadcrumb-sep">/</span>}
-                            {crumb.href ? (
+                            {crumb.href && surfacePolicy.canSeeGlobalBreadcrumbs ? (
                               <Link href={crumb.href} className="puh-breadcrumb-link">
                                 {crumb.label}
                               </Link>
@@ -1019,7 +1025,7 @@ export default function PublicUnifiedHeader({
         hideCurrency={effectiveHideCurrencySelector}
       />
 
-      {!purePublic && !whiteLabel && (
+      {surfacePolicy.canSeeB2BDrawer && !purePublic && !whiteLabel && (
         <B2BUniversalMenu isSpanish={isSpanish} />
       )}
     </>

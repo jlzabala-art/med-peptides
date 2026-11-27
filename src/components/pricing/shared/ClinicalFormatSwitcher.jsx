@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { FlaskConical, Syringe, Pill, Layers, Calculator, BookOpen, ShoppingBag, ChevronDown, Dna, Sparkles } from '@/lib/icons';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
+import { useSurfacePolicy } from '@/hooks/useSurfacePolicy';
 import { PRICING_GROUPS, findPricingGroupByFormat } from '@/constants/pricingTaxonomy';
 
 /**
@@ -20,6 +21,7 @@ export default function ClinicalFormatSwitcher({
   currency: currencyProp = null,
 }) {
   const workspace = usePublicWorkspace?.() || null;
+  const { canSeeFormatSwitcher } = useSurfacePolicy();
   const lang = langProp || workspace?.lang || 'en';
   const currency = currencyProp || workspace?.currency || null;
   const isEs = lang === 'es';
@@ -88,6 +90,10 @@ export default function ClinicalFormatSwitcher({
     const qs = params.toString();
     return qs ? `${basePath}?${qs}` : basePath;
   };
+
+  if (!canSeeFormatSwitcher) {
+    return null;
+  }
 
   const activeGroup = findPricingGroupByFormat(activeFormat);
   const groupIconMap = {

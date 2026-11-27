@@ -1,20 +1,9 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
+import { FX_RATES_FROM_AED, CURRENCY_SYMBOLS } from '@/constants/fxRates';
 
-const DEFAULT_RATES_FROM_AED = {
-  AED: 1,
-  USD: 1 / 3.6725,
-  EUR: 1 / 3.98,
-  QAR: 3.64 / 3.6725,
-};
-
-const CURRENCY_SYMBOLS = {
-  AED: 'AED ',
-  USD: '$',
-  EUR: '€',
-  QAR: 'QAR ',
-};
+const DEFAULT_RATES_FROM_AED = FX_RATES_FROM_AED;
 
 export function useCurrencyConverter({
   defaultCurrency = 'AED',

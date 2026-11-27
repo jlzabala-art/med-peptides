@@ -11,7 +11,7 @@ import { useFirestoreCollection } from '../../hooks/data/useFirestoreCollection'
 import ClinicFormDrawer from './clinics/ClinicFormDrawer';
 
 import { approveUserRoleAction } from '../../actions/adminActions';
-import { CANONICAL_ROLES, normalizeRole } from '../../constants/roles';
+import { CANONICAL_ROLES, PRICING_MARKETS, normalizeRole, normalizePricingMarket } from '../../constants/roles';
 
 export default function UserFormDrawer({
   isOpen,
@@ -56,7 +56,8 @@ export default function UserFormDrawer({
           { value: CANONICAL_ROLES.MEDICAL_DIRECTOR, label: 'Medical Director' },
           { value: CANONICAL_ROLES.CLINIC, label: 'Clinic / Institution' },
           { value: CANONICAL_ROLES.COMPOUNDING_PHARMACY, label: 'Compounding Pharmacy' },
-          { value: CANONICAL_ROLES.WHOLESALER, label: 'Wholesaler / Distributor' },
+          { value: CANONICAL_ROLES.DISTRIBUTOR, label: 'Distributor (+15%)' },
+          { value: CANONICAL_ROLES.WHOLESALER, label: 'Wholesaler (+15% + 15%)' },
           { value: CANONICAL_ROLES.SUPPLIER, label: 'Supplier / Manufacturer' },
           { value: CANONICAL_ROLES.ACCOUNT_MANAGER, label: 'Account Manager' },
           { value: CANONICAL_ROLES.SALES_AGENT, label: 'Sales Agent' },
@@ -64,6 +65,35 @@ export default function UserFormDrawer({
           { value: CANONICAL_ROLES.GUEST, label: 'Guest (B2C)' },
           { value: CANONICAL_ROLES.ADMIN, label: 'Super Admin' }
         ]
+      },
+      {
+        name: 'market',
+        label: 'Pricing Market / Country',
+        type: 'select',
+        required: false,
+        options: Object.values(PRICING_MARKETS).map((m) => ({
+          value: m.id,
+          label: `${m.labelEn} (${m.badge})${m.id === 'global' ? ' — Default 15%+15%' : ''}`,
+        })),
+      },
+      {
+        name: 'preferredCurrency',
+        label: 'Preferred Currency',
+        type: 'select',
+        required: false,
+        options: [
+          { value: '', label: 'Auto (By Market)' },
+          { value: 'EUR', label: 'EUR (€)' },
+          { value: 'USD', label: 'USD ($)' },
+          { value: 'AED', label: 'AED' },
+          { value: 'QAR', label: 'QAR' },
+        ],
+      },
+      {
+        name: 'priceMarkupPercent',
+        label: 'Custom Markup Override % (optional — blank uses Role + Market)',
+        type: 'number',
+        required: false,
       },
       { 
         name: 'institution', 
@@ -106,12 +136,20 @@ export default function UserFormDrawer({
       if (isCreating) {
         // Create Logic
         const selectedRoles = Array.isArray(formData.roles) && formData.roles.length > 0 ? formData.roles : [defaultRole];
+        const resolvedMarket = normalizePricingMarket(formData.market || 'global');
+        const parsedMarkup =
+          formData.priceMarkupPercent !== '' && formData.priceMarkupPercent != null && !Number.isNaN(Number(formData.priceMarkupPercent))
+            ? Number(formData.priceMarkupPercent)
+            : null;
         const newUser = {
           fullName: formData.fullName,
           email: formData.email.toLowerCase(),
           phone: formData.phone || '',
           role: selectedRoles[0], // legacy
           roles: selectedRoles,
+          market: resolvedMarket,
+          preferredCurrency: formData.preferredCurrency || '',
+          ...(parsedMarkup != null ? { priceMarkupPercent: parsedMarkup } : {}),
           approved: true,
           createdAt: new Date().toISOString(),
           institution: formData.institution || '',
@@ -161,12 +199,20 @@ export default function UserFormDrawer({
         const userRef = doc(db, 'users', user.id);
         const selectedRoles = Array.isArray(formData.roles) && formData.roles.length > 0 ? formData.roles : [defaultRole];
         
+        const resolvedMarket = normalizePricingMarket(formData.market || 'global');
+        const parsedMarkup =
+          formData.priceMarkupPercent !== '' && formData.priceMarkupPercent != null && !Number.isNaN(Number(formData.priceMarkupPercent))
+            ? Number(formData.priceMarkupPercent)
+            : null;
         const updates = {
           fullName: formData.fullName,
           email: formData.email.toLowerCase(),
           phone: formData.phone || '',
           role: selectedRoles[0], // legacy
           roles: selectedRoles,
+          market: resolvedMarket,
+          preferredCurrency: formData.preferredCurrency || '',
+          priceMarkupPercent: parsedMarkup,
           institution: formData.institution || '',
           updatedAt: new Date().toISOString(),
         };
@@ -199,7 +245,18 @@ export default function UserFormDrawer({
         onClose={onClose}
         title={isCreating ? `Create New ${defaultRole}` : `User Profile`}
         schema={schema}
-        initialData={user ? { ...user, fullName: user.fullName || user.displayName || '', roles: initialRoles } : { roles: [defaultRole] }}
+        initialData={
+          user
+            ? {
+                ...user,
+                fullName: user.fullName || user.displayName || '',
+                roles: initialRoles,
+                market: normalizePricingMarket(user.market || user.countryCode || 'global'),
+                preferredCurrency: user.preferredCurrency || '',
+                priceMarkupPercent: user.priceMarkupPercent ?? '',
+              }
+            : { roles: [defaultRole], market: 'global', preferredCurrency: '', priceMarkupPercent: '' }
+        }
         initialMode={initialMode}
         onSubmit={handleSubmit}
         onValuesChange={(newValues) => {

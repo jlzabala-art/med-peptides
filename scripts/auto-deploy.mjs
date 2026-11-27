@@ -42,9 +42,9 @@ function getCmdOutput(cmd) {
   }
 }
 
-// 1. Validar integridad de rutas antes del despliegue
-console.log('🔍 [Auto Deploy] Validando consistencia de rutas en el portal...');
-runCmd('npm run test:routes');
+// 1. Validar integridad de rutas, fórmulas de pricing y política de menús antes del despliegue
+console.log('🔍 [Auto Deploy] Validando rutas, pricing (15%+15%) y política de visibilidad...');
+runCmd('npm run test:invariants');
 
 // 2. Comprobar estado de Git
 const currentBranch = getCmdOutput('git rev-parse --abbrev-ref HEAD') || 'main';

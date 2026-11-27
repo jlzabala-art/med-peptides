@@ -1,11 +1,48 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '../../../ui';
 import DataTable from '../../../ui/DataTable';
-import { Sparkles } from '@/lib/icons';
+import { Sparkles, Globe, ChevronDown, ChevronRight } from '@/lib/icons';
+
+const REGIONAL_MARKETS = [
+  { id: 'uae', label: 'UAE / GCC', badge: 'AE', defaultCurrency: 'AED' },
+  { id: 'qatar', label: 'Qatar', badge: 'QA', defaultCurrency: 'QAR' },
+  { id: 'us', label: 'United States', badge: 'US', defaultCurrency: 'USD' },
+];
 
 const getMarginColor = (m) => (m >= 40 ? '#34d399' : m >= 20 ? '#f59e0b' : '#f87171');
 
 export default function PricingTab({ form = {}, setForm, autoGenMoq }) {
+  const [showRegionalOverrides, setShowRegionalOverrides] = useState(
+    () => Boolean(form.byMarket && Object.keys(form.byMarket).length > 0)
+  );
+  const byMarket = form.byMarket || form.pricing?.byMarket || {};
+
+  const updateMarketField = (marketId, field, rawValue) => {
+    const nextMarket = { ...(byMarket[marketId] || {}) };
+    if (field === 'currency') {
+      nextMarket.currency = rawValue;
+    } else {
+      const parsed = rawValue === '' ? null : parseFloat(rawValue);
+      if (parsed == null || Number.isNaN(parsed) || parsed <= 0) {
+        delete nextMarket[field];
+      } else {
+        nextMarket[field] = parsed;
+      }
+    }
+    const nextByMarket = { ...byMarket, [marketId]: nextMarket };
+    // Clean up empty market entries so blank markets inherit Global (15%+15%)
+    const hasValues = ['distributor', 'wholesale', 'clinic', 'retail'].some((k) => nextMarket[k] > 0);
+    if (!hasValues) delete nextByMarket[marketId];
+
+    setForm({
+      ...form,
+      byMarket: nextByMarket,
+      pricing: {
+        ...(form.pricing || {}),
+        byMarket: nextByMarket,
+      },
+    });
+  };
   const cost = Number(form.costPrice || form.cost || 0);
   const retail = Number(form.guestVialPrice || form.pricePatient || form.price || 0);
   const clinic = Number(form.proVialPrice || form.priceDoctor || 0);
@@ -77,6 +114,109 @@ export default function PricingTab({ form = {}, setForm, autoGenMoq }) {
               </div>
             ))}
           </div>
+        </Card>
+
+        {/* Regional Market Overrides (Progressive Disclosure — Rule #26) */}
+        <Card padding="md" style={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <button
+            type="button"
+            onClick={() => setShowRegionalOverrides((v) => !v)}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px',
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Globe size={15} style={{ color: '#003666' }} />
+              <div>
+                <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
+                  Regional Market Overrides (byMarket)
+                </h3>
+                <p style={{ margin: '2px 0 0 0', fontSize: '0.73rem', color: '#64748b' }}>
+                  Leave blank to inherit Global rule (Wholeseller = Cost + 15% + 15%). Only enter country exceptions.
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', background: '#f1f5f9', padding: '2px 8px', borderRadius: '999px' }}>
+                {Object.keys(byMarket).length} active
+              </span>
+              {showRegionalOverrides ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+            </div>
+          </button>
+
+          {showRegionalOverrides && (
+            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {REGIONAL_MARKETS.map((m) => {
+                const entry = byMarket[m.id] || {};
+                const cur = entry.currency || m.defaultCurrency;
+                const hasOverride = Boolean(entry.distributor || entry.wholesale || entry.clinic);
+                return (
+                  <div
+                    key={m.id}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'minmax(120px, 1.1fr) 84px repeat(3, minmax(90px, 1fr))',
+                      gap: '8px',
+                      alignItems: 'center',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: hasOverride ? '#f8fafc' : '#ffffff',
+                      border: `1px solid ${hasOverride ? '#cbd5e1' : '#e2e8f0'}`,
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>
+                        {m.label} <span style={{ fontFamily: 'monospace', color: '#64748b', fontSize: '0.7rem' }}>({m.badge})</span>
+                      </div>
+                      <div style={{ fontSize: '0.67rem', color: hasOverride ? '#0f766e' : '#94a3b8' }}>
+                        {hasOverride ? 'Regional override active' : 'Inherits Global (15%+15%)'}
+                      </div>
+                    </div>
+                    <select
+                      value={cur}
+                      onChange={(e) => updateMarketField(m.id, 'currency', e.target.value)}
+                      style={{ padding: '5px 6px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.76rem', fontWeight: 600 }}
+                    >
+                      <option value="EUR">EUR</option>
+                      <option value="USD">USD</option>
+                      <option value="AED">AED</option>
+                      <option value="QAR">QAR</option>
+                    </select>
+                    <input
+                      type="number"
+                      placeholder="Dist (+15%)"
+                      value={entry.distributor ?? ''}
+                      onChange={(e) => updateMarketField(m.id, 'distributor', e.target.value)}
+                      style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Wholeseller"
+                      value={entry.wholesale ?? ''}
+                      onChange={(e) => updateMarketField(m.id, 'wholesale', e.target.value)}
+                      style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Clinic"
+                      value={entry.clinic ?? ''}
+                      onChange={(e) => updateMarketField(m.id, 'clinic', e.target.value)}
+                      style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </Card>
 
         {/* 7. MOQ Pricing Matrix */}

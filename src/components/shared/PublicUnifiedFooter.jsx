@@ -9,6 +9,7 @@ import {
   Briefcase,
 } from '@/lib/icons';
 import BrandLogo from '../common/BrandLogo';
+import AtlasAiFooterBar from './AtlasAiFooterBar';
 import './PublicUnifiedFooter.css';
 
 const FOOTER_SECTIONS = [
@@ -199,6 +200,11 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
             })}
           </div>
 
+        </div>
+
+        {/* ── Universal Contextual Atlas AI Bar (Google Cloud UX) ── */}
+        <div style={{ margin: '0 -16px 20px -16px' }}>
+          <AtlasAiFooterBar lang={isEs ? 'es' : 'en'} />
         </div>
 
         {/* ── Bottom Utility Bar: Minimalist & Legal (Static GCP Style) ── */}

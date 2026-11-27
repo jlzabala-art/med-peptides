@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import PublicAtlasAIDrawer from './PublicAtlasAIDrawer';
 import { useAtlasContext } from '@/context/AtlasContextProvider';
+import { resolveFallbackContextTitle } from '@/constants/atlasAiContextChips';
 
 /**
  * GlobalPublicAtlasDrawer
@@ -246,10 +247,19 @@ export default function GlobalPublicAtlasDrawer() {
       };
     }
 
+    const fallbackTitle = resolveFallbackContextTitle(
+      pathname,
+      typeof document !== 'undefined' ? (document.title || '').split('|')[0].trim() : ''
+    );
+
     return {
       contextType: 'catalog',
       storageKey: `public-${pathname.replace(/[^a-z0-9]/gi, '_').slice(0, 40) || 'home'}`,
-      contextAnchor: null,
+      contextAnchor: {
+        sectionTitle: fallbackTitle,
+        keyActives: fallbackTitle,
+        mechanisms: `Contextual Atlas Health Services clinical & commercial guidance for ${fallbackTitle}.`,
+      },
     };
   }, [pathname, customContext, screenContext]);
 

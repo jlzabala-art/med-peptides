@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
+import ActivePricingContextBadge from '@/components/pricing/shared/ActivePricingContextBadge';
 import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
 import { usePricing } from '@/hooks/usePricing';
 import PageHeroCard from '@/components/ui/PageHeroCard';
@@ -451,6 +452,7 @@ export default function FillersPriceListClient({
           }
           actions={
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <ActivePricingContextBadge currency={currency} lang={lang} />
               <button
                 type="button"
                 onClick={handleExportPdf}
