@@ -174,6 +174,9 @@ export default async function ColwayPricingPage({ searchParams }) {
   const resolvedSearch = searchParams ? await searchParams : {};
   const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || '').toUpperCase();
   const initialCurrency = ['AED', 'USD', 'EUR'].includes(rawCur) ? rawCur : 'AED';
+  const rawCat = String(resolvedSearch?.category || '').toLowerCase().trim();
+  const isHairLineFocus = rawCat === 'hair' || rawCat === 'trichology' || rawCat === 'trichology & scalp';
+  const initialCategory = isHairLineFocus ? 'Trichology & Scalp' : undefined;
 
   const standaloneProducts = await fetchBrandPricingProductsAction({
     brand: 'colway',
@@ -181,5 +184,12 @@ export default async function ColwayPricingPage({ searchParams }) {
     excludeCombos: true,
   });
 
-  return <ColwayPriceListClient initialProducts={standaloneProducts} initialCurrency={initialCurrency} />;
+  return (
+    <ColwayPriceListClient
+      initialProducts={standaloneProducts}
+      initialCurrency={initialCurrency}
+      initialCategory={initialCategory}
+      isHairLineFocus={isHairLineFocus}
+    />
+  );
 }
