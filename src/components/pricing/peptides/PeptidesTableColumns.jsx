@@ -242,7 +242,7 @@ export function getPeptidesColumns({
             </span>
             <span style={{ fontSize: '0.64rem', color: '#5f6368' }}>
               {pricingRole === 'guest'
-                ? 'Wholeseller'
+                ? (isEs ? 'por vial estéril' : 'per sterile vial')
                 : (resolved?.primaryLabel || (isEs ? 'por vial estéril' : 'per sterile vial'))}
             </span>
           </div>

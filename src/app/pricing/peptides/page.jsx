@@ -23,11 +23,16 @@ export async function generateMetadata({ searchParams }) {
   const rawRef = String(resolvedSearch?.ref || '').toLowerCase();
   const isWholesaler = rawRef.includes('whole');
 
+  const ogParams = new URLSearchParams();
+  if (currency) ogParams.set('currency', currency);
+  if (['EU', 'US', 'AE'].includes(rawDest)) ogParams.set('dest', rawDest);
+  const resolvedOgPath = `/pricing/peptides${ogParams.toString() ? `?${ogParams.toString()}` : ''}`;
+
   return buildBilingualMetadata({
     lang,
     topic: 'peptides',
     currency,
-    path: '/pricing/peptides',
+    path: resolvedOgPath,
     siteName: 'Atlas Health Services',
     en: {
       title: isWholesaler
@@ -48,7 +53,7 @@ export default async function PeptidesPricingPage({ searchParams }) {
   const resolvedSearch = await searchParams;
   const rawRef = resolvedSearch?.ref || resolvedSearch?.referral || resolvedSearch?.tier || null;
   const initialLang = normalizeMetaLang(resolvedSearch);
-  const initialCurrency = normalizeCurrency(resolvedSearch?.currency);
+  const initialCurrency = normalizeCurrency(resolvedSearch?.currency || resolvedSearch?.cur || resolvedSearch?.curr);
   const rawDest = String(resolvedSearch?.dest || resolvedSearch?.region || '').toUpperCase();
   const initialDest = ['EU', 'US', 'AE'].includes(rawDest) ? rawDest : 'EU';
   const trackingCode = resolvedSearch?.tc || resolvedSearch?.track || resolvedSearch?.sid || null;

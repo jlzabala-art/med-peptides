@@ -45,8 +45,8 @@ export async function generateMetadata({ searchParams }) {
   };
   const specMeta = SPECIALTY_META[specialtyKey] || null;
   const lang = normalizeMetaLang(resolvedSearch);
-  const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || 'EUR').toUpperCase();
-  const validCur = ['EUR', 'USD', 'AED'].includes(rawCur) ? rawCur : 'EUR';
+  const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || 'USD').toUpperCase();
+  const validCur = ['EUR', 'USD', 'AED'].includes(rawCur) ? rawCur : 'USD';
   const ogTopic = collectionKey === 'bloodo' ? 'bloodo' : collectionKey === 'colway' ? 'colway' : 'peptides';
 
   if (isPatientView) {
@@ -103,8 +103,8 @@ export default async function VialsPublicPage({ searchParams }) {
   const collection = rawCollection === 'ultraperson' ? 'ultraman' : (SUPPORTED_COLLECTIONS[rawCollection] ? rawCollection : 'vials');
   const isPatientView = String(resolvedSearch?.view || '').toLowerCase() === 'patient';
   const initialLang = normalizeMetaLang(resolvedSearch);
-  const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || 'EUR').toUpperCase();
-  const initialCurrency = ['EUR', 'USD', 'AED'].includes(rawCur) ? rawCur : 'EUR';
+  const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || 'USD').toUpperCase();
+  const initialCurrency = ['EUR', 'USD', 'AED'].includes(rawCur) ? rawCur : 'USD';
   
   const rawRef = resolvedSearch?.ref || resolvedSearch?.referral || null;
   const isPartnerAlias = !rawRef || ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482', 'nikolas', 'partner-7482'].includes(String(rawRef).toLowerCase());
@@ -136,7 +136,7 @@ export default async function VialsPublicPage({ searchParams }) {
     path: '/vials',
     name: 'Clinical Peptide Vials & Specialty Formularies',
     description: 'Specialty-filtered clinical peptide vials for longevity, gynecology, dermatology, metabolic endocrinology, and urology clinics.',
-    currency: 'EUR',
+    currency: initialCurrency,
     category: 'Clinical Peptide Vials',
     products: initialProducts,
   });

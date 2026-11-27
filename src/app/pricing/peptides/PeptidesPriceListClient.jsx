@@ -105,7 +105,7 @@ export default function PeptidesPriceListClient({
 
   // Order submission & contact form state
   const [submittingOrder, setSubmittingOrder] = useState(false);
-  const [, setFormErrors] = useState({});
+  const [formErrors, setFormErrors] = useState({});
   const [submittedOrderData, setSubmittedOrderData] = useState(null);
   const [isLookingUpUser, setIsLookingUpUser] = useState(false);
   const [lookupUserResult, setLookupUserResult] = useState(null);
@@ -208,6 +208,7 @@ export default function PeptidesPriceListClient({
   } = usePeptidesCart({
     referralCode,
     isDistributor,
+    isEs,
     shippingDest,
     currency,
     currencySymbol,
@@ -427,6 +428,10 @@ export default function PeptidesPriceListClient({
       const subtotalUsd = totalCartValueUsd;
       const finalShippingUsd = totalUnits > 0 ? shippingCostUsd : 0;
       const finalGrandTotalUsd = subtotalUsd + finalShippingUsd;
+      const activeFx = fxRate || 1;
+      const subtotalActive = Number((subtotalUsd * activeFx).toFixed(2));
+      const finalShippingActive = totalUnits > 0 ? Number(shippingCostCurrentCurrency.toFixed(2)) : 0;
+      const finalGrandTotalActive = Number((subtotalActive + finalShippingActive).toFixed(2));
 
       const res = await fetch('/api/orders/create-draft', {
         method: 'POST',
@@ -441,19 +446,20 @@ export default function PeptidesPriceListClient({
           customerAddress: fullAddress,
           customerNotes: orderForm.notes,
           shippingDestination: orderForm.country || 'International Express Medical Courier',
+          shippingCode: shippingDest,
           referralCode: referralCode || 'CAT-RX-7482',
           trackingCode: trackingCode || (typeof window !== 'undefined' ? new URL(window.location.href).searchParams.get('tc') : null) || referralCode,
           catalogId: trackingCode || (typeof window !== 'undefined' ? new URL(window.location.href).searchParams.get('tc') : null) || null,
           source: 'public_peptides_price_schedule',
           collection: 'vials',
-          subtotal: subtotalUsd,
-          shippingCost: finalShippingUsd,
-          shippingCostEur: 60,
-          grandTotal: finalGrandTotalUsd,
+          subtotal: subtotalActive,
+          shippingCost: finalShippingActive,
+          shippingCostEur: activeShippingCorridor?.eurCost || 60,
+          grandTotal: finalGrandTotalActive,
           totalAmountUsd: finalGrandTotalUsd,
           totalUnits,
-          currency: 'USD',
-          currencySymbol: '$',
+          currency,
+          currencySymbol,
           company_fax: orderForm.company_fax || ''
         })
       });
@@ -464,7 +470,7 @@ export default function PeptidesPriceListClient({
       }
 
       const resData = await res.json().catch(() => ({}));
-      const assignedRef = resData.orderNumber || resData.id || `PO-${referralCode || 'DISTRIBUTOR-15'}-${Date.now().toString().slice(-4)}`;
+      const assignedRef = resData.orderCode || resData.orderId || resData.orderNumber || resData.id || `PO-${referralCode || 'B2B'}-${Date.now().toString().slice(-4)}`;
 
       setSubmittedOrderData({
         referenceId: assignedRef,
@@ -472,8 +478,10 @@ export default function PeptidesPriceListClient({
         customerEmail: orderForm.email,
         customerPhone: orderForm.phone,
         itemsCount: totalUnits,
-        grandTotal: finalGrandTotalUsd,
-        currency: 'USD',
+        grandTotal: finalGrandTotalActive,
+        grandTotalUsd: finalGrandTotalUsd,
+        currency,
+        currencySymbol,
         shippingDestination: fullAddress
       });
 
@@ -623,11 +631,13 @@ export default function PeptidesPriceListClient({
           @media (max-width: 768px) {
             .mobile-hide, .desktop-only-utilities, .desktop-only-currency { display: none !important; }
             .mobile-only-header-actions, .mobile-only-sticky-bar { display: inline-flex !important; }
-            .peptides-page-header { display: none !important; }
-            .peptides-mobile-category-strip { display: none !important; }
-            .peptides-mobile-quick-filters-rail { display: none !important; }
-            .peptides-secondary-filters-subbar { display: none !important; }
-            .gcp-kpis-summary-block { display: none !important; }
+            .peptides-page-header { margin-bottom: 0.55rem !important; }
+            .peptides-mobile-category-strip { display: flex !important; margin-bottom: 6px !important; }
+            .peptides-mobile-quick-filters-rail { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; margin-bottom: 6px !important; }
+            .gcp-kpis-summary-block { display: block !important; padding: 8px 10px !important; margin-bottom: 0.6rem !important; }
+            .gcp-kpis-summary-block .mobile-kpi-summary-strip { display: flex !important; }
+            .gcp-kpis-summary-block .mobile-kpi-collapsed { display: none !important; }
+            .gcp-kpis-summary-block .mobile-scope-hidden { display: none !important; }
             .peptides-b2b-portal .peptides-nav-container { padding: 6px 12px !important; gap: 8px !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: space-between !important; height: 48px !important; }
             .peptides-b2b-portal .peptides-nav-left { width: auto !important; flex: 0 1 auto !important; min-width: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; }
             .peptides-b2b-portal .peptides-nav-actions { width: auto !important; flex: 0 0 auto !important; display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: flex-end !important; gap: 6px !important; }
@@ -857,6 +867,7 @@ export default function PeptidesPriceListClient({
         handlePrintProforma={handlePrintProforma}
         orderForm={orderForm}
         setOrderForm={setOrderForm}
+        formErrors={formErrors}
         handleSubmitOrder={handleSubmitOrder}
         submittingOrder={submittingOrder}
         isLookingUpUser={isLookingUpUser}
@@ -1003,7 +1014,7 @@ export default function PeptidesPriceListClient({
               : {
                   name: selectedCategory !== 'all'
                     ? (isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn)
-                    : (isEs ? 'Tarifa Oficial de Péptidos B2B (109 Formulaciones)' : 'Official Peptide B2B Schedule (109 Formulations)'),
+                    : (isEs ? `Tarifa Oficial de Péptidos B2B (${processedProducts.length} Formulaciones)` : `Official Peptide B2B Schedule (${processedProducts.length} Formulations)`),
                   currency,
                   selectedItemsSummary: totalCartCount > 0
                     ? Object.values(cartItems)
@@ -1016,7 +1027,7 @@ export default function PeptidesPriceListClient({
       )}
 
       {/* Unified Public Footer */}
-      <div style={{ pointerEvents: 'none', userSelect: 'none', opacity: 0.85 }}>
+      <div>
         <PublicUnifiedFooter />
       </div>
     </div>

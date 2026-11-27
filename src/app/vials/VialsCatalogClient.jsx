@@ -2,12 +2,13 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { Search, ShoppingCart, Package, Check, CheckCircle2, ShieldCheck, ArrowRight, X, Plus, Minus, Globe, QrCode, SlidersHorizontal } from '@/lib/icons';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import CopyableId from '@/components/ui/CopyableId';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
-import { trackReferralVisitAction, fetchCollectionProductsAction } from '@/actions/vialsCatalogActions';
+import { fetchCollectionProductsAction } from '@/actions/vialsCatalogActions';
 import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
 import { usePricing } from '@/hooks/usePricing';
 import PriceDisplay from '@/components/pricing/PriceDisplay';
@@ -72,10 +73,10 @@ const SPECIALTY_FILTERS = {
 };
 
 const SHIPPING_OPTIONS = [
-  { code: 'EU', label: 'European Union (Express Tracked)', cost: 30 },
-  { code: 'UK', label: 'United Kingdom (Express Tracked)', cost: 35 },
-  { code: 'US', label: 'United States & Canada (Air Courier)', cost: 45 },
-  { code: 'ROW', label: 'International / Worldwide (DHL Express)', cost: 55 }
+  { code: 'EU', label: 'Europe Express Cold-Pack (≤2 kg)', cost: 65.22 },
+  { code: 'US', label: 'United States Express Cold-Pack (≤2 kg)', cost: 25 },
+  { code: 'AE', label: 'UAE / GCC Express Cold-Pack (≤2 kg)', cost: 80 },
+  { code: 'ROW', label: 'International / Worldwide (DHL Express)', cost: 80 }
 ];
 
 export default function VialsCatalogClient({ initialVials = [], initialCollection = 'vials', initialLang = 'en', initialCurrency = 'EUR', referralInfo = null, isPatientView = false }) {
@@ -127,22 +128,16 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
   // Active opaque referral code tracking (strictly white-label on client)
   const activeReferralCode = referralInfo?.referralCode || 'CAT-RX-7482';
 
-  // Track visit on mount if referral code is active
+  // Persist referral code locally (visit is already tracked server-side in page.jsx to prevent double-counting)
   useEffect(() => {
     if (activeReferralCode) {
       try {
         localStorage.setItem('atlas_catalog_ref', activeReferralCode);
-        trackReferralVisitAction({
-          wholesalerId: activeReferralCode,
-          referralCode: activeReferralCode,
-          collection: activeCollection,
-          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : ''
-        });
       } catch {
         // Safe localStorage fallback
       }
     }
-  }, [activeReferralCode, activeCollection]);
+  }, [activeReferralCode]);
 
   const handleSwitchCollection = async (slug) => {
     if (slug === activeCollection) return;
@@ -272,8 +267,12 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
     };
   }, [cartItemsArray]);
 
-  const activeCurrency = 'USD';
-  const activeCurrencySymbol = '$';
+  const activeCurrency = ['EUR', 'USD', 'AED'].includes(String(initialCurrency || '').toUpperCase())
+    ? String(initialCurrency).toUpperCase()
+    : 'USD';
+  const fxRate = activeCurrency === 'EUR' ? 0.92 : activeCurrency === 'AED' ? 3.6725 : 1;
+  const activeCurrencySymbol = activeCurrency === 'EUR' ? '€' : activeCurrency === 'AED' ? 'AED ' : '$';
+  const fmtAmount = (usdVal) => `${activeCurrencySymbol}${(Number(usdVal || 0) * fxRate).toFixed(2)}`;
   const grandTotal = Math.round((subtotal + (totalUnits > 0 ? selectedShipping.cost : 0)) * 100) / 100;
 
   useRegisterAtlasContext(
@@ -387,8 +386,9 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
 
       // Clear cart
       setCart({});
+      toast.success(isEs ? 'Solicitud de pedido registrada con éxito ✓' : 'Order request confirmed ✓');
     } catch (err) {
-      alert(`Error submitting order: ${err.message}`);
+      toast.error(isEs ? `Error al enviar el pedido: ${err.message}` : `Error submitting order: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -562,12 +562,34 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
               gap: '16px',
               flexWrap: 'wrap'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
                 <ShieldCheck size={22} color="#1d4ed8" style={{ flexShrink: 0 }} />
                 <div style={{ fontSize: '0.85rem', color: '#1e3a8a', lineHeight: 1.45 }}>
                   <strong>{colInfo.title}:</strong> {colInfo.badge}. {colInfo.deliveryPledge} <strong>No upfront card payment required today</strong> — a verified secure payment link will be issued to your email and WhatsApp within 24 hours of placing your request.
                 </div>
               </div>
+              {!isPatientView && activeCollection === 'vials' && (
+                <Link
+                  href={`/pricing/peptides?currency=${encodeURIComponent(activeCurrency)}${isEs ? '&lang=es' : ''}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    backgroundColor: '#003666',
+                    color: '#ffffff',
+                    fontSize: '0.80rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                >
+                  <span>{isEs ? 'Ver Tarifario B2B + PDF' : 'Official B2B Table & PDF'}</span>
+                  <ArrowRight size={14} />
+                </Link>
+              )}
             </div>
           );
         })()}
@@ -883,12 +905,17 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                       margin: '0 0 6px 0',
                       letterSpacing: '-0.2px'
                     }}>
-                      {vial.productName}
+                      <Link
+                        href={`/p/${encodeURIComponent(vial.slug || vial.productId || vial.id)}${isPatientView ? '?view=patient' : ''}`}
+                        style={{ color: 'inherit', textDecoration: 'none' }}
+                      >
+                        {vial.productName}
+                      </Link>
                     </h3>
 
                     {/* Format info */}
                     <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '12px' }}>
-                      {vial.presentation} • Lyophilized Cake
+                      {vial.presentation}{vial.collection === 'vials' && /vial/i.test(vial.presentation || '') ? ' • Lyophilized Cake' : ''}
                     </div>
 
                     {/* Description snippet */}
@@ -935,8 +962,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                     <div style={{ marginBottom: '12px' }}>
                       {(() => {
                         const resolved = resolveProduct(vial);
-                        const sym = vial.currencySymbol || activeCurrencySymbol;
-                        const fmtVial = (n) => `${sym}${Number(n).toFixed(2)}`;
+                        const fmtVial = (n) => fmtAmount(n);
                         if (isAdmin && resolved?.showTriple) {
                           return (
                             <PriceDisplay
@@ -953,14 +979,16 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                           <>
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#003666' }}>
-                                {sym}{Number(displayPrice || 0).toFixed(2)}
+                                {fmtVial(displayPrice || 0)}
                               </span>
                               <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
                                 / {(vial.unitNoun || 'vial').toLowerCase()}
                               </span>
                             </div>
                             <span style={{ fontSize: '0.68rem', color: '#64748b', display: 'block', marginTop: '2px' }}>
-                              {pricingRole === 'guest' ? 'Wholeseller' : (resolved?.primaryLabel || 'Wholeseller')}
+                              {pricingRole === 'guest'
+                                ? (isEs ? 'Tarifa clínica B2B' : 'Clinical B2B schedule')
+                                : (resolved?.primaryLabel || (isEs ? 'Tarifa clínica B2B' : 'Clinical B2B schedule'))}
                             </span>
                           </>
                         );
@@ -978,7 +1006,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                         borderRadius: '6px',
                         fontWeight: 600
                       }}>
-                        Pack x10: {vial.currencySymbol || activeCurrencySymbol}{vial.pack10Price.toFixed(2)} ({vial.currencySymbol || activeCurrencySymbol}{vial.tier10UnitPrice.toFixed(2)}/ea)
+                        Pack x10: {fmtAmount(vial.pack10Price)} ({fmtAmount(vial.tier10UnitPrice)}/ea)
                       </div>
                     </div>
 
@@ -1726,6 +1754,8 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
           </div>
         </div>
       )}
+
+      <PublicUnifiedFooter />
     </div>
   );
 }

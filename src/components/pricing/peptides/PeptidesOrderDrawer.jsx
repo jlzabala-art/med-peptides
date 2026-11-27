@@ -13,6 +13,7 @@ import {
   MessageCircle
 } from 'lucide-react';
 import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
+import CopyableId from '@/components/ui/CopyableId';
 import { COUNTRIES } from '@/data/countries';
 import { SHIPPING_DESTINATIONS } from '@/constants/peptideCategories';
 
@@ -44,6 +45,7 @@ export default function PeptidesOrderDrawer({
   handlePrintProforma,
   orderForm = {},
   setOrderForm,
+  formErrors = {},
   handleSubmitOrder,
   submittingOrder = false,
   isLookingUpUser = false,
@@ -206,11 +208,17 @@ export default function PeptidesOrderDrawer({
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
                   {isEs ? '¡Solicitud de Proforma Recibida!' : 'Proforma Request Received!'}
                 </h3>
-                <p style={{ fontSize: '0.85rem', color: '#475569', margin: '0 0 16px 0', lineHeight: 1.5 }}>
-                  {isEs
-                    ? `Referencia: ${submittedOrderData.referenceId}. Su perfil de clínica ha sido registrado en Atlas Health.`
-                    : `Reference: ${submittedOrderData.referenceId}. Your clinic profile has been registered in the Atlas Health network.`}
-                </p>
+                <div style={{ fontSize: '0.85rem', color: '#475569', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+                  <div style={{ marginBottom: '6px' }}>
+                    <span>{isEs ? 'Referencia: ' : 'Reference: '}</span>
+                    <CopyableId value={submittedOrderData.referenceId} />
+                  </div>
+                  <div>
+                    {isEs
+                      ? `Total estimado: ${submittedOrderData.currencySymbol || currencySymbol}${Number(submittedOrderData.grandTotal || 0).toFixed(2)} ${submittedOrderData.currency || 'USD'} (${submittedOrderData.itemsCount || 0} viales).`
+                      : `Estimated total: ${submittedOrderData.currencySymbol || currencySymbol}${Number(submittedOrderData.grandTotal || 0).toFixed(2)} ${submittedOrderData.currency || 'USD'} (${submittedOrderData.itemsCount || 0} vials).`}
+                  </div>
+                </div>
 
                 <div
                   style={{
@@ -345,7 +353,7 @@ export default function PeptidesOrderDrawer({
                           marginBottom: '8px'
                         }}
                       >
-                        <span>Restored previous session draft ✓</span>
+                        <span>{isEs ? 'Borrador anterior restaurado ✓' : 'Restored previous session draft ✓'}</span>
                         <button
                           type="button"
                           onClick={() => setHasRestoredCart && setHasRestoredCart(false)}
@@ -368,7 +376,9 @@ export default function PeptidesOrderDrawer({
                           fontSize: '0.82rem'
                         }}
                       >
-                        Your order request is currently empty. Use the &quot;+1 Vial&quot; or &quot;+Pack ×10&quot; buttons in the table to add items.
+                        {isEs
+                          ? 'Tu solicitud de pedido está vacía. Usa los botones "+1 Vial" o "Pack ×10" en la tabla para añadir formulaciones.'
+                          : 'Your order request is currently empty. Use the "+1 Vial" or "Pack ×10" buttons in the table to add items.'}
                       </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -666,14 +676,20 @@ export default function PeptidesOrderDrawer({
                             gap: '6px',
                             transition: 'all 0.15s ease'
                           }}
-                          title="Generate official printable B2B proforma sheet"
+                          title={isEs ? 'Generar hoja de proforma B2B imprimible' : 'Generate official printable B2B proforma sheet'}
                         >
                           <Printer size={14} />
-                          <span>Print / Save PDF Proforma Quote</span>
+                          <span>{isEs ? 'Imprimir / Guardar Proforma PDF' : 'Print / Save PDF Proforma Quote'}</span>
                         </button>
                       </div>
                     )}
                   </div>
+
+                  {/* Responsive 2-col helper for mobile drawer */}
+                  <style>{`
+                    .peptides-order-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+                    @media (max-width: 640px) { .peptides-order-two-col { grid-template-columns: minmax(0, 1fr); } }
+                  `}</style>
 
                   {/* Contact Form */}
                   <form id="b2b-proforma-form" onSubmit={handleSubmitOrder}>
@@ -691,54 +707,59 @@ export default function PeptidesOrderDrawer({
 
                     {/* Section 1: Contact */}
                     <h4 style={{ fontSize: '0.80rem', fontWeight: 750, color: '#0f172a', marginBottom: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>1.</span> Institutional Contact
+                      <span>1.</span> {isEs ? 'Contacto Institucional' : 'Institutional Contact'}
                     </h4>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.25rem' }}>
                       <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                          Contact Name *
+                        <label htmlFor="order-field-name" style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                          {isEs ? 'Nombre de Contacto *' : 'Contact Name *'}
                         </label>
                         <input
+                          id="order-field-name"
                           type="text"
                           required
                           value={orderForm.name || ''}
                           onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, name: e.target.value }))}
-                          placeholder="Dr. Full Name / Procurement Lead"
+                          placeholder={isEs ? 'Dr./Dra. Nombre Completo / Responsable de Compras' : 'Dr. Full Name / Procurement Lead'}
                           style={{
                             width: '100%',
                             padding: '8px 12px',
                             borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.85rem'
+                            border: `1px solid ${formErrors.name ? '#ef4444' : '#cbd5e1'}`,
+                            fontSize: '0.85rem',
+                            boxSizing: 'border-box'
                           }}
                         />
+                        {formErrors.name && <span style={{ fontSize: '0.72rem', color: '#ef4444', marginTop: '2px', display: 'block' }}>{formErrors.name}</span>}
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div className="peptides-order-two-col">
                         <div>
-                          <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                            Practice / Clinic Name
+                          <label htmlFor="order-field-clinicName" style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                            {isEs ? 'Clínica / Centro Médico' : 'Practice / Clinic Name'}
                           </label>
                           <input
+                            id="order-field-clinicName"
                             type="text"
                             value={orderForm.clinicName || ''}
                             onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, clinicName: e.target.value }))}
-                            placeholder="Clinic / Lab Name"
+                            placeholder={isEs ? 'Nombre de Clínica / Laboratorio' : 'Clinic / Lab Name'}
                             style={{
                               width: '100%',
                               padding: '8px 12px',
                               borderRadius: '6px',
                               border: '1px solid #cbd5e1',
-                              fontSize: '0.85rem'
+                              fontSize: '0.85rem',
+                              boxSizing: 'border-box'
                             }}
                           />
                         </div>
 
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3px' }}>
-                            <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569' }}>
-                              Work Email *
+                            <label htmlFor="order-field-email" style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569' }}>
+                              {isEs ? 'Correo Profesional *' : 'Work Email *'}
                             </label>
                             {isLookingUpUser && (
                               <span style={{ fontSize: '0.68rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
@@ -752,6 +773,7 @@ export default function PeptidesOrderDrawer({
                             )}
                           </div>
                           <input
+                            id="order-field-email"
                             type="email"
                             required
                             value={orderForm.email || ''}
@@ -762,39 +784,44 @@ export default function PeptidesOrderDrawer({
                               width: '100%',
                               padding: '8px 12px',
                               borderRadius: '6px',
-                              border: `1px solid ${lookupUserResult ? '#86efac' : '#cbd5e1'}`,
+                              border: `1px solid ${formErrors.email ? '#ef4444' : (lookupUserResult ? '#86efac' : '#cbd5e1')}`,
                               backgroundColor: lookupUserResult ? '#f0fdf4' : '#ffffff',
-                              fontSize: '0.85rem'
+                              fontSize: '0.85rem',
+                              boxSizing: 'border-box'
                             }}
                           />
+                          {formErrors.email && <span style={{ fontSize: '0.72rem', color: '#ef4444', marginTop: '2px', display: 'block' }}>{formErrors.email}</span>}
                         </div>
                       </div>
 
-                      <div>
+                      <div id="order-field-phone">
                         <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                          Phone / WhatsApp (International) *
+                          {isEs ? 'Teléfono / WhatsApp (Internacional) *' : 'Phone / WhatsApp (International) *'}
                         </label>
                         <InternationalPhoneInput
                           value={orderForm.phone || ''}
                           onChange={val => setOrderForm && setOrderForm(prev => ({ ...prev, phone: val }))}
                           countryHint={orderForm.phoneCountryCode || 'ES'}
-                          placeholder="Phone number"
+                          lang={isEs ? 'es' : 'en'}
+                          placeholder={isEs ? 'Número de teléfono' : 'Phone number'}
                           required
                         />
+                        {formErrors.phone && <span style={{ fontSize: '0.72rem', color: '#ef4444', marginTop: '2px', display: 'block' }}>{formErrors.phone}</span>}
                       </div>
                     </div>
 
                     {/* Section 2: Delivery Destination */}
                     <h4 style={{ fontSize: '0.80rem', fontWeight: 750, color: '#0f172a', marginBottom: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>2.</span> Shipping & Delivery Destination
+                      <span>2.</span> {isEs ? 'Destino de Envío y Entrega' : 'Shipping & Delivery Destination'}
                     </h4>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.25rem' }}>
                       <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                          Destination Country *
+                        <label htmlFor="order-field-country" style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                          {isEs ? 'País de Destino *' : 'Destination Country *'}
                         </label>
                         <select
+                          id="order-field-country"
                           value={orderForm.country || 'Spain'}
                           onChange={e => {
                             const selectedName = e.target.value;
@@ -811,10 +838,11 @@ export default function PeptidesOrderDrawer({
                             width: '100%',
                             padding: '8px 12px',
                             borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
+                            border: `1px solid ${formErrors.country ? '#ef4444' : '#cbd5e1'}`,
                             fontSize: '0.85rem',
                             backgroundColor: '#ffffff',
-                            color: '#0f172a'
+                            color: '#0f172a',
+                            boxSizing: 'border-box'
                           }}
                         >
                           {COUNTRIES.map(c => (
@@ -823,127 +851,143 @@ export default function PeptidesOrderDrawer({
                             </option>
                           ))}
                         </select>
+                        {formErrors.country && <span style={{ fontSize: '0.72rem', color: '#ef4444', marginTop: '2px', display: 'block' }}>{formErrors.country}</span>}
                       </div>
 
                       <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                          Street Address Line 1 *
+                        <label htmlFor="order-field-addressLine1" style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                          {isEs ? 'Dirección (Calle y Número) *' : 'Street Address Line 1 *'}
                         </label>
                         <input
+                          id="order-field-addressLine1"
                           type="text"
                           required
                           value={orderForm.addressLine1 || ''}
                           onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, addressLine1: e.target.value }))}
-                          placeholder="Street address, building number, medical tower..."
+                          placeholder={isEs ? 'Calle, número, edificio médico...' : 'Street address, building number, medical tower...'}
                           style={{
                             width: '100%',
                             padding: '8px 12px',
                             borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.85rem'
+                            border: `1px solid ${formErrors.addressLine1 ? '#ef4444' : '#cbd5e1'}`,
+                            fontSize: '0.85rem',
+                            boxSizing: 'border-box'
                           }}
                         />
+                        {formErrors.addressLine1 && <span style={{ fontSize: '0.72rem', color: '#ef4444', marginTop: '2px', display: 'block' }}>{formErrors.addressLine1}</span>}
                       </div>
 
                       <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                          Suite / Floor / Department (Optional)
+                        <label htmlFor="order-field-addressLine2" style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                          {isEs ? 'Planta / Despacho / Departamento (Opcional)' : 'Suite / Floor / Department (Optional)'}
                         </label>
                         <input
+                          id="order-field-addressLine2"
                           type="text"
                           value={orderForm.addressLine2 || ''}
                           onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, addressLine2: e.target.value }))}
-                          placeholder="Suite 400, Floor 3, Clinic Reception..."
-                          style={{
-                            width: '100%',
-                            padding: '8px 12px',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.85rem'
-                          }}
-                        />
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                        <div>
-                          <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                            City *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={orderForm.city || ''}
-                            onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, city: e.target.value }))}
-                            placeholder="City"
-                            style={{
-                              width: '100%',
-                              padding: '8px 12px',
-                              borderRadius: '6px',
-                              border: '1px solid #cbd5e1',
-                              fontSize: '0.85rem'
-                            }}
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                            State / Province / Region
-                          </label>
-                          <input
-                            type="text"
-                            value={orderForm.state || ''}
-                            onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, state: e.target.value }))}
-                            placeholder="State or Region"
-                            style={{
-                              width: '100%',
-                              padding: '8px 12px',
-                              borderRadius: '6px',
-                              border: '1px solid #cbd5e1',
-                              fontSize: '0.85rem'
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                          Postal Code / ZIP *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={orderForm.postalCode || ''}
-                          onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, postalCode: e.target.value }))}
-                          placeholder="Postal / ZIP code"
-                          style={{
-                            width: '100%',
-                            padding: '8px 12px',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.85rem'
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Section 3: Notes */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                          Order Notes / Compounding Specifications
-                        </label>
-                        <textarea
-                          rows={2}
-                          value={orderForm.notes || ''}
-                          onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, notes: e.target.value }))}
-                          placeholder="Any specific batch, concentration, or delivery notes..."
+                          placeholder={isEs ? 'Planta 3, Recepción de Clínica...' : 'Suite 400, Floor 3, Clinic Reception...'}
                           style={{
                             width: '100%',
                             padding: '8px 12px',
                             borderRadius: '6px',
                             border: '1px solid #cbd5e1',
                             fontSize: '0.85rem',
-                            fontFamily: 'inherit'
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+
+                      <div className="peptides-order-two-col">
+                        <div>
+                          <label htmlFor="order-field-city" style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                            {isEs ? 'Ciudad *' : 'City *'}
+                          </label>
+                          <input
+                            id="order-field-city"
+                            type="text"
+                            required
+                            value={orderForm.city || ''}
+                            onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, city: e.target.value }))}
+                            placeholder={isEs ? 'Ciudad' : 'City'}
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              border: `1px solid ${formErrors.city ? '#ef4444' : '#cbd5e1'}`,
+                              fontSize: '0.85rem',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                          {formErrors.city && <span style={{ fontSize: '0.72rem', color: '#ef4444', marginTop: '2px', display: 'block' }}>{formErrors.city}</span>}
+                        </div>
+
+                        <div>
+                          <label htmlFor="order-field-state" style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                            {isEs ? 'Provincia / Región / Estado' : 'State / Province / Region'}
+                          </label>
+                          <input
+                            id="order-field-state"
+                            type="text"
+                            value={orderForm.state || ''}
+                            onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, state: e.target.value }))}
+                            placeholder={isEs ? 'Provincia o Región' : 'State or Region'}
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label htmlFor="order-field-postalCode" style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                          {isEs ? 'Código Postal *' : 'Postal Code / ZIP *'}
+                        </label>
+                        <input
+                          id="order-field-postalCode"
+                          type="text"
+                          required
+                          value={orderForm.postalCode || ''}
+                          onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, postalCode: e.target.value }))}
+                          placeholder={isEs ? 'Código Postal' : 'Postal / ZIP code'}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            border: `1px solid ${formErrors.postalCode ? '#ef4444' : '#cbd5e1'}`,
+                            fontSize: '0.85rem',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                        {formErrors.postalCode && <span style={{ fontSize: '0.72rem', color: '#ef4444', marginTop: '2px', display: 'block' }}>{formErrors.postalCode}</span>}
+                      </div>
+                    </div>
+
+                    {/* Section 3: Notes */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div>
+                        <label htmlFor="order-field-notes" style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                          {isEs ? 'Notas de Pedido / Especificaciones de Entrega' : 'Order Notes / Compounding Specifications'}
+                        </label>
+                        <textarea
+                          id="order-field-notes"
+                          rows={2}
+                          value={orderForm.notes || ''}
+                          onChange={e => setOrderForm && setOrderForm(prev => ({ ...prev, notes: e.target.value }))}
+                          placeholder={isEs ? 'Horario de recepción, notas de lote o entrega...' : 'Any specific batch, concentration, or delivery notes...'}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '0.85rem',
+                            fontFamily: 'inherit',
+                            boxSizing: 'border-box'
                           }}
                         />
                       </div>
@@ -1072,16 +1116,13 @@ export default function PeptidesOrderDrawer({
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '10pt', fontWeight: 700, color: '#0f172a' }}>
-              PROFORMA ESTIMATE
+              {isEs ? 'ESTIMACIÓN PROFORMA' : 'PROFORMA ESTIMATE'}
             </div>
             <div style={{ fontSize: '8.5pt', color: '#64748b', marginTop: '2px' }}>
-              Date: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+              {isEs ? 'Fecha:' : 'Date:'} {new Date().toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
             </div>
-            <div style={{ fontSize: '8.5pt', color: '#0284c7', fontWeight: 700, marginTop: '2px' }}>
-              Attributed Wholesaler: Nikolaos Psathas (NP Labs)
-            </div>
-            <div style={{ fontSize: '8pt', fontFamily: 'monospace', color: '#64748b' }}>
-              Ref Code: {referralCode || 'CAT-RX-7482'}
+            <div style={{ fontSize: '8pt', fontFamily: 'monospace', color: '#0284c7', fontWeight: 700, marginTop: '2px' }}>
+              Ref: {referralCode || 'CAT-RX-7482'}
             </div>
           </div>
         </div>
@@ -1121,7 +1162,9 @@ export default function PeptidesOrderDrawer({
           <tbody>
             {Object.values(cartItems).map((item, idx) => {
               const p = item.product;
-              const lineTotal = (item.quantity1x * p.unitPrice) + (item.quantity10x * (p.pack10Price || p.unitPrice * 8.5));
+              const pack10Cost = p.pack10Price || p.unitPrice * 8.5;
+              const discPct = p.unitPrice > 0 ? Math.max(10, Math.round((1 - pack10Cost / (p.unitPrice * 10)) * 100)) : 15;
+              const lineTotal = (item.quantity1x * p.unitPrice) + (item.quantity10x * pack10Cost);
               return (
                 <tr key={p.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
                   <td style={{ padding: '8px 10px', fontFamily: 'monospace', color: '#64748b' }}>{idx + 1}</td>
@@ -1130,12 +1173,12 @@ export default function PeptidesOrderDrawer({
                     <div style={{ fontSize: '8pt', color: '#64748b' }}>{p.dosage} • Lyophilized Vial (10R) • ≥99.0% HPLC</div>
                   </td>
                   <td style={{ padding: '8px 10px' }}>
-                    {item.quantity1x > 0 && <div>{item.quantity1x}x Single Vial</div>}
-                    {item.quantity10x > 0 && <div style={{ color: '#047857', fontWeight: 600 }}>{item.quantity10x}x Pack ×10 (-15% Vol.)</div>}
+                    {item.quantity1x > 0 && <div>{item.quantity1x}x {isEs ? 'Vial Individual' : 'Single Vial'}</div>}
+                    {item.quantity10x > 0 && <div style={{ color: '#047857', fontWeight: 600 }}>{item.quantity10x}x Pack ×10 (-{discPct}% Vol.)</div>}
                   </td>
                   <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: 'monospace' }}>
                     {item.quantity1x > 0 && <div>{formatPrice(p.unitPrice)}</div>}
-                    {item.quantity10x > 0 && <div style={{ color: '#047857' }}>{formatPrice(p.pack10Price || p.unitPrice * 8.5)}</div>}
+                    {item.quantity10x > 0 && <div style={{ color: '#047857' }}>{formatPrice(pack10Cost)}</div>}
                   </td>
                   <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>
                     {formatPrice(lineTotal)}

@@ -16,6 +16,7 @@ import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 export function usePeptidesCart({
   referralCode = 'CAT-RX-7482',
   isDistributor = false,
+  isEs = false,
   shippingDest = 'EU',
   currency = 'USD',
   currencySymbol = '$',
@@ -132,16 +133,24 @@ export function usePeptidesCart({
       };
       return { ...prev, [product.id]: updated };
     });
-    toast.success(`Added ${product.productName} (${packType === '10x' ? 'Pack ×10' : '1x Vial'}) to request ✓`);
-  }, [syncPeptideToWorkspace]);
+    toast.success(
+      isEs
+        ? `Añadido ${product.productName} (${packType === '10x' ? 'Pack ×10' : '1x Vial'}) a tu proforma ✓`
+        : `Added ${product.productName} (${packType === '10x' ? 'Pack ×10' : '1x Vial'}) to request ✓`
+    );
+  }, [syncPeptideToWorkspace, isEs]);
 
   const handlePrintProforma = useCallback(() => {
     if (Object.keys(cartItems).length === 0) {
-      toast.error('Please select formulations before printing or saving a PDF proforma.');
+      toast.error(
+        isEs
+          ? 'Selecciona formulaciones antes de imprimir o guardar la proforma PDF.'
+          : 'Please select formulations before printing or saving a PDF proforma.'
+      );
       return;
     }
     window.print();
-  }, [cartItems]);
+  }, [cartItems, isEs]);
 
   const totalCartCount = useMemo(() => {
     return Object.values(cartItems).reduce((sum, item) => sum + item.quantity1x + (item.quantity10x * 10), 0);
@@ -224,7 +233,7 @@ export function usePeptidesCart({
 
   const handleOrderViaWhatsApp = useCallback(() => {
     if (Object.keys(cartItems).length === 0) {
-      toast.error('Please add formulations before ordering via WhatsApp');
+      toast.error(isEs ? 'Añade formulaciones antes de enviar el pedido por WhatsApp' : 'Please add formulations before ordering via WhatsApp');
       return;
     }
 
@@ -233,30 +242,44 @@ export function usePeptidesCart({
     }
 
     const itemsListText = Object.values(cartItems).map(item => {
-      const qty1x = item.quantity1x > 0 ? `${item.quantity1x}x 1x Vial` : null;
+      const qty1x = item.quantity1x > 0 ? `${item.quantity1x}x ${isEs ? 'Vial 1x' : '1x Vial'}` : null;
       const qty10x = item.quantity10x > 0 ? `${item.quantity10x}x Pack ×10` : null;
       const qtyStr = [qty1x, qty10x].filter(Boolean).join(', ');
       const lineTotal = (item.quantity1x * item.product.unitPrice) + (item.quantity10x * (item.product.pack10Price || item.product.unitPrice * 8.5));
-      return `• ${item.product.productName} (${item.product.dosage || 'Lyophilized'}) [${qtyStr}] ── ${currencySymbol}${(lineTotal * fxRate).toFixed(2)}`;
+      return `• ${item.product.productName} (${item.product.dosage || (isEs ? 'Liofilizado' : 'Lyophilized')}) [${qtyStr}] ── ${currencySymbol}${(lineTotal * fxRate).toFixed(2)}`;
     }).join('\n');
 
     const totalStr = `${formatPrice(grandTotalCartValueUsd)} (${currency})`;
-    const clinicStr = orderForm.clinicName || orderForm.name ? `\nClinic: ${orderForm.clinicName || orderForm.name}` : '';
+    const clinicStr = orderForm.clinicName || orderForm.name
+      ? `\n${isEs ? 'Clínica / Contacto' : 'Clinic / Contact'}: ${orderForm.clinicName || orderForm.name}`
+      : '';
     const emailStr = orderForm.email ? `\nEmail: ${orderForm.email}` : '';
-    const destinationStr = `\nDestination Corridor: ${activeShippingCorridor.flag} ${activeShippingCorridor.labelEn} (${orderForm.city ? `${orderForm.city}, ` : ''}${orderForm.country || activeShippingCorridor.defaultCountry})`;
+    const corridorLabel = isEs ? activeShippingCorridor.labelEs : activeShippingCorridor.labelEn;
+    const destinationStr = `\n${isEs ? 'Destino de Envío' : 'Destination Corridor'}: ${activeShippingCorridor.flag} ${corridorLabel} (${orderForm.city ? `${orderForm.city}, ` : ''}${orderForm.country || activeShippingCorridor.defaultCountry})`;
 
-    const message = `Hello, I would like to place this clinical peptide proforma request (Partner Code: ${referralCode || 'CAT-RX-7482'}):
+    const message = isEs
+      ? `Hola, me gustaría solicitar esta proforma clínica de viales de péptidos (Ref: ${referralCode || 'CAT-RX-7482'}):
 
 ${itemsListText}
 
 Subtotal: ${formatPrice(totalCartValueUsd)}
-Shipping (${activeShippingCorridor.labelEn} · Parcels ≤ 2 kg): ${currencySymbol}${shippingCostCurrentCurrency.toFixed(2)}
+Envío (${corridorLabel} · Paquetes ≤ 2 kg): ${currencySymbol}${shippingCostCurrentCurrency.toFixed(2)}
+Total Estimado: ${totalStr}${clinicStr}${emailStr}${destinationStr}
+
+Por favor, confirmen la proforma y el enlace seguro de pago en menos de 24 horas. ¡Gracias!`
+      : `Hello, I would like to place this clinical peptide proforma request (Ref: ${referralCode || 'CAT-RX-7482'}):
+
+${itemsListText}
+
+Subtotal: ${formatPrice(totalCartValueUsd)}
+Shipping (${corridorLabel} · Parcels ≤ 2 kg): ${currencySymbol}${shippingCostCurrentCurrency.toFixed(2)}
 Grand Total: ${totalStr}${clinicStr}${emailStr}${destinationStr}
 
 Please coordinate 24-hour proforma confirmation and secure payment link. Thank you!`;
 
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
-  }, [cartItems, currencySymbol, fxRate, formatPrice, grandTotalCartValueUsd, currency, orderForm, referralCode, totalCartValueUsd, shippingCostCurrentCurrency, activeShippingCorridor, validateOrderForm]);
+    const waPhone = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971553561058').replace(/\D/g, '');
+    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+  }, [cartItems, currencySymbol, fxRate, formatPrice, grandTotalCartValueUsd, currency, orderForm, referralCode, totalCartValueUsd, shippingCostCurrentCurrency, activeShippingCorridor, validateOrderForm, isEs]);
 
   return {
     cartItems,

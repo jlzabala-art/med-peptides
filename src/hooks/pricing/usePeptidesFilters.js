@@ -46,12 +46,12 @@ export function usePeptidesFilters({
       const resolvedLang = (pLang === 'es' || pLang === 'en') ? pLang : 'en';
       setLang(resolvedLang);
 
-      const pCurr = (url.searchParams.get('currency') || url.searchParams.get('curr') || '').toUpperCase();
-      const resolvedCurr = (pCurr === 'USD' || pCurr === 'EUR' || pCurr === 'AED') ? pCurr : 'USD';
+      const pCurr = (url.searchParams.get('currency') || url.searchParams.get('cur') || url.searchParams.get('curr') || '').toUpperCase();
+      const resolvedCurr = (pCurr === 'USD' || pCurr === 'EUR' || pCurr === 'AED') ? pCurr : (initialCurrency || 'USD');
       setCurrency(resolvedCurr);
 
       const pDest = (url.searchParams.get('dest') || url.searchParams.get('region') || '').toUpperCase();
-      const resolvedDest = (pDest === 'EU' || pDest === 'US' || pDest === 'AE') ? pDest : 'EU';
+      const resolvedDest = (pDest === 'EU' || pDest === 'US' || pDest === 'AE') ? pDest : (initialDest || 'EU');
       setShippingDest(resolvedDest);
 
       const pCat = url.searchParams.get('category');

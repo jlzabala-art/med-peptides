@@ -52,7 +52,8 @@ export default function PeptidesFilterToolbar({
       ? (isEs ? 'FDA: Todas' : 'FDA: All')
       : (isEs ? (activeFdaObj?.labelEs || 'FDA') : (activeFdaObj?.labelEn || 'FDA'));
 
-  const activeCorridor = SHIPPING_DESTINATIONS[shippingDest] || SHIPPING_DESTINATIONS.EU;
+  const activeCorridor =
+    SHIPPING_DESTINATIONS.find((c) => c.id === shippingDest) || SHIPPING_DESTINATIONS[0];
 
   const filterOptions = [
     {

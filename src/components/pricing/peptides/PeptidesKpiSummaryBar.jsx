@@ -359,7 +359,7 @@ export default function PeptidesKpiSummaryBar({
             </div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>≥99.0% HPLC</span>
-              <span style={{ color: '#0d9488', fontWeight: 600 }}>{isEs ? 'Fichas →' : 'Specs →'}</span>
+              <span style={{ color: '#0d9488', fontWeight: 600 }}>cGMP · CoA</span>
             </div>
           </div>
         </div>

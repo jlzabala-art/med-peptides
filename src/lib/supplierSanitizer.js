@@ -1,9 +1,9 @@
-const SUPPLIER_TEXT_REGEX = /\b(pharmapolis(\s+compounding\s+pharmacy)?(\s+bulgaria)?|np\s*labs?|dn\s*labs?|fagron|bioblend)\b/gi;
+const SUPPLIER_TEXT_REGEX = /\b(lotusland(\s+limited)?|lotus\s*land|pharmapolis(\s+compounding\s+pharmacy)?(\s+bulgaria)?|np\s*labs?|dn\s*labs?|fagron|bioblend)\b/gi;
 
 export function scrubSupplierText(val) {
   if (typeof val !== 'string') return val;
   return val
-    .replace(/\s*·\s*(Pharmapolis|NP\s*Labs?|DN\s*Labs?|Fagron|BioBlend)[^·]*/gi, '')
+    .replace(/\s*·\s*(Lotusland|Lotus\s*Land|Pharmapolis|NP\s*Labs?|DN\s*Labs?|Fagron|BioBlend)[^·]*/gi, '')
     .replace(SUPPLIER_TEXT_REGEX, 'EU GMP Facility')
     .replace(/\(\s*Bulgaria\s*\)/gi, '(EU)')
     .replace(/\bBulgaria\b/gi, 'EU')
