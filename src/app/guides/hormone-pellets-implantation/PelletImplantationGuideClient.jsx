@@ -504,11 +504,36 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
           flex-wrap: wrap;
         }
         .pellet-planner-label {
-          font-size: 0.72rem;
-          font-weight: 800;
-          color: #475569;
-          text-transform: uppercase;
+          font-size: 0.78rem;
+          font-weight: 700;
+          color: #3c4043;
           min-width: 115px;
+        }
+        .pellet-guide-pill-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+        }
+        .pellet-guide-pill-btn:focus-visible,
+        .pellet-guide-icon-btn:focus-visible {
+          outline: 2px solid #1a73e8;
+          outline-offset: 2px;
+        }
+        @media (max-width: 768px) {
+          .pellet-guide-btn-label { display: none; }
+          .pellet-guide-icon-btn {
+            min-width: 44px;
+            min-height: 44px;
+            padding: 0 !important;
+            justify-content: center;
+          }
+          .pellet-guide-primary-cta {
+            min-height: 44px;
+            flex: 1;
+            justify-content: center;
+          }
+          .pellet-guide-toolbar { width: 100%; flex-wrap: nowrap !important; }
         }
         .pellet-planner-pills {
           display: flex;
@@ -710,30 +735,34 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
           </div>
 
           {/* Monochrome GCP Action Toolbar (Rule #40 & #57: 1 primary CTA + neutral secondary buttons) */}
-          <div className="pellet-guide-no-print" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="pellet-guide-no-print pellet-guide-toolbar" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <button
               type="button"
               onClick={() => typeof window !== 'undefined' && window.print()}
-              className="gcp-btn-secondary"
+              className="gcp-btn-secondary pellet-guide-icon-btn"
+              aria-label={isEs ? 'Imprimir / PDF' : 'Print / PDF'}
+              title={isEs ? 'Imprimir / PDF' : 'Print / PDF'}
               style={{ padding: '7px 12px', fontSize: '0.76rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
               <Printer size={14} />
-              <span>{isEs ? 'Imprimir / PDF' : 'Print / PDF'}</span>
+              <span className="pellet-guide-btn-label">{isEs ? 'Imprimir / PDF' : 'Print / PDF'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setIsShareOpen(true)}
-              className="gcp-btn-secondary"
+              className="gcp-btn-secondary pellet-guide-icon-btn"
+              aria-label={isEs ? 'Compartir' : 'Share'}
+              title={isEs ? 'Compartir' : 'Share'}
               style={{ padding: '7px 12px', fontSize: '0.76rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
               <Share2 size={14} />
-              <span>{isEs ? 'Compartir' : 'Share'}</span>
+              <span className="pellet-guide-btn-label">{isEs ? 'Compartir' : 'Share'}</span>
             </button>
 
             <Link
               href="/pricing/pellets"
-              className="gcp-btn-primary"
+              className="gcp-btn-primary pellet-guide-primary-cta"
               style={{ padding: '7px 14px', fontSize: '0.76rem', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
               <Package size={14} />
@@ -766,7 +795,7 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
       <div className="pellet-mobile-progress-bar no-print">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
           <span style={{ fontWeight: 700, color: '#003666', whiteSpace: 'nowrap' }}>
-            {isEs ? 'Pre-Op' : 'Pre-Op'} {completedChecklistCount}/{PREOP_CHECKLIST.length}
+            {isEs ? 'Checklist pre-op' : 'Pre-op checklist'} {completedChecklistCount}/{PREOP_CHECKLIST.length}
           </span>
           <div style={{ flex: 1, height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
             <div style={{ width: `${Math.round((completedChecklistCount / PREOP_CHECKLIST.length) * 100)}%`, height: '100%', background: completedChecklistCount === PREOP_CHECKLIST.length ? '#16a34a' : '#0284c7', transition: 'width 0.2s ease' }} />
@@ -778,9 +807,10 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
             setOpsTab('checklist');
             document.getElementById('clinical-ops')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }}
-          style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#0f172a', fontWeight: 700, fontSize: '0.72rem', whiteSpace: 'nowrap', cursor: 'pointer' }}
+          aria-label={isEs ? 'Abrir checklist pre-quirúrgico' : 'Open pre-op checklist'}
+          style={{ padding: '4px 12px', minHeight: '36px', borderRadius: '6px', border: '1px solid #dadce0', background: '#ffffff', color: '#1a73e8', fontWeight: 700, fontSize: '0.72rem', whiteSpace: 'nowrap', cursor: 'pointer' }}
         >
-          {isEs ? 'Checklist' : 'Checklist'}
+          {isEs ? 'Abrir' : 'Open'}
         </button>
       </div>
 
@@ -844,7 +874,11 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
 
         {/* ── BLOCK 2: INTERACTIVE 6-STEP VISUAL SURGICAL PROTOCOL ── */}
         <section id="protocol-sim" className="pellet-guide-section">
-          <InteractiveTrocarPelletGuide lang={lang} showDosingMatrix={false} />
+          <InteractiveTrocarPelletGuide
+            lang={lang}
+            showDosingMatrix={false}
+            completeAction={{ href: '#dosing-planner', labelEn: 'Continue to planner', labelEs: 'Ir al planificador' }}
+          />
         </section>
 
         {/* ── BLOCK 3: INTERACTIVE PHYSICIAN DOSING, TROCAR & FAN-TRACK PLANNER ── */}
@@ -899,38 +933,50 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
             {/* Selectors Row (GCP Stacked Form Groups on Mobile) */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div className="pellet-planner-row">
-                <span className="pellet-planner-label">
-                  {isEs ? '1. Perfil Clínico:' : '1. Clinical Profile:'}
+                <span className="pellet-planner-label" id="planner-profile-label">
+                  {isEs ? '1. Perfil clínico' : '1. Clinical profile'}
                 </span>
-                <div className="pellet-planner-pills">
-                  {CLINICAL_PROFILES.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setSelectedProfileId(p.id)}
-                      className={`pellet-guide-pill-btn ${selectedProfileId === p.id ? 'active' : ''}`}
-                    >
-                      {isEs ? p.labelEs : p.labelEn}
-                    </button>
-                  ))}
+                <div className="pellet-planner-pills" role="radiogroup" aria-labelledby="planner-profile-label">
+                  {CLINICAL_PROFILES.map((p) => {
+                    const isSel = selectedProfileId === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSel}
+                        onClick={() => setSelectedProfileId(p.id)}
+                        className={`pellet-guide-pill-btn ${isSel ? 'active' : ''}`}
+                      >
+                        {isSel && <Check size={13} style={{ flexShrink: 0 }} />}
+                        <span>{isEs ? p.labelEs : p.labelEn}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               <div className="pellet-planner-row">
-                <span className="pellet-planner-label">
-                  {isEs ? '2. Composición:' : '2. Body Habitus:'}
+                <span className="pellet-planner-label" id="planner-habitus-label">
+                  {isEs ? '2. Composición corporal' : '2. Body habitus'}
                 </span>
-                <div className="pellet-planner-pills pellet-planner-pills--3">
-                  {BODY_HABITUS.map((h) => (
-                    <button
-                      key={h.id}
-                      type="button"
-                      onClick={() => setSelectedHabitusId(h.id)}
-                      className={`pellet-guide-pill-btn ${selectedHabitusId === h.id ? 'active' : ''}`}
-                    >
-                      {isEs ? h.labelEs : h.labelEn}
-                    </button>
-                  ))}
+                <div className="pellet-planner-pills pellet-planner-pills--3" role="radiogroup" aria-labelledby="planner-habitus-label">
+                  {BODY_HABITUS.map((h) => {
+                    const isSel = selectedHabitusId === h.id;
+                    return (
+                      <button
+                        key={h.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSel}
+                        onClick={() => setSelectedHabitusId(h.id)}
+                        className={`pellet-guide-pill-btn ${isSel ? 'active' : ''}`}
+                      >
+                        {isSel && <Check size={13} style={{ flexShrink: 0 }} />}
+                        <span>{isEs ? h.labelEs : h.labelEn}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

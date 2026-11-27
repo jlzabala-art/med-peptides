@@ -12,9 +12,10 @@
 
 /* Header */
 .trocar-guide-header {
-  background: linear-gradient(135deg, #003666 0%, #0369a1 100%);
-  color: #ffffff;
-  padding: 1.15rem 1.5rem;
+  background: #f8fafc;
+  color: #202124;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -32,8 +33,9 @@
   width: 38px;
   height: 38px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: #e8f0fe;
+  border: 1px solid #d2e3fc;
+  color: #1a73e8;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,21 +43,23 @@
 }
 
 .trocar-guide-title {
-  font-size: 1.08rem;
+  font-size: 1.02rem;
+  color: #003666;
   font-weight: 800;
   margin: 0;
   letter-spacing: -0.01em;
 }
 
 .trocar-guide-subtitle {
-  font-size: 0.77rem;
-  opacity: 0.9;
+  font-size: 0.76rem;
+  color: #5f6368;
   margin: 2px 0 0;
 }
 
 .trocar-guide-badge {
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  color: #5f6368;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.72rem;
@@ -77,34 +81,6 @@
 /* Mobile-only GCP Connected Stepper */
 .trocar-mobile-stepper {
   display: none;
-}
-
-@media (max-width: 768px) {
-  .trocar-guide-header {
-    padding: 0.95rem 1rem;
-  }
-  .trocar-guide-title {
-    font-size: 0.96rem;
-  }
-  .trocar-step-track {
-    display: none;
-  }
-  .trocar-guide-badge,
-  .trocar-info-phase-tag {
-    display: none;
-  }
-  .trocar-guide-footer {
-    padding: 0.75rem 1rem;
-  }
-  .trocar-nav-controls {
-    width: 100%;
-    justify-content: space-between;
-  }
-  .trocar-nav-controls button {
-    flex: 1;
-    min-height: 44px;
-    justify-content: center;
-  }
 }
 
 .trocar-step-track::-webkit-scrollbar {
@@ -284,6 +260,7 @@
 .trocar-callout-warning {
   background: #fffbeb;
   border: 1px solid #fde68a;
+  border-left: 3px solid #d97706;
   color: #92400e;
 }
 
@@ -365,4 +342,62 @@
   padding: 4px 10px;
   border-radius: 6px;
   width: fit-content;
+}
+
+/* Next-step preview in footer (replaces redundant "Step X of Y") */
+.trocar-footer-next {
+  font-size: 0.78rem;
+  color: #5f6368;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.trocar-footer-next strong {
+  color: #202124;
+  font-weight: 700;
+}
+.trocar-footer-next.is-done {
+  color: #16a34a;
+}
+
+/* ── Mobile overrides — MUST stay at the end of the file so they win the cascade ── */
+@media (max-width: 768px) {
+  .trocar-guide-header {
+    padding: 0.85rem 1rem;
+  }
+  .trocar-guide-title {
+    font-size: 0.96rem;
+  }
+  .trocar-guide-subtitle {
+    display: none;
+  }
+  .trocar-step-track {
+    display: none;
+  }
+  .trocar-guide-badge,
+  .trocar-info-phase-tag,
+  .trocar-visual-caption {
+    display: none;
+  }
+  .trocar-visual-stage {
+    min-height: 0;
+    padding: 8px;
+  }
+  .trocar-guide-footer {
+    padding: 0.75rem 1rem;
+  }
+  .trocar-footer-next {
+    width: 100%;
+  }
+  .trocar-nav-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .trocar-nav-controls > * {
+    flex: 1;
+    min-height: 44px;
+    justify-content: center;
+  }
 }

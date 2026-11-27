@@ -22,6 +22,9 @@ import {
   Layers,
   Globe,
   ExternalLink,
+  Package,
+  CheckCircle2,
+  XCircle,
 } from '@/lib/icons';
 
 const PRIMARY_SWATCHES = [
@@ -32,6 +35,9 @@ const PRIMARY_SWATCHES = [
     roleEs: 'Color Principal · Cabeceras · Títulos',
     hex: '#003666',
     rgb: '0, 54, 102',
+    cmyk: '100, 47, 0, 60',
+    pantone: '295 C',
+    contrast: '11.8:1 AAA',
     token: '--atlas-brand-navy',
     darkText: false,
   },
@@ -42,6 +48,9 @@ const PRIMARY_SWATCHES = [
     roleEs: 'Color Secundario · Botones CTA · Enlaces',
     hex: '#1A73E8',
     rgb: '26, 115, 232',
+    cmyk: '89, 50, 0, 9',
+    pantone: '2727 C',
+    contrast: '4.5:1 AA',
     token: '--atlas-brand-blue',
     darkText: false,
   },
@@ -52,6 +61,9 @@ const PRIMARY_SWATCHES = [
     roleEs: 'Portal Médico · Guías Clínicas y BHRT',
     hex: '#0D9488',
     rgb: '13, 148, 136',
+    cmyk: '91, 0, 8, 42',
+    pantone: '3282 C',
+    contrast: '3.8:1 AA Large',
     token: '--atlas-brand-teal',
     darkText: false,
   },
@@ -62,6 +74,9 @@ const PRIMARY_SWATCHES = [
     roleEs: 'Trazo EKG del Isotipo · Detalles Técnicos',
     hex: '#00BCD4',
     rgb: '0, 188, 212',
+    cmyk: '100, 11, 0, 17',
+    pantone: '3125 C',
+    contrast: 'Accent',
     token: '--atlas-brand-cyan',
     darkText: true,
   },
@@ -72,19 +87,22 @@ const PRIMARY_SWATCHES = [
     roleEs: 'Fondos Oscuros · Acento sobre Navy',
     hex: '#38BDF8',
     rgb: '56, 189, 248',
+    cmyk: '77, 24, 0, 3',
+    pantone: '298 C',
+    contrast: 'On Navy AAA',
     token: '--atlas-brand-sky',
     darkText: true,
   },
 ];
 
 const NEUTRAL_SWATCHES = [
-  { name: 'Ink Primary', hex: '#0F172A', rgb: '15, 23, 42', token: '--atlas-ink-primary', darkText: false },
-  { name: 'Ink Secondary', hex: '#475569', rgb: '71, 85, 105', token: '--atlas-ink-secondary', darkText: false },
-  { name: 'Ink Control', hex: '#5F6368', rgb: '95, 99, 104', token: '--atlas-ink-control', darkText: false },
-  { name: 'Border Control', hex: '#DADCE0', rgb: '218, 220, 224', token: '--atlas-border-control', darkText: true },
-  { name: 'Surface Muted', hex: '#F1F5F9', rgb: '241, 245, 249', token: '--atlas-surface-muted', darkText: true },
-  { name: 'Surface Page', hex: '#F8FAFC', rgb: '248, 250, 252', token: '--atlas-surface-page', darkText: true },
-  { name: 'Surface Card', hex: '#FFFFFF', rgb: '255, 255, 255', token: '--atlas-surface-card', darkText: true },
+  { name: 'Ink Primary', hex: '#0F172A', rgb: '15, 23, 42', token: '--atlas-ink-primary' },
+  { name: 'Ink Secondary', hex: '#475569', rgb: '71, 85, 105', token: '--atlas-ink-secondary' },
+  { name: 'Ink Control', hex: '#5F6368', rgb: '95, 99, 104', token: '--atlas-ink-control' },
+  { name: 'Border Control', hex: '#DADCE0', rgb: '218, 220, 224', token: '--atlas-border-control' },
+  { name: 'Surface Muted', hex: '#F1F5F9', rgb: '241, 245, 249', token: '--atlas-surface-muted' },
+  { name: 'Surface Page', hex: '#F8FAFC', rgb: '248, 250, 252', token: '--atlas-surface-page' },
+  { name: 'Surface Card', hex: '#FFFFFF', rgb: '255, 255, 255', token: '--atlas-surface-card' },
 ];
 
 const LOGO_FILES = [
@@ -162,15 +180,17 @@ const LOGO_FILES = [
   },
 ];
 
-export default function BrandbookClient({ initialLang = 'es' }) {
+export default function BrandbookClient({ initialLang = 'es', partnerName = '' }) {
   const [lang, setLang] = useState(initialLang === 'en' ? 'en' : 'es');
   const [copiedKey, setCopiedKey] = useState(null);
+  const [downloadingZip, setDownloadingZip] = useState(false);
   const [sigName, setSigName] = useState('José Luis Zabala');
   const [sigRole, setSigRole] = useState('Managing Director · Clinical & B2B Supply');
   const [sigEmail, setSigEmail] = useState(BRAND_CONFIG.supportEmail);
   const [sigPhone, setSigPhone] = useState('+34 600 000 000');
 
   const isEs = lang === 'es';
+  const partnerLabel = partnerName || 'Mediluxe';
 
   const handleCopy = async (text, key, label) => {
     try {
@@ -184,8 +204,122 @@ export default function BrandbookClient({ initialLang = 'es' }) {
   };
 
   const handleCopyLink = () => {
-    const shareUrl = `${BRAND_CONFIG.url}/brand?lang=${lang}`;
+    const partnerQuery = partnerName ? `&partner=${encodeURIComponent(partnerName)}` : '';
+    const shareUrl = `${BRAND_CONFIG.url}/brand?lang=${lang}${partnerQuery}`;
     handleCopy(shareUrl, 'share-url', isEs ? 'Enlace del Brandbook' : 'Brandbook link');
+  };
+
+  const handleDownloadBrandKitZip = async () => {
+    if (downloadingZip) return;
+    setDownloadingZip(true);
+    const toastId = toast.loading(
+      isEs ? 'Empaquetando Kit de Marca oficial (.ZIP)...' : 'Bundling official Brand Kit (.ZIP)...'
+    );
+    try {
+      const { default: JSZip } = await import('jszip');
+      const zip = new JSZip();
+      const logosFolder = zip.folder('logos');
+      const tokensFolder = zip.folder('tokens');
+
+      await Promise.all(
+        LOGO_FILES.map(async (item) => {
+          const res = await fetch(item.href);
+          if (res.ok) {
+            const blob = await res.blob();
+            logosFolder.file(item.fileName, blob);
+          }
+        })
+      );
+
+      const cssTokens = `:root {
+  /* Atlas Health Services — Official Brand Tokens */
+  --atlas-brand-navy: #003666;
+  --atlas-brand-navy-dark: #002244;
+  --atlas-brand-blue: #1A73E8;
+  --atlas-brand-blue-hover: #1557B0;
+  --atlas-brand-teal: #0D9488;
+  --atlas-brand-cyan: #00BCD4;
+  --atlas-brand-sky: #38BDF8;
+  --atlas-surface-page: #F8FAFC;
+  --atlas-surface-card: #FFFFFF;
+  --atlas-surface-muted: #F1F5F9;
+  --atlas-border-subtle: #E2E8F0;
+  --atlas-border-control: #DADCE0;
+  --atlas-ink-primary: #0F172A;
+  --atlas-ink-secondary: #475569;
+  --atlas-ink-control: #5F6368;
+  --atlas-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --atlas-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+`;
+      tokensFolder.file('atlas-brand-tokens.css', cssTokens);
+
+      const jsonTokens = {
+        brand: BRAND_CONFIG.name,
+        domain: BRAND_CONFIG.domain,
+        supportEmail: BRAND_CONFIG.supportEmail,
+        coBrandingLockup: `${partnerLabel} × ${BRAND_CONFIG.name}`,
+        colors: Object.fromEntries(
+          PRIMARY_SWATCHES.map((s) => [
+            s.token.replace('--atlas-', ''),
+            { hex: s.hex, rgb: s.rgb, cmyk: s.cmyk, pantoneRef: s.pantone },
+          ])
+        ),
+        neutrals: Object.fromEntries(
+          NEUTRAL_SWATCHES.map((n) => [n.token.replace('--atlas-', ''), { hex: n.hex, rgb: n.rgb }])
+        ),
+        typography: {
+          primarySans: { family: 'Inter', weights: [400, 500, 600, 700, 800], url: 'https://fonts.google.com/specimen/Inter' },
+          technicalMono: { family: 'JetBrains Mono', weights: [400, 500, 600, 700], url: 'https://fonts.google.com/specimen/JetBrains+Mono' },
+        },
+      };
+      tokensFolder.file('atlas-brand-tokens.json', JSON.stringify(jsonTokens, null, 2));
+
+      const readme = `ATLAS HEALTH SERVICES — OFFICIAL BRAND KIT (V2.0)
+====================================================================
+Platform URL  : https://www.atlashealth-services.com
+Brandbook URL : https://www.atlashealth-services.com/brand?lang=es
+Contact Email : info@atlashealth-services.com
+Co-Branding   : ${partnerLabel} × Atlas Health Services
+
+1. PRIMARY & SECONDARY COLORS
+- Primary   : Atlas Deep Navy    | HEX #003666 | RGB(0, 54, 102)    | CMYK(100, 47, 0, 60) | Pantone 295 C
+- Secondary : Atlas Clinical Blue| HEX #1A73E8 | RGB(26, 115, 232)  | CMYK(89, 50, 0, 9)   | Pantone 2727 C
+- Clinical  : Medical Teal       | HEX #0D9488 | RGB(13, 148, 136)  | CMYK(91, 0, 8, 42)   | Pantone 3282 C
+- EKG Mark  : EKG Pulse Cyan     | HEX #00BCD4 | RGB(0, 188, 212)   | CMYK(100, 11, 0, 17) | Pantone 3125 C
+- Dark UI   : Clinical Sky       | HEX #38BDF8 | RGB(56, 189, 248)  | CMYK(77, 24, 0, 3)   | Pantone 298 C
+
+2. TYPOGRAPHY (Google Fonts — Open Source)
+- Primary Sans-Serif : Inter (400, 500, 600, 700, 800) -> https://fonts.google.com/specimen/Inter
+- Technical Monospace: JetBrains Mono (400, 500, 600, 700) -> https://fonts.google.com/specimen/JetBrains+Mono
+
+3. LOGOS INCLUDED (/logos/)
+- Always prefer SVG vectors for web, presentations, and print.
+- Use PNG files only for email signatures, WhatsApp Business, and tools that block SVG.
+`;
+      zip.file('README-BRAND-SPEC.txt', readme);
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = partnerName
+        ? `Atlas-Health-Services-x-${partnerName.replace(/\s+/g, '-')}-Brand-Kit.zip`
+        : 'Atlas-Health-Services-Brand-Kit.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success(
+        isEs ? 'Kit de Marca (.ZIP) descargado con SVG, PNG y tokens' : 'Brand Kit (.ZIP) downloaded with SVG, PNG & tokens',
+        { id: toastId }
+      );
+    } catch {
+      toast.error(isEs ? 'Error al generar el archivo ZIP' : 'Could not generate ZIP archive', { id: toastId });
+    } finally {
+      setDownloadingZip(false);
+    }
   };
 
   const buildEmailSignatureHtml = () => {
@@ -245,11 +379,12 @@ export default function BrandbookClient({ initialLang = 'es' }) {
           .bb-grid-7 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         @media print {
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           .bb-no-print, header, footer, nav { display: none !important; }
           .atlas-page-bg { background: #ffffff !important; }
           .atlas-page-shell { max-width: 100% !important; padding: 0 !important; }
           .atlas-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
-          @page { size: A4 portrait; margin: 14mm; }
+          @page { size: A4 portrait; margin: 12mm; }
         }
       `}</style>
 
@@ -267,21 +402,29 @@ export default function BrandbookClient({ initialLang = 'es' }) {
                   <ShieldCheck size={11} />
                   {isEs ? 'BRANDBOOK OFICIAL · V2.0' : 'OFFICIAL BRANDBOOK · V2.0'}
                 </span>
-                <span className="atlas-hero-pill-secondary">SVG · HEX · INTER · JETBRAINS MONO</span>
+                {partnerName && (
+                  <span className="atlas-hero-pill-secondary">
+                    {partnerName} × Atlas Health Services
+                  </span>
+                )}
                 <span className="atlas-hero-pill-meta">
                   <span className="atlas-hero-pill-meta-lbl">SSOT</span>
                   {BRAND_CONFIG.domain}
                 </span>
               </div>
               <h1 className="atlas-hero-title">
-                {isEs
-                  ? 'Manual de Identidad Visual — Atlas Health Services'
-                  : 'Visual Identity & Brandbook — Atlas Health Services'}
+                {partnerName
+                  ? (isEs
+                      ? `Manual de Identidad Visual — ${partnerName} × Atlas Health Services`
+                      : `Visual Identity & Brandbook — ${partnerName} × Atlas Health Services`)
+                  : (isEs
+                      ? 'Manual de Identidad Visual — Atlas Health Services'
+                      : 'Visual Identity & Brandbook — Atlas Health Services')}
               </h1>
               <p className="atlas-hero-subtitle">
                 {isEs
-                  ? 'Logotipos vectoriales SVG, paleta principal y secundaria, tipografía oficial, sistema de componentes Google Cloud UX y generador de firma institucional listo para compartir con socios y agencias.'
-                  : 'Master SVG vector logos, primary & secondary color palette, official typography, Google Cloud UX component system, and institutional email signature kit ready to share with partners and agencies.'}
+                  ? 'Logotipos vectoriales SVG, paleta principal y secundaria (HEX · RGB · CMYK · Pantone), tipografía oficial Inter y JetBrains Mono, kit descargable en ZIP y PDF A4 listo para diseño, web e imprenta.'
+                  : 'Master SVG vector logos, primary & secondary color palette (HEX · RGB · CMYK · Pantone), official Inter & JetBrains Mono typography, 1-click ZIP Brand Kit, and A4 PDF ready for digital & print.'}
               </p>
             </div>
 
@@ -306,12 +449,24 @@ export default function BrandbookClient({ initialLang = 'es' }) {
               </button>
               <button
                 type="button"
-                className="gcp-btn-primary"
+                className="gcp-btn-secondary"
                 onClick={() => window.print()}
-                style={{ minHeight: '36px', padding: '0 14px', backgroundColor: '#003666' }}
+                style={{ minHeight: '36px', padding: '0 12px' }}
               >
                 <Printer size={15} />
-                {isEs ? 'Descargar Brandbook PDF' : 'Download Brandbook PDF'}
+                {isEs ? 'PDF A4' : 'A4 PDF'}
+              </button>
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                disabled={downloadingZip}
+                onClick={handleDownloadBrandKitZip}
+                style={{ minHeight: '36px', padding: '0 14px', backgroundColor: '#003666' }}
+              >
+                <Package size={15} />
+                {downloadingZip
+                  ? (isEs ? 'Generando ZIP...' : 'Bundling ZIP...')
+                  : (isEs ? 'Descargar Kit Completo (.ZIP)' : 'Download Full Kit (.ZIP)')}
               </button>
             </div>
           </div>
@@ -327,7 +482,7 @@ export default function BrandbookClient({ initialLang = 'es' }) {
               <span style={{ width: 16, height: 16, borderRadius: 4, background: '#003666', display: 'inline-block', border: '1px solid #002244' }} />
               <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', fontFamily: 'var(--atlas-font-mono)' }}>#003666</span>
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px' }}>Atlas Deep Navy</div>
+            <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px' }}>Atlas Deep Navy · Pantone 295 C</div>
           </div>
 
           <div className="atlas-card" style={{ padding: '0.9rem 1rem' }}>
@@ -338,7 +493,7 @@ export default function BrandbookClient({ initialLang = 'es' }) {
               <span style={{ width: 16, height: 16, borderRadius: 4, background: '#1A73E8', display: 'inline-block' }} />
               <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', fontFamily: 'var(--atlas-font-mono)' }}>#1A73E8</span>
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px' }}>Atlas Clinical Blue</div>
+            <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px' }}>Atlas Clinical Blue · Pantone 2727 C</div>
           </div>
 
           <div className="atlas-card" style={{ padding: '0.9rem 1rem' }}>
@@ -355,7 +510,7 @@ export default function BrandbookClient({ initialLang = 'es' }) {
             </div>
             <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginTop: '6px' }}>SVG Vector + PNG</div>
             <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px' }}>
-              {isEs ? '6 archivos listos para descarga' : '6 ready-to-download assets'}
+              {isEs ? '6 logos + CSS/JSON tokens en .ZIP' : '6 logos + CSS/JSON tokens in .ZIP'}
             </div>
           </div>
         </section>
@@ -435,35 +590,43 @@ export default function BrandbookClient({ initialLang = 'es' }) {
               ))}
             </div>
 
-            <div
-              style={{
-                marginTop: '1rem',
-                padding: '0.85rem 1rem',
-                borderRadius: '8px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                fontSize: '0.78rem',
-                color: '#475569',
-                lineHeight: 1.5,
-              }}
-            >
-              <strong style={{ color: '#003666' }}>{isEs ? 'Reglas de uso del logotipo:' : 'Logo usage rules:'}</strong>{' '}
-              {isEs
-                ? 'Usar siempre formato SVG en web, documentos vectoriales e imprenta. Mantener un área de respeto mínima equivalente a la altura de la "A" del isotipo alrededor de la marca. No alterar los colores (#003666 + #00BCD4), no distorsionar proporciones y no aplicar sombras difusas sobre la tipografía.'
-                : 'Always use SVG for web, decks, and print. Maintain a minimum clear space equal to the height of the "A" isotype around the mark. Never alter brand colors (#003666 + #00BCD4), stretch proportions, or add drop shadows to the wordmark.'}
+            {/* Visual Do / Don't Governance */}
+            <div className="bb-grid-2" style={{ marginTop: '1rem' }}>
+              <div style={{ padding: '0.85rem 1rem', borderRadius: '8px', background: '#f0fdf4', border: '1px solid #bbf7d0', fontSize: '0.78rem', color: '#14532d', lineHeight: 1.5 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, marginBottom: '4px' }}>
+                  <CheckCircle2 size={15} color="#15803d" />
+                  {isEs ? 'Uso Correcto (Do)' : 'Correct Usage (Do)'}
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                  <li>{isEs ? 'Usar siempre los archivos SVG en web, decks e imprenta.' : 'Always use master SVG files for web, decks, and print.'}</li>
+                  <li>{isEs ? 'Respetar un margen libre mínimo igual a la altura del isotipo "A".' : 'Maintain clear space equal to at least the height of the "A" isotype.'}</li>
+                  <li>{isEs ? 'Aplicar la versión invertida sobre fondos Navy (#003666) u oscuros.' : 'Use the inverted light version on Navy (#003666) or dark surfaces.'}</li>
+                </ul>
+              </div>
+              <div style={{ padding: '0.85rem 1rem', borderRadius: '8px', background: '#fef2f2', border: '1px solid #fecaca', fontSize: '0.78rem', color: '#7f1d1d', lineHeight: 1.5 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, marginBottom: '4px' }}>
+                  <XCircle size={15} color="#b91c1c" />
+                  {isEs ? 'Uso Incorrecto (Don’t)' : 'Incorrect Usage (Don’t)'}
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                  <li>{isEs ? 'No recolorear el isotipo ni sustituir el cyan EKG (#00BCD4).' : 'Never recolor the isotype or alter the EKG cyan crossbar (#00BCD4).'}</li>
+                  <li>{isEs ? 'No estirar, rotar ni aplicar sombras difusas o contornos externos.' : 'Never stretch, rotate, or add drop shadows or outer glows.'}</li>
+                  <li>{isEs ? 'No colocar la versión oscura sobre fotografías sin contraste suficiente.' : 'Never place the dark wordmark on low-contrast photography.'}</li>
+                </ul>
+              </div>
             </div>
           </section>
 
-          {/* SECTION 2: COLOR SYSTEM */}
+          {/* SECTION 2: COLOR SYSTEM (DIGITAL + PRINT) */}
           <section className="atlas-card" style={{ padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Palette size={18} color="#003666" />
                 <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>
-                  {isEs ? '2. Paleta de Colores (Haz clic para copiar HEX)' : '2. Color Palette (Click any swatch to copy HEX)'}
+                  {isEs ? '2. Paleta de Colores Digital e Imprenta (Clic para copiar HEX)' : '2. Digital & Print Color Palette (Click to copy HEX)'}
                 </h2>
               </div>
-              <span style={{ fontSize: '0.74rem', color: '#64748b' }}>SSOT · design-tokens.css</span>
+              <span style={{ fontSize: '0.74rem', color: '#64748b' }}>HEX · RGB · CMYK · Pantone Ref · WCAG</span>
             </div>
 
             <div className="bb-grid-5">
@@ -486,31 +649,42 @@ export default function BrandbookClient({ initialLang = 'es' }) {
                 >
                   <div
                     style={{
-                      height: '78px',
+                      height: '76px',
                       backgroundColor: swatch.hex,
                       padding: '10px',
                       display: 'flex',
+                      flexDirection: 'column',
                       justifyContent: 'space-between',
-                      alignItems: 'flex-start',
                       color: swatch.darkText ? '#0f172a' : '#ffffff',
                     }}
                   >
-                    <span style={{ fontFamily: 'var(--atlas-font-mono)', fontSize: '0.82rem', fontWeight: 700 }}>
-                      {swatch.hex}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                      <span style={{ fontFamily: 'var(--atlas-font-mono)', fontSize: '0.82rem', fontWeight: 700 }}>
+                        {swatch.hex}
+                      </span>
+                      {copiedKey === swatch.hex ? <Check size={15} /> : <Copy size={14} style={{ opacity: 0.8 }} />}
+                    </div>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 700, opacity: 0.9 }}>
+                      {swatch.contrast}
                     </span>
-                    {copiedKey === swatch.hex ? <Check size={15} /> : <Copy size={14} style={{ opacity: 0.8 }} />}
                   </div>
-                  <div style={{ padding: '0.7rem', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <div style={{ padding: '0.7rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                     <strong style={{ fontSize: '0.8rem', color: '#0f172a' }}>
                       {isEs ? swatch.nameEs : swatch.nameEn}
                     </strong>
-                    <span style={{ fontSize: '0.7rem', color: '#64748b', lineHeight: 1.35 }}>
+                    <span style={{ fontSize: '0.69rem', color: '#64748b', lineHeight: 1.35, marginBottom: '4px' }}>
                       {isEs ? swatch.roleEs : swatch.roleEn}
                     </span>
-                    <span style={{ fontSize: '0.67rem', color: '#475569', fontFamily: 'var(--atlas-font-mono)', marginTop: '4px' }}>
-                      RGB({swatch.rgb})
+                    <span style={{ fontSize: '0.65rem', color: '#475569', fontFamily: 'var(--atlas-font-mono)' }}>
+                      RGB: {swatch.rgb}
                     </span>
-                    <span style={{ fontSize: '0.65rem', color: '#1A73E8', fontFamily: 'var(--atlas-font-mono)' }}>
+                    <span style={{ fontSize: '0.65rem', color: '#475569', fontFamily: 'var(--atlas-font-mono)' }}>
+                      CMYK: {swatch.cmyk}
+                    </span>
+                    <span style={{ fontSize: '0.65rem', color: '#003666', fontFamily: 'var(--atlas-font-mono)', fontWeight: 700 }}>
+                      PMS: {swatch.pantone}
+                    </span>
+                    <span style={{ fontSize: '0.63rem', color: '#1A73E8', fontFamily: 'var(--atlas-font-mono)', marginTop: '2px' }}>
                       var({swatch.token})
                     </span>
                   </div>
@@ -583,7 +757,7 @@ export default function BrandbookClient({ initialLang = 'es' }) {
             <div className="bb-grid-2">
               <div style={{ padding: '1rem', border: '1px solid #e2e8f0', borderRadius: '10px', background: '#f8fafc' }}>
                 <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#1A73E8', letterSpacing: '0.06em' }}>
-                  {isEs ? 'Tipografía Primaria · Inter' : 'Primary Sans-Serif · Inter'}
+                  {isEs ? 'Tipografía Primaria · Inter (Pesos 400–800)' : 'Primary Sans-Serif · Inter (Weights 400–800)'}
                 </div>
                 <div style={{ fontSize: '2.1rem', fontWeight: 800, color: '#003666', letterSpacing: '-0.025em', margin: '0.35rem 0' }}>
                   Aa Bb Cc 123
@@ -603,7 +777,7 @@ export default function BrandbookClient({ initialLang = 'es' }) {
 
               <div style={{ padding: '1rem', border: '1px solid #e2e8f0', borderRadius: '10px', background: '#f8fafc' }}>
                 <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#0D9488', letterSpacing: '0.06em' }}>
-                  {isEs ? 'Tipografía Técnica · JetBrains Mono' : 'Technical Monospace · JetBrains Mono'}
+                  {isEs ? 'Tipografía Técnica · JetBrains Mono (400–700)' : 'Technical Monospace · JetBrains Mono (400–700)'}
                 </div>
                 <div style={{ fontSize: '1.85rem', fontWeight: 700, color: '#0f172a', fontFamily: 'var(--atlas-font-mono)', margin: '0.45rem 0' }}>
                   AS-MED-BP02-2611
@@ -622,12 +796,12 @@ export default function BrandbookClient({ initialLang = 'es' }) {
             </div>
           </section>
 
-          {/* SECTION 4: GOOGLE CLOUD UX COMPONENTS & BRAND ARCHITECTURE */}
+          {/* SECTION 4: GOOGLE CLOUD UX COMPONENTS & BRAND ARCHITECTURE (ATLAS x MEDILUXE) */}
           <section className="atlas-card" style={{ padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
               <Layers size={18} color="#003666" />
               <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>
-                {isEs ? '4. Sistema de Interfaz (Google Cloud UX) y Arquitectura de Marca' : '4. UI Component Standards (Google Cloud UX) & Brand Architecture'}
+                {isEs ? '4. Sistema UI (Google Cloud UX) y Co-Branding Institucional' : '4. UI Component Standards (Google Cloud UX) & Institutional Co-Branding'}
               </h2>
             </div>
 
@@ -663,18 +837,27 @@ export default function BrandbookClient({ initialLang = 'es' }) {
 
               <div style={{ padding: '1rem', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#003666', marginBottom: '0.4rem' }}>
-                  {isEs ? 'Arquitectura de Marca y Co-Branding' : 'Brand Architecture & Co-Branding'}
+                  {isEs ? `Arquitectura de Marca · ${partnerLabel} × Atlas Health Services` : `Brand Architecture · ${partnerLabel} × Atlas Health Services`}
                 </div>
-                <p style={{ margin: '0 0 0.6rem 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 0.7rem 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
                   {isEs
-                    ? 'Atlas Health Services es la plataforma institucional de inteligencia clínica, protocolos y suministro B2B (atlashealth-services.com). Cuando se colabora con marcas comerciales o socios clínicos (ej. Mediluxe), Atlas actúa como sello técnico y de trazabilidad bajo la convención:'
-                    : 'Atlas Health Services is the institutional clinical intelligence, protocol, and B2B supply platform (atlashealth-services.com). When collaborating with commercial or clinical partner brands (e.g., Mediluxe), Atlas serves as the technical & traceability standard under the lockup:'}
+                    ? `Atlas Health Services es la plataforma institucional de inteligencia clínica, protocolos y suministro B2B (atlashealth-services.com). En materiales comerciales junto a ${partnerLabel}, Atlas actúa como marca matriz técnica y de trazabilidad bajo este lockup oficial:`
+                    : `Atlas Health Services is the institutional clinical intelligence, protocol, and B2B supply platform (atlashealth-services.com). Across commercial materials alongside ${partnerLabel}, Atlas serves as the master technical & traceability brand under this official lockup:`}
                 </p>
-                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a', fontFamily: 'var(--atlas-font-mono)', background: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #dadce0' }}>
-                  [Partner Brand] × Atlas Health Services
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '0.65rem', borderRadius: '8px', background: '#ffffff', border: '1px solid #dadce0' }}>
+                    <span style={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a', letterSpacing: '0.02em' }}>{partnerLabel.toUpperCase()}</span>
+                    <span style={{ color: '#94a3b8', fontWeight: 600 }}>×</span>
+                    <BrandLogo variant="dark" size="compact" />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '0.65rem', borderRadius: '8px', background: '#003666', border: '1px solid #002244' }}>
+                    <span style={{ fontWeight: 800, fontSize: '0.92rem', color: '#ffffff', letterSpacing: '0.02em' }}>{partnerLabel.toUpperCase()}</span>
+                    <span style={{ color: '#38bdf8', fontWeight: 600 }}>×</span>
+                    <BrandLogo variant="light" size="compact" />
+                  </div>
                 </div>
                 <div style={{ marginTop: '0.6rem', fontSize: '0.74rem', color: '#64748b' }}>
-                  {isEs ? 'Contacto institucional:' : 'Institutional contact:'}{' '}
+                  {isEs ? 'Contacto institucional oficial:' : 'Official institutional contact:'}{' '}
                   <strong style={{ color: '#003666' }}>{BRAND_CONFIG.supportEmail}</strong> · {BRAND_CONFIG.domain}
                 </div>
               </div>
@@ -752,7 +935,7 @@ export default function BrandbookClient({ initialLang = 'es' }) {
       </main>
 
       <div className="bb-no-print">
-        <PublicUnifiedFooter />
+        <PublicUnifiedFooter lang={lang} />
       </div>
     </div>
   );

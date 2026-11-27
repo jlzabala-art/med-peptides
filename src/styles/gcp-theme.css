@@ -106,6 +106,14 @@
   background-color: var(--gcp-bg-main);
 }
 
+/* GCP disabled state: visibly inert so users never tap a dead control */
+.gcp-btn-secondary:disabled {
+  color: #a8aab0;
+  border-color: #e8eaed;
+  background-color: transparent;
+  cursor: not-allowed;
+}
+
 .gcp-btn-danger {
   background-color: var(--gcp-bg-card);
   border: 1px solid var(--gcp-border);

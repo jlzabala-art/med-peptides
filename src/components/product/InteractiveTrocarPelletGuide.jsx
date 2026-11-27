@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Syringe,
   CheckCircle2,
@@ -11,7 +11,9 @@ import {
   ChevronLeft,
   Copy,
   Check,
-  Sparkles
+  Sparkles,
+  RotateCcw,
+  ArrowRight
 } from '@/lib/icons';
 import toast from 'react-hot-toast';
 import MobileConnectedStepper from '@/components/ui/MobileConnectedStepper';
@@ -132,12 +134,38 @@ const STEPS_DATA = [
   }
 ];
 
-export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMatrix = true }) {
+/**
+ * @param {object} props
+ * @param {'en'|'es'} [props.lang]
+ * @param {boolean} [props.showDosingMatrix]
+ * @param {{ href: string, labelEn: string, labelEs: string }} [props.completeAction]
+ *   Optional GCP-style "finish" CTA shown on the last step (e.g. jump to the planner).
+ *   When omitted, the last step offers "Restart guide".
+ */
+export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMatrix = true, completeAction = null }) {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [copiedPatientGuide, setCopiedPatientGuide] = useState(false);
+  const containerRef = useRef(null);
   const isEs = lang === 'es';
 
   const currentStep = STEPS_DATA[activeStepIndex];
+  const nextStep = STEPS_DATA[activeStepIndex + 1] || null;
+  const isLastStep = activeStepIndex === STEPS_DATA.length - 1;
+  const stepLabel = (s) => (isEs ? (s.shortEs || s.titleEs) : (s.shortEn || s.titleEn));
+
+  // GCP wizard pattern: after navigating from the footer, bring the stepper + new
+  // illustration back into view instead of leaving the user at the bottom of the old step.
+  const goToStep = (idx) => {
+    const next = Math.max(0, Math.min(STEPS_DATA.length - 1, idx));
+    setActiveStepIndex(next);
+    const el = containerRef.current;
+    if (el && typeof window !== 'undefined') {
+      const top = el.getBoundingClientRect().top;
+      if (top < 0) {
+        window.scrollTo({ top: window.scrollY + top - 72, behavior: 'smooth' });
+      }
+    }
+  };
 
   const handleCopyPatientCare = async () => {
     const text = isEs
@@ -165,7 +193,7 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
   };
 
   return (
-    <div className="trocar-guide-container">
+    <div className="trocar-guide-container" ref={containerRef}>
       {/* ── HEADER ── */}
       <div className="trocar-guide-header">
         <div className="trocar-guide-title-row">
@@ -199,7 +227,7 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
               type="button"
               role="tab"
               aria-selected={isActive}
-              onClick={() => setActiveStepIndex(idx)}
+              onClick={() => goToStep(idx)}
               className={`trocar-step-btn ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
             >
               <span className="trocar-step-btn-num">
@@ -218,10 +246,10 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
       <MobileConnectedStepper
         steps={STEPS_DATA.map((s) => ({
           id: s.id,
-          label: isEs ? (s.shortEs || s.titleEs) : (s.shortEn || s.titleEn),
+          label: stepLabel(s),
         }))}
         activeIndex={activeStepIndex}
-        onSelect={setActiveStepIndex}
+        onSelect={goToStep}
         isEs={isEs}
         ariaLabel={isEs ? 'Progreso del protocolo quirúrgico' : 'Surgical protocol progress'}
       />
@@ -479,6 +507,15 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
             {isEs ? currentStep.descEs : currentStep.descEn}
           </p>
 
+          {/* Safety first: critical precautions lead, before specs and trends (GCP severity ordering) */}
+          <div className="trocar-info-callout trocar-callout-warning" role="note">
+            <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <strong>{isEs ? 'Alerta de Seguridad:' : 'Safety Precaution:'}</strong>{' '}
+              {isEs ? currentStep.dangerWarningEs : currentStep.dangerWarningEn}
+            </div>
+          </div>
+
           <div className="trocar-info-callout trocar-callout-spec">
             <Info size={16} style={{ flexShrink: 0, marginTop: '2px', color: '#0284c7' }} />
             <div>
@@ -494,44 +531,65 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
             </div>
           </div>
 
-          <div className="trocar-info-callout trocar-callout-warning">
-            <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div>
-              <strong>{isEs ? 'Alerta de Seguridad:' : 'Safety Precaution:'}</strong>{' '}
-              {isEs ? currentStep.dangerWarningEs : currentStep.dangerWarningEn}
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* ── FOOTER CONTROLS ── */}
+      {/* ── FOOTER CONTROLS (next-step preview + Back / Next / Finish) ── */}
       <div className="trocar-guide-footer">
-        <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
-          {isEs ? `Paso ${activeStepIndex + 1} de ${STEPS_DATA.length}` : `Step ${activeStepIndex + 1} of ${STEPS_DATA.length}`}
-        </div>
+        {isLastStep ? (
+          <div className="trocar-footer-next is-done">
+            <CheckCircle2 size={14} />
+            <span>{isEs ? 'Protocolo completo · 6 de 6 pasos revisados' : 'Protocol complete · all 6 steps reviewed'}</span>
+          </div>
+        ) : (
+          <div className="trocar-footer-next">
+            <span>{isEs ? 'Siguiente:' : 'Up next:'}</span>
+            <strong>{stepLabel(nextStep)}</strong>
+          </div>
+        )}
 
         <div className="trocar-nav-controls">
           <button
             type="button"
-            onClick={() => setActiveStepIndex((prev) => Math.max(0, prev - 1))}
+            onClick={() => goToStep(activeStepIndex - 1)}
             disabled={activeStepIndex === 0}
             className="gcp-btn-secondary"
             style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700 }}
           >
             <ChevronLeft size={13} />
-            <span>{isEs ? 'Paso Anterior' : 'Previous'}</span>
+            <span>{isEs ? 'Anterior' : 'Previous'}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveStepIndex((prev) => Math.min(STEPS_DATA.length - 1, prev + 1))}
-            disabled={activeStepIndex === STEPS_DATA.length - 1}
-            className="gcp-btn-primary"
-            style={{ padding: '6px 14px', fontSize: '0.75rem', fontWeight: 700 }}
-          >
-            <span>{isEs ? 'Siguiente Paso' : 'Next Step'}</span>
-            <ChevronRight size={13} />
-          </button>
+          {!isLastStep ? (
+            <button
+              type="button"
+              onClick={() => goToStep(activeStepIndex + 1)}
+              className="gcp-btn-primary"
+              style={{ padding: '6px 14px', fontSize: '0.75rem', fontWeight: 700 }}
+            >
+              <span>{isEs ? 'Siguiente paso' : 'Next step'}</span>
+              <ChevronRight size={13} />
+            </button>
+          ) : completeAction?.href ? (
+            <a
+              href={completeAction.href}
+              className="gcp-btn-primary"
+              style={{ padding: '6px 14px', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none' }}
+            >
+              <span>{isEs ? completeAction.labelEs : completeAction.labelEn}</span>
+              <ArrowRight size={13} />
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={() => goToStep(0)}
+              className="gcp-btn-primary"
+              style={{ padding: '6px 14px', fontSize: '0.75rem', fontWeight: 700 }}
+            >
+              <RotateCcw size={13} />
+              <span>{isEs ? 'Reiniciar guía' : 'Restart guide'}</span>
+            </button>
+          )}
         </div>
       </div>
 
