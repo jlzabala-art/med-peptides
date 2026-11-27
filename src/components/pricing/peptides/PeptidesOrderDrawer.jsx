@@ -130,7 +130,7 @@ export default function PeptidesOrderDrawer({
             bottom: 0,
             background: 'rgba(15, 23, 42, 0.6)',
             backdropFilter: 'blur(4px)',
-            zIndex: 1200,
+            zIndex: 10050,
             display: 'flex',
             justifyContent: 'flex-end'
           }}

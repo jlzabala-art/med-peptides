@@ -34,13 +34,13 @@ export default function PeptidesBottomCartDock({
 
   return (
     <aside
-      className="gcp-fixed-bottom-dock animate-fadeInUp"
+      className="gcp-fixed-bottom-dock peptides-bottom-cart-dock animate-fadeInUp"
       style={{
         position: 'fixed',
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 900,
+        zIndex: 9910,
         background: '#ffffff',
         borderTop: '1px solid #dadce0',
         boxShadow: '0 -4px 20px rgba(60, 64, 67, 0.15)',
@@ -51,6 +51,14 @@ export default function PeptidesBottomCartDock({
       }}
       aria-label="Bottom Cart & Proforma Action Dock"
     >
+      <style>{`
+        @media (max-width: 1023px) {
+          .peptides-bottom-cart-dock {
+            bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+            padding-bottom: 10px !important;
+          }
+        }
+      `}</style>
       <div
         style={{
           maxWidth: '1440px',

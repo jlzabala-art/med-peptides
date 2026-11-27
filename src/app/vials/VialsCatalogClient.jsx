@@ -468,6 +468,33 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
           grid-template-columns: 1fr 1fr;
           gap: 10px;
         }
+        .vials-sticky-cart-bar {
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: calc(100% - 32px);
+          max-width: 800px;
+          background-color: #003666;
+          border-radius: 14px;
+          padding: 12px 20px;
+          box-shadow: 0 12px 30px rgba(0, 54, 102, 0.35);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          z-index: 9910;
+          color: #ffffff;
+          box-sizing: border-box;
+        }
+        @media (max-width: 1023px) {
+          .vials-sticky-cart-bar {
+            bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+            width: calc(100% - 20px);
+            padding: 10px 14px;
+            border-radius: 12px;
+          }
+        }
         @media (max-width: 768px) {
           .vials-hero-wrap,
           .vials-notice-banner,
@@ -490,7 +517,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
           }
         }
       `}</style>
-      <main className="atlas-page-shell" style={{ overflowX: 'hidden' }}>
+      <main className="atlas-page-shell" style={{ overflowX: 'hidden', paddingBottom: totalUnits > 0 ? '150px' : '84px' }}>
         <div className="vials-hero-wrap">
           <PageHeroCard
             brandLeft={isPatientView ? 'PATIENT GUIDE' : 'ATLAS HEALTH'}
@@ -1133,52 +1160,39 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
 
       {/* ── Sticky Bottom Cart Bar (Appears when items are selected) ── */}
       {totalUnits > 0 && !isCartModalOpen && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 'calc(100% - 32px)',
-          maxWidth: '800px',
-          backgroundColor: '#003666',
-          borderRadius: '16px',
-          padding: '14px 22px',
-          boxShadow: '0 12px 30px rgba(0, 54, 102, 0.35)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px',
-          zIndex: 50,
-          color: '#ffffff'
-        }}>
-          <div>
-            <div style={{ fontSize: '0.82rem', color: '#93c5fd', fontWeight: 600 }}>
-              {totalUnits} Vials in Order Request
+        <div className="vials-sticky-cart-bar">
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '0.78rem', color: '#93c5fd', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              {totalUnits} {isEs ? (totalUnits === 1 ? 'Vial en Solicitud' : 'Viales en Solicitud') : (totalUnits === 1 ? 'Vial in Order Request' : 'Vials in Order Request')}
             </div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>
-              ${subtotal.toFixed(2)} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#bfdbfe' }}>USD</span>
+            <div style={{ fontSize: '1.12rem', fontWeight: 800, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
+              {fmtAmount(subtotal)} <span style={{ fontSize: '0.72rem', fontWeight: 500, color: '#bfdbfe' }}>{activeCurrency}</span>
             </div>
           </div>
 
           <button
+            type="button"
             onClick={() => setIsCartModalOpen(true)}
             style={{
               backgroundColor: '#16a34a',
               color: '#ffffff',
               border: 'none',
               borderRadius: '10px',
-              padding: '10px 20px',
-              fontSize: '0.9rem',
+              padding: '10px 16px',
+              minHeight: '42px',
+              fontSize: '0.86rem',
               fontWeight: 800,
               cursor: 'pointer',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '6px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
               boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)'
             }}
           >
-            <span>Proceed to Request</span>
-            <ArrowRight size={16} />
+            <span>{isEs ? 'Continuar Pedido' : 'Proceed to Request'}</span>
+            <ArrowRight size={15} />
           </button>
         </div>
       )}
@@ -1197,7 +1211,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
           alignItems: 'center',
           justifyContent: 'center',
           padding: '16px',
-          zIndex: 100
+          zIndex: 10050
         }}>
           <div style={{
             backgroundColor: '#ffffff',
@@ -1418,16 +1432,16 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                     {/* Financial Summary */}
                     <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', marginBottom: '20px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginBottom: '4px' }}>
-                        <span>Subtotal ({totalUnits} vials):</span>
-                        <span>${subtotal.toFixed(2)} USD</span>
+                        <span>Subtotal ({totalUnits} {isEs ? 'viales' : 'vials'}):</span>
+                        <span>{fmtAmount(subtotal)} {activeCurrency}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginBottom: '8px' }}>
-                        <span>Estimated Shipping:</span>
-                        <span>${selectedShipping.cost.toFixed(2)} USD</span>
+                        <span>{isEs ? 'Envío Estimado:' : 'Estimated Shipping:'}</span>
+                        <span>{fmtAmount(selectedShipping.cost)} {activeCurrency}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.98rem', fontWeight: 800, color: '#003666', borderTop: '1px solid #e2e8f0', paddingTop: '8px' }}>
-                        <span>Grand Total:</span>
-                        <span>${grandTotal.toFixed(2)} USD</span>
+                        <span>{isEs ? 'Total Estimado:' : 'Grand Total:'}</span>
+                        <span>{fmtAmount(grandTotal)} {activeCurrency}</span>
                       </div>
                     </div>
 
@@ -1595,7 +1609,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
             position: 'fixed',
             inset: 0,
             backgroundColor: 'rgba(15, 23, 42, 0.45)',
-            zIndex: 1200,
+            zIndex: 10050,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
