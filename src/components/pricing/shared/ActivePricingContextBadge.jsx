@@ -29,7 +29,10 @@ export default function ActivePricingContextBadge({
   const { pricingRole, market: sessionMarket, isSimulating } = usePricing();
   const isEs = lang === 'es';
   const activeMarket = marketOverride || sessionMarket || 'global';
-  const marketMeta = PRICING_MARKETS[activeMarket] || PRICING_MARKETS.global;
+  const marketMeta =
+    PRICING_MARKETS.find((m) => m.id === activeMarket) ||
+    PRICING_MARKETS[0] ||
+    { id: 'global', labelEn: 'Global / EU', labelEs: 'Global / UE', badge: 'GLB' };
   const roleMeta = ROLE_DISPLAY[pricingRole] || ROLE_DISPLAY.wholeseller;
 
   return (

@@ -217,7 +217,10 @@ export default function ModularPriceSchedule({
       rightAlignCols.push(i);
     }
 
-    const marketMeta = PRICING_MARKETS[sessionMarket] || PRICING_MARKETS.global;
+    const marketMeta =
+      PRICING_MARKETS.find((m) => m.id === sessionMarket) ||
+      PRICING_MARKETS[0] ||
+      { id: 'global', labelEn: 'Global / EU', badge: 'GLB' };
     const tierLabel = isAdmin
       ? 'Admin Master Schedule'
       : pricingRole === 'distributor'

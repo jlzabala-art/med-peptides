@@ -72,7 +72,7 @@ export default function UserFormDrawer({
         label: 'Pricing Market / Country',
         type: 'select',
         required: false,
-        options: Object.values(PRICING_MARKETS).map((m) => ({
+        options: PRICING_MARKETS.map((m) => ({
           value: m.id,
           label: `${m.labelEn} (${m.badge})${m.id === 'global' ? ' — Default 15%+15%' : ''}`,
         })),
