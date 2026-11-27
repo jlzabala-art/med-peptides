@@ -119,6 +119,42 @@ console.log(`Total rules in AGENTS.md : ${ruleNums.length} (duplicates: ${dupes.
 console.log(`window.confirm/alert     : ${nativeDialogs.length} (enforced = 0)`);
 console.log(`Ad-hoc <header> in app/  : ${bespokeHeaders.length} (enforced = 0)`);
 console.log(`Supplier leaks (Rule #73): ${supplierLeaks.length} (enforced = 0)`);
+
+// 3. Enforce canonical CSS button SSOT (no global .gcp-btn-primary/.gcp-btn-secondary redefinitions outside gcp-theme.css / mobile.css)
+const cssBtnCollisions = [];
+function walkCss(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkCss(full);
+    else if (entry.name.endsWith('.css')) {
+      const rel = path.relative(ROOT, full);
+      if (rel === 'src/styles/gcp-theme.css' || rel === 'src/styles/mobile.css') continue;
+      const lines = fs.readFileSync(full, 'utf8').split('\n');
+      lines.forEach((line, i) => {
+        if (/^\s*\.gcp-btn-(primary|secondary)\b/.test(line)) {
+          cssBtnCollisions.push(`${rel}:${i + 1}`);
+        }
+      });
+    }
+  }
+}
+walkCss(path.join(ROOT, 'src'));
+
+// 4. Enforce canonical brand domain in brandConfig.js & manifest.json
+const legacyBrandRefs = [];
+for (const brandFile of ['src/config/brandConfig.js', 'public/manifest.json']) {
+  const full = path.join(ROOT, brandFile);
+  if (fs.existsSync(full)) {
+    const text = fs.readFileSync(full, 'utf8');
+    if (/atlas-services\.com/i.test(text)) {
+      legacyBrandRefs.push(brandFile);
+    }
+  }
+}
+
+console.log(`CSS .gcp-btn-* collisions: ${cssBtnCollisions.length} (enforced = 0)`);
+console.log(`Legacy brand domain SSOT : ${legacyBrandRefs.length} (enforced = 0)`);
 console.log(`Raw <table> (non-PDF)    : ${rawTables.length} (inventory)`);
 console.log(`Client-root page.jsx     : ${clientRootPages.length} (inventory)`);
 
@@ -144,6 +180,18 @@ if (bespokeHeaders.length > 0) {
 if (supplierLeaks.length > 0) {
   console.error('❌ Public supplier string leak found (Rule #73):');
   supplierLeaks.forEach((x) => console.error('  -', x));
+  failed = true;
+}
+
+if (cssBtnCollisions.length > 0) {
+  console.error('❌ Duplicate global .gcp-btn-primary/.gcp-btn-secondary CSS found:');
+  cssBtnCollisions.forEach((x) => console.error('  -', x));
+  failed = true;
+}
+
+if (legacyBrandRefs.length > 0) {
+  console.error('❌ Legacy atlas-services.com domain found in brand SSOT:');
+  legacyBrandRefs.forEach((x) => console.error('  -', x));
   failed = true;
 }
 

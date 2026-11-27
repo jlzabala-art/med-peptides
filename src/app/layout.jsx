@@ -8,17 +8,33 @@ import { getTokens } from 'next-firebase-auth-edge';
 import { serverConfig } from '../authConfig';
 import GlobalClientWrapper from './GlobalClientWrapper';
 import { Suspense } from 'react';
+import { Inter, JetBrains_Mono } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
 
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com'),
   title: {
-    default: 'Atlas — Precision Peptide & Clinical Protocol Intelligence',
-    template: '%s | Atlas Health'
+    default: 'Atlas Health Services — Precision Peptide & Clinical Protocol Intelligence',
+    template: '%s | Atlas Health Services'
   },
-  description: 'Atlas is the institutional medical intelligence platform for evidence-based peptide protocols, compounding pharmacy supply, and certified bulk active pharmaceutical ingredients (APIs).',
-  applicationName: 'Atlas Health',
+  description: 'Atlas Health Services is the institutional medical intelligence platform for evidence-based peptide protocols, compounding pharmacy supply, and certified bulk active pharmaceutical ingredients (APIs).',
+  applicationName: 'Atlas Health Services',
   keywords: [
+    'Atlas Health Services',
     'Atlas Health',
     'Atlas Peptides',
     'clinical peptide protocol directory',
@@ -31,8 +47,8 @@ export const metadata = {
     'physician peptide prescribing platform'
   ],
   authors: [{ name: 'Atlas Clinical Advisory Board', url: 'https://www.atlashealth-services.com' }],
-  creator: 'Atlas Health Intelligence',
-  publisher: 'Atlas Health Intelligence',
+  creator: 'Atlas Health Services',
+  publisher: 'Atlas Health Services',
   manifest: '/manifest.json',
   robots: {
     index: true,
@@ -46,10 +62,10 @@ export const metadata = {
     },
   },
   openGraph: {
-    title: 'Atlas — Precision Peptide & Clinical Protocol Intelligence',
+    title: 'Atlas Health Services — Precision Peptide & Clinical Protocol Intelligence',
     description: 'Standardized clinical blueprints, HPLC-certified peptides, and bulk active ingredients for licensed physicians and compounding facilities.',
     url: 'https://www.atlashealth-services.com',
-    siteName: 'Atlas Health Platform',
+    siteName: 'Atlas Health Services',
     locale: 'en_US',
     type: 'website',
   },
@@ -80,8 +96,8 @@ export const metadata = {
 const medicalOrgSchema = {
   '@context': 'https://schema.org',
   '@type': 'MedicalOrganization',
-  name: 'Atlas Health',
-  alternateName: 'Atlas Peptide & Protocol Intelligence Platform',
+  name: 'Atlas Health Services',
+  alternateName: 'Atlas Health — Precision Peptide & Protocol Intelligence Platform',
   url: 'https://www.atlashealth-services.com',
   logo: 'https://www.atlashealth-services.com/icon-512.png',
   medicalSpecialty: [
@@ -132,7 +148,7 @@ async function AuthWrapper({ children }) {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

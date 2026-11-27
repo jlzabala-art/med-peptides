@@ -186,10 +186,10 @@ The Atlas procurement repository contains complete line-item traceability for **
         maxWidth: '580px',
         backgroundColor: '#ffffff',
         boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.18)',
-        zIndex: 100,
+        zIndex: 'var(--atlas-z-ai, 1200)',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: 'Inter, system-ui, sans-serif'
+        fontFamily: 'var(--atlas-font-sans, Inter, system-ui, sans-serif)'
       }}
     >
       {/* Header */}

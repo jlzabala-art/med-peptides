@@ -1,7 +1,7 @@
 {
-  "name": "Atlas Services",
-  "short_name": "Atlas",
-  "description": "Atlas Services — Precision Peptide & Protocol Intelligence Platform",
+  "name": "Atlas Health Services",
+  "short_name": "Atlas Health",
+  "description": "Atlas Health Services — Institutional Clinical & Pharmaceutical Intelligence Platform",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",

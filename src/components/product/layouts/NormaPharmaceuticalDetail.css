@@ -137,63 +137,7 @@
   background-color: #f8fafc;
 }
 
-/* Google Cloud Buttons */
-.gcp-btn-primary {
-  width: 100%;
-  padding: 10px 18px;
-  min-height: 40px;
-  background-color: #003666;
-  color: #ffffff;
-  border: 1px solid #00284d;
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 1px 2px rgba(0, 54, 102, 0.15);
-  transition: all 0.15s ease;
-}
-
-.gcp-btn-primary:hover {
-  background-color: #00284d;
-  box-shadow: 0 2px 4px rgba(0, 54, 102, 0.25);
-}
-
-.gcp-btn-primary:active {
-  transform: translateY(1px);
-}
-
-.gcp-btn-secondary {
-  width: 100%;
-  padding: 9px 16px;
-  min-height: 38px;
-  background-color: #ffffff;
-  color: #003666;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.15s ease;
-}
-
-.gcp-btn-secondary:hover {
-  background-color: #f8fafc;
-  border-color: #94a3b8;
-  color: #00284d;
-}
-
-.gcp-btn-secondary:active {
-  transform: translateY(1px);
-}
+/* Google Cloud Buttons inherit canonical .gcp-btn-primary / .gcp-btn-secondary from src/styles/gcp-theme.css */
 
 /* Google Cloud Key-Value Specification Grid */
 .gcp-kv-grid {

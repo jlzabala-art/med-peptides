@@ -365,10 +365,10 @@
 
 /* Root font & global fallback spinner (moved from RootLayout <head> to avoid React #418 hydration warning) */
 :root {
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: var(--atlas-font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
 body {
-  font-family: var(--font-sans);
+  font-family: var(--atlas-font-sans, var(--font-sans));
 }
 .global-spinner {
   width: 36px;

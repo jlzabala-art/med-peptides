@@ -554,6 +554,38 @@ const TOPIC_CONFIG = {
       ],
     },
   },
+  brand: {
+    accent: '#003666',
+    accentSoft: '#38bdf8',
+    en: {
+      badge: 'OFFICIAL BRAND GUIDELINES · V2.0',
+      title1: 'Atlas Health Services',
+      title2: 'Brandbook & SVG Kit',
+      subtitle: 'Deep Navy #003666 · Clinical Blue #1A73E8 · Inter & JetBrains Mono',
+      pills: ['SVG Vector Logos', 'Copyable HEX/RGB', 'Inter + JetBrains Mono', 'A4 PDF Export'],
+      cardTitle: 'Identity System',
+      cardLines: [
+        { k: 'Primary', v: 'Deep Navy #003666' },
+        { k: 'Secondary', v: 'Clinical Blue #1A73E8' },
+        { k: 'Typography', v: 'Inter · JetBrains Mono' },
+        { k: 'Master Assets', v: 'SVG Vector + PNG Fallbacks' },
+      ],
+    },
+    es: {
+      badge: 'MANUAL DE MARCA OFICIAL · V2.0',
+      title1: 'Atlas Health Services',
+      title2: 'Brandbook y Kit SVG',
+      subtitle: 'Deep Navy #003666 · Clinical Blue #1A73E8 · Inter y JetBrains Mono',
+      pills: ['Logos Vector SVG', 'HEX/RGB Copiable', 'Inter + JetBrains Mono', 'PDF A4 Listo'],
+      cardTitle: 'Sistema de Identidad',
+      cardLines: [
+        { k: 'Primario', v: 'Deep Navy #003666' },
+        { k: 'Secundario', v: 'Clinical Blue #1A73E8' },
+        { k: 'Tipografía', v: 'Inter · JetBrains Mono' },
+        { k: 'Archivos', v: 'Vector SVG + PNG Respaldo' },
+      ],
+    },
+  },
 };
 
 export async function GET(request) {
@@ -562,7 +594,7 @@ export async function GET(request) {
   const lang = (searchParams.get('lang') || 'en').toLowerCase() === 'es' ? 'es' : 'en';
   const cur = (searchParams.get('cur') || searchParams.get('currency') || 'EUR').toUpperCase();
   const validCur = ['EUR', 'USD', 'AED'].includes(cur) ? cur : 'EUR';
-  const showCurrency = !topic.endsWith('-guide');
+  const showCurrency = !topic.endsWith('-guide') && topic !== 'brand' && topic !== 'rx';
 
   const cfg = TOPIC_CONFIG[topic] || TOPIC_CONFIG.pricing;
   const copy = cfg[lang] || cfg.en;

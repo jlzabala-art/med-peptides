@@ -553,54 +553,7 @@ html, body {
   justify-content: space-between;
 }
 
-.gcp-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  padding: 0.45rem 1rem;
-  border-radius: 4px;
-  border: none;
-  background-color: #1a73e8;
-  color: #ffffff;
-  font-size: 0.8rem;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background-color 0.15s, box-shadow 0.15s;
-}
-
-.gcp-btn-primary:hover:not(:disabled) {
-  background-color: #1765cc;
-  box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
-}
-
-.gcp-btn-primary:disabled {
-  background-color: #f1f3f4;
-  color: #a8aab0;
-  cursor: not-allowed;
-}
-
-.gcp-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  padding: 0.45rem 1rem;
-  border-radius: 4px;
-  border: 1px solid #dadce0;
-  background-color: #ffffff;
-  color: #1a73e8;
-  font-size: 0.8rem;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-
-.gcp-btn-secondary:hover:not(:disabled) {
-  background-color: #f8f9fa;
-}
+/* Canonical .gcp-btn-primary & .gcp-btn-secondary live in src/styles/gcp-theme.css (SSOT) */
 
 .gcp-input {
   width: 100%;

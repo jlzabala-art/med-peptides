@@ -411,7 +411,7 @@ export default function AtlasAiCopilotDrawer({
           position: 'fixed',
           bottom: '24px',
           right: '24px',
-          zIndex: 1300,
+          zIndex: 'var(--atlas-z-ai, 1200)',
           background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
           color: '#ffffff',
           padding: '10px 18px',
@@ -462,7 +462,7 @@ export default function AtlasAiCopilotDrawer({
         inset: 0,
         background: isMobile ? 'rgba(15, 23, 42, 0.35)' : 'transparent',
         pointerEvents: isMobile ? 'auto' : 'none', // Desktop allows interacting with background table!
-        zIndex: 1200,
+        zIndex: 'var(--atlas-z-ai, 1200)',
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
         justifyContent: 'flex-end',

@@ -1392,7 +1392,7 @@ export default function PublicAtlasAIDrawer({
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            zIndex: 45,
+            zIndex: 'var(--atlas-z-dock, 90)',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '9px',

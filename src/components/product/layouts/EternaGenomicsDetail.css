@@ -132,42 +132,8 @@
 
 /* ==========================================================================
    GOOGLE CLOUD UX: BUTTONS SYSTEM
+   Canonical .gcp-btn-primary & .gcp-btn-secondary inherited from gcp-theme.css
    ========================================================================== */
-.gcp-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 20px;
-  border-radius: var(--gcp-radius-btn);
-  background-color: var(--gcp-blue-primary);
-  border: 1px solid var(--gcp-blue-primary);
-  color: #ffffff;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.25px;
-  cursor: pointer;
-  box-shadow: var(--gcp-shadow-btn);
-  transition: background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-  white-space: nowrap;
-  text-decoration: none;
-}
-
-.gcp-btn-primary:hover:not(:disabled) {
-  background-color: var(--gcp-blue-hover);
-  border-color: var(--gcp-blue-hover);
-  box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.35), 0 4px 8px 3px rgba(60, 64, 67, 0.2);
-  color: #ffffff;
-}
-
-.gcp-btn-primary:active:not(:disabled) {
-  background-color: var(--gcp-blue-active);
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3);
-}
-
-.gcp-btn-secondary,
 .gcp-btn-outlined {
   display: inline-flex;
   align-items: center;
@@ -175,10 +141,10 @@
   gap: 8px;
   height: 40px;
   padding: 0 18px;
-  border-radius: var(--gcp-radius-btn);
+  border-radius: var(--gcp-radius-btn, 8px);
   background-color: #ffffff;
-  border: 1px solid var(--gcp-border);
-  color: var(--gcp-text-secondary);
+  border: 1px solid var(--gcp-border, #dadce0);
+  color: var(--gcp-text-secondary, #5f6368);
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -190,11 +156,10 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.gcp-btn-secondary:hover:not(:disabled),
 .gcp-btn-outlined:hover:not(:disabled) {
   background-color: #f8fafc;
   border-color: #cbd5e1;
-  color: var(--gcp-blue-primary);
+  color: var(--atlas-brand-blue, #1a73e8);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
