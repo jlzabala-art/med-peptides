@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import PageHeroCard from '@/components/ui/PageHeroCard';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -177,58 +178,57 @@ export default async function PeptideProtocolsComparisonPage({ searchParams }) {
     ],
   };
 
+  const breadcrumb = [
+    { label: isEs ? 'Catálogo' : 'Catalog', href: '/catalog' },
+    { label: isEs ? 'Péptidos' : 'Peptides', href: '/pricing/peptides' },
+    { label: isEs ? 'Comparativa Clínica' : 'Clinical Comparisons' },
+  ];
+
   return (
     <div className="atlas-page-bg">
-      <PublicUnifiedHeader />
-      <main className="atlas-page-shell" style={{ paddingTop: '24px', paddingBottom: '64px' }}>
+      <PublicUnifiedHeader purePublic={true} lang={isEs ? 'es' : 'en'} breadcrumb={breadcrumb} />
+      <main className="atlas-page-shell" style={{ paddingTop: '20px', paddingBottom: '64px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div style={{ maxWidth: '980px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <section style={{ background: '#003666', color: '#fff', borderRadius: '14px', padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#7dd3fc' }}>
-              Atlas Health Services · {isEs ? 'Comparativa Clínica' : 'Clinical Comparison Guide'}
-            </div>
-            <div style={{ display: 'inline-flex', gap: '6px' }}>
-              <Link
-                href="/guides/peptide-protocols-comparison?lang=en"
-                style={{ padding: '3px 9px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, textDecoration: 'none', background: !isEs ? '#fff' : 'rgba(255,255,255,0.14)', color: !isEs ? '#003666' : '#fff' }}
-              >
-                EN
-              </Link>
-              <Link
-                href="/guides/peptide-protocols-comparison?lang=es"
-                style={{ padding: '3px 9px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, textDecoration: 'none', background: isEs ? '#fff' : 'rgba(255,255,255,0.14)', color: isEs ? '#003666' : '#fff' }}
-              >
-                ES
-              </Link>
-            </div>
-          </div>
-          <h1 style={{ margin: '8px 0', fontSize: '1.5rem', fontWeight: 800 }}>
-            {isEs
+      <div style={{ maxWidth: '1040px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <PageHeroCard
+          brandLeft="ATLAS HEALTH"
+          brandRight={isEs ? 'COMPARATIVA CLÍNICA' : 'CLINICAL COMPARISON GUIDE'}
+          badges={[isEs ? 'Viales 10R vs Plumas 3 mL' : '10R Vials vs 3 mL Pens']}
+          title={
+            isEs
               ? 'Comparativa Clínica de Péptidos y Formatos (Viales vs Plumas)'
-              : 'Clinical Peptide & Format Comparisons (Vials vs Multi-Dose Pens)'}
-          </h1>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: '#dbeafe', lineHeight: 1.5 }}>
-            {isEs
+              : 'Clinical Peptide & Format Comparisons (Vials vs Multi-Dose Pens)'
+          }
+          subtitle={
+            isEs
               ? 'Resumen técnico objetivo sobre mecanismos, sinergias clínicas y selección de formato para medicina de longevidad y endocrinología.'
-              : 'Objective clinical summary covering mechanisms of action, pathway synergies, and presentation selection for longevity and endocrine practice.'}
-          </p>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
-            <Link href="/tools/peptide-calculator" style={{ background: '#fff', color: '#003666', padding: '8px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 750, textDecoration: 'none' }}>
-              {isEs ? 'Calculadora de Reconstitución' : 'Open Dosing Calculator'}
-            </Link>
-            <Link href="/pricing/peptides" style={{ background: 'rgba(255,255,255,0.14)', color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.28)' }}>
-              {isEs ? 'Tarifa Péptidos 10R' : '10R Peptides Schedule'}
-            </Link>
-            <Link href="/pricing/pens" style={{ background: 'rgba(255,255,255,0.14)', color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.28)' }}>
-              {isEs ? 'Plumas Precargadas 3 mL' : '3 mL Peptide Pens'}
-            </Link>
-          </div>
-        </section>
+              : 'Objective clinical summary covering mechanisms of action, pathway synergies, and presentation selection for longevity and endocrine practice.'
+          }
+          actions={
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <Link
+                href={isEs ? '/guides/peptide-protocols-comparison?lang=en' : '/guides/peptide-protocols-comparison?lang=es'}
+                className="gcp-btn-secondary"
+                style={{ padding: '7px 10px', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none' }}
+              >
+                {isEs ? 'EN' : 'ES'}
+              </Link>
+              <Link href="/pricing/peptides" className="gcp-btn-secondary" style={{ padding: '7px 12px', fontSize: '0.76rem', textDecoration: 'none' }}>
+                {isEs ? 'Péptidos 10R' : '10R Peptides'}
+              </Link>
+              <Link href="/pricing/pens" className="gcp-btn-secondary" style={{ padding: '7px 12px', fontSize: '0.76rem', textDecoration: 'none' }}>
+                {isEs ? 'Plumas 3 mL' : '3 mL Pens'}
+              </Link>
+              <Link href="/tools/peptide-calculator" className="gcp-btn-primary" style={{ padding: '7px 14px', fontSize: '0.76rem', fontWeight: 700, textDecoration: 'none' }}>
+                {isEs ? 'Calculadora de Reconstitución' : 'Open Dosing Calculator'}
+              </Link>
+            </div>
+          }
+        />
 
         {COMPARISONS.map((block, idx) => (
-          <section key={idx} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
-            <h2 style={{ margin: '0 0 12px', fontSize: '1.08rem', fontWeight: 800, color: '#0f172a' }}>
+          <section key={idx} style={{ background: '#fff', border: '1px solid #dadce0', borderRadius: '12px', padding: '20px' }}>
+            <h2 style={{ margin: '0 0 12px', fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>
               {isEs ? block.titleEs : block.titleEn}
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

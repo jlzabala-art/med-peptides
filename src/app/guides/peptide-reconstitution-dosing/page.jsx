@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import PageHeroCard from '@/components/ui/PageHeroCard';
+import InlineAlert from '@/components/ui/InlineAlert';
+import GuideReferenceTable from '@/components/guides/GuideReferenceTable';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -110,136 +113,102 @@ export default async function PeptideReconstitutionGuidePage({ searchParams }) {
     ],
   };
 
+  const breadcrumb = [
+    { label: isEs ? 'Catálogo' : 'Catalog', href: '/catalog' },
+    { label: isEs ? 'Péptidos' : 'Peptides', href: '/pricing/peptides' },
+    { label: isEs ? 'Guía de Reconstitución' : 'Reconstitution Guide' },
+  ];
+
+  const reconColumns = [
+    { key: 'vial', header: isEs ? 'Vial' : 'Vial' },
+    { key: 'water', header: isEs ? 'Diluyente (BAC)' : 'Diluent' },
+    { key: 'conc', header: isEs ? 'Concentración' : 'Concentration' },
+    { key: 'per10Units', header: isEs ? '10 Unidades (0,10 mL)' : '10 Units (0.10 mL)' },
+    { key: 'per5Units', header: isEs ? '5 Unidades (0,05 mL)' : '5 Units (0.05 mL)' },
+  ];
+
+  const penColumns = [
+    { key: 'pen', header: isEs ? 'Pluma Precargada' : 'Pen Formulation' },
+    { key: 'strength', header: isEs ? 'Contenido Total' : 'Total Fill' },
+    { key: 'perClick', header: isEs ? 'Dosis / Clic' : 'Dose / Click' },
+    { key: 'commonDose', header: isEs ? 'Dosificación Habitual' : 'Standard Clinical Dial' },
+  ];
+
   return (
     <div className="atlas-page-bg">
-      <PublicUnifiedHeader />
-      <main className="atlas-page-shell" style={{ paddingTop: '24px', paddingBottom: '64px' }}>
+      <PublicUnifiedHeader purePublic={true} lang={isEs ? 'es' : 'en'} breadcrumb={breadcrumb} />
+      <main className="atlas-page-shell" style={{ paddingTop: '20px', paddingBottom: '64px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div style={{ maxWidth: '980px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <section style={{ background: '#003666', color: '#fff', borderRadius: '14px', padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#7dd3fc' }}>
-              Atlas Health Services · {isEs ? 'Referencia Clínica' : 'Clinical Reference'}
-            </div>
-            <div style={{ display: 'inline-flex', gap: '6px' }}>
-              <Link
-                href="/guides/peptide-reconstitution-dosing?lang=en"
-                style={{
-                  padding: '3px 9px',
-                  borderRadius: '6px',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  textDecoration: 'none',
-                  background: !isEs ? '#ffffff' : 'rgba(255,255,255,0.14)',
-                  color: !isEs ? '#003666' : '#ffffff',
-                }}
-              >
-                EN
-              </Link>
-              <Link
-                href="/guides/peptide-reconstitution-dosing?lang=es"
-                style={{
-                  padding: '3px 9px',
-                  borderRadius: '6px',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  textDecoration: 'none',
-                  background: isEs ? '#ffffff' : 'rgba(255,255,255,0.14)',
-                  color: isEs ? '#003666' : '#ffffff',
-                }}
-              >
-                ES
-              </Link>
-            </div>
-          </div>
-          <h1 style={{ margin: '6px 0 8px', fontSize: '1.55rem', fontWeight: 800 }}>
-            {isEs
+      <div style={{ maxWidth: '1040px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <PageHeroCard
+          brandLeft="ATLAS HEALTH"
+          brandRight={isEs ? 'REFERENCIA CLÍNICA' : 'CLINICAL REFERENCE'}
+          badges={[isEs ? 'cGMP · 28 Días Frío' : 'cGMP · 28-Day Cold Chain']}
+          title={
+            isEs
               ? 'Guía Clínica de Reconstitución, Jeringa U-100 y Plumas Click-Dial'
-              : 'Clinical Peptide Reconstitution, U-100 Syringe & Click-Dial Dosing Guide'}
-          </h1>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: '#dbeafe', lineHeight: 1.5 }}>
-            {isEs
-              ? 'Referencia estandarizada para médicos y clínicas sobre reconstitución estéril con agua bacteriostática (BAC), cálculo exacto en jeringas U-100 (100 UI = 1 mL) y plumas precargadas de 3 mL (300 clics).'
-              : 'Standardized clinical reference for physicians and longevity clinics covering sterile bacteriostatic water (BAC) reconstitution, U-100 syringe unit math (100 IU = 1 mL), and 3 mL multi-dose click-dial pens (300 clicks).'}
-          </p>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
-            <Link href="/pricing/peptides" style={{ background: '#fff', color: '#003666', padding: '8px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 750, textDecoration: 'none' }}>
-              {isEs ? 'Ver Tarifa de Péptidos' : 'View Peptide Schedule'}
-            </Link>
-            <Link href="/pricing/pens" style={{ background: 'rgba(255,255,255,0.14)', color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.28)' }}>
-              {isEs ? 'Ver Plumas Precargadas' : 'View Multi-Dose Pens'}
-            </Link>
-            <Link href="/proto" style={{ background: 'rgba(255,255,255,0.14)', color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.28)' }}>
-              {isEs ? 'Protocolos Clínicos' : 'Clinical Protocols'}
-            </Link>
-          </div>
-        </section>
+              : 'Clinical Peptide Reconstitution, U-100 Syringe & Click-Dial Dosing Guide'
+          }
+          subtitle={
+            isEs
+              ? 'Referencia estandarizada sobre reconstitución estéril con agua bacteriostática (BAC), cálculo en jeringas U-100 (100 UI = 1 mL) y plumas precargadas de 3 mL (300 clics).'
+              : 'Standardized clinical reference covering sterile bacteriostatic water (BAC) reconstitution, U-100 syringe unit math (100 IU = 1 mL), and 3 mL multi-dose click-dial pens (300 clicks).'
+          }
+          actions={
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <Link
+                href={isEs ? '/guides/peptide-reconstitution-dosing?lang=en' : '/guides/peptide-reconstitution-dosing?lang=es'}
+                className="gcp-btn-secondary"
+                style={{ padding: '7px 10px', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none' }}
+              >
+                {isEs ? 'EN' : 'ES'}
+              </Link>
+              <Link href="/pricing/pens" className="gcp-btn-secondary" style={{ padding: '7px 12px', fontSize: '0.76rem', textDecoration: 'none' }}>
+                {isEs ? 'Plumas 3 mL' : '3 mL Pens'}
+              </Link>
+              <Link href="/proto" className="gcp-btn-secondary" style={{ padding: '7px 12px', fontSize: '0.76rem', textDecoration: 'none' }}>
+                {isEs ? 'Protocolos' : 'Protocols'}
+              </Link>
+              <Link href="/pricing/peptides" className="gcp-btn-primary" style={{ padding: '7px 14px', fontSize: '0.76rem', fontWeight: 700, textDecoration: 'none' }}>
+                {isEs ? 'Ver Tarifa de Péptidos' : 'View Peptide Schedule'}
+              </Link>
+            </div>
+          }
+        />
 
-        <section style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
-          <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+        <section style={{ background: '#fff', border: '1px solid #dadce0', borderRadius: '12px', padding: '20px' }}>
+          <h2 style={{ margin: '0 0 12px', fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>
             {isEs ? '1. Tabla de Reconstitución de Viales 10R (Jeringa U-100)' : '1. 10R Vial Reconstitution Reference (U-100 Insulin Syringe)'}
           </h2>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#475569' }}>
-                  <th style={{ padding: '8px' }}>{isEs ? 'Vial' : 'Vial'}</th>
-                  <th style={{ padding: '8px' }}>{isEs ? 'Diluyente (BAC)' : 'Diluent'}</th>
-                  <th style={{ padding: '8px' }}>{isEs ? 'Concentración' : 'Concentration'}</th>
-                  <th style={{ padding: '8px' }}>{isEs ? '10 Unidades (0,10 mL)' : '10 Units (0.10 mL)'}</th>
-                  <th style={{ padding: '8px' }}>{isEs ? '5 Unidades (0,05 mL)' : '5 Units (0.05 mL)'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {RECONSTITUTION_ROWS.map((r, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '8px', fontWeight: 700, color: '#0f172a' }}>{r.vial}</td>
-                    <td style={{ padding: '8px' }}>{r.water}</td>
-                    <td style={{ padding: '8px' }}>{r.conc}</td>
-                    <td style={{ padding: '8px', fontWeight: 700, color: '#003666' }}>{r.per10Units}</td>
-                    <td style={{ padding: '8px' }}>{r.per5Units}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <GuideReferenceTable
+            columns={reconColumns}
+            data={RECONSTITUTION_ROWS}
+            accentKeys={{ vial: '#0f172a', per10Units: '#003666' }}
+          />
         </section>
 
-        <section style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
-          <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+        <section style={{ background: '#fff', border: '1px solid #dadce0', borderRadius: '12px', padding: '20px' }}>
+          <h2 style={{ margin: '0 0 12px', fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>
             {isEs ? '2. Equivalencia por Clics en Plumas Precargadas de 3 mL (100 clics = 1 mL)' : '2. Pre-Filled 3 mL Peptide Pen Click-Dial Reference (100 clicks = 1 mL)'}
           </h2>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#475569' }}>
-                  <th style={{ padding: '8px' }}>{isEs ? 'Pluma Precargada' : 'Pen Formulation'}</th>
-                  <th style={{ padding: '8px' }}>{isEs ? 'Contenido Total' : 'Total Fill'}</th>
-                  <th style={{ padding: '8px' }}>{isEs ? 'Dosis / Clic' : 'Dose / Click'}</th>
-                  <th style={{ padding: '8px' }}>{isEs ? 'Dosificación Habitual' : 'Standard Clinical Dial'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PEN_CLICK_ROWS.map((r, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '8px', fontWeight: 700, color: '#0f172a' }}>{r.pen}</td>
-                    <td style={{ padding: '8px' }}>{r.strength}</td>
-                    <td style={{ padding: '8px', fontWeight: 700, color: '#0d9488' }}>{r.perClick}</td>
-                    <td style={{ padding: '8px' }}>{r.commonDose}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <GuideReferenceTable
+            columns={penColumns}
+            data={PEN_CLICK_ROWS}
+            accentKeys={{ pen: '#0f172a', perClick: '#0d9488' }}
+          />
         </section>
 
-        <section style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
-          <h2 style={{ margin: '0 0 10px', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+        <section style={{ background: '#fff', border: '1px solid #dadce0', borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>
             {isEs ? '3. Estabilidad en Cadena de Frío y Buenas Prácticas (28 Días)' : '3. Cold-Chain & 28-Day In-Use Stability Standards'}
           </h2>
+          <InlineAlert compact variant="warning" title={isEs ? 'Manejo Estéril:' : 'Sterile Handling:'}>
+            {isEs
+              ? 'Reconstituir dejando resbalar el agua bacteriostática suavemente por la pared del vidrio; girar con suavidad sin agitar para evitar desnaturalización.'
+              : 'Direct bacteriostatic water gently down the glass wall; swirl softly without shaking to prevent peptide denaturation.'}
+          </InlineAlert>
           <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.86rem', color: '#334155', lineHeight: 1.65 }}>
             <li>{isEs ? 'Pureza analítica estándar: ≥99.0% HPLC (viales liofilizados 10R) y ≥99.2% HPLC (plumas precargadas).' : 'Analytical purity standard: ≥99.0% HPLC (10R lyophilized vials) and ≥99.2% HPLC (pre-filled pens).'}</li>
-            <li>{isEs ? 'Reconstituir dejando resbalar el agua bacteriostática suavemente por la pared del vidrio; girar con suavidad sin agitar.' : 'Reconstitute by directing bacteriostatic water gently down the glass wall; swirl softly without shaking.'}</li>
             <li>{isEs ? 'Conservar tras reconstitución entre 2 °C y 8 °C protegido de la luz durante un máximo de 28 días.' : 'Store reconstituted vials and active cartridges at 2°C–8°C protected from light for up to 28 days.'}</li>
           </ul>
         </section>

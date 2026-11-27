@@ -6,6 +6,9 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import InteractiveTrocarPelletGuide from '@/components/product/InteractiveTrocarPelletGuide';
 import UniversalShareDrawer from '@/components/ui/UniversalShareDrawer';
+import InlineAlert from '@/components/ui/InlineAlert';
+import OptionChipGroup from '@/components/ui/OptionChipGroup';
+import CopyActionButton from '@/components/ui/CopyActionButton';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import toast from 'react-hot-toast';
 import {
@@ -282,10 +285,8 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
   const [patientWeightKg, setPatientWeightKg] = useState(68);
   const [cycleStage, setCycleStage] = useState('initial'); // 'initial' | 'maintenance'
   const [implantDate, setImplantDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [copiedReminder, setCopiedReminder] = useState(false);
   const [opsTab, setOpsTab] = useState('checklist'); // 'checklist' | 'followup' | 'contraindications' | 'complications' | 'patient'
   const [checkedItems, setCheckedItems] = useState({});
-  const [copiedPatientCare, setCopiedPatientCare] = useState(false);
 
   const shareUrl = isEs
     ? 'https://www.atlashealth-services.com/guides/hormone-pellets-implantation?lang=es'
@@ -355,19 +356,9 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
     };
   }, [implantDate, selectedProfileId, isEs]);
 
-  const handleCopyFollowUpReminder = async () => {
-    const msg = isEs
-      ? `📅 *Atlas Health Services — Calendario de Seguimiento de Pellets (BHRT)*\n• *Analítica de control en pico (Sem 4–6)*: entre el *${followUpSchedule.labStart}* y el *${followUpSchedule.labEnd}*.\n• *Ventana estimada de renovación de ciclo*: entre el *${followUpSchedule.reimplantStart}* y el *${followUpSchedule.reimplantEnd}*.`
-      : `📅 *Atlas Health Services — Hormone Pellet Follow-Up Schedule (BHRT)*\n• *Peak Serum Lab Panel (Wk 4–6)*: between *${followUpSchedule.labStart}* and *${followUpSchedule.labEnd}*.\n• *Estimated Next Cycle Window*: between *${followUpSchedule.reimplantStart}* and *${followUpSchedule.reimplantEnd}*.`;
-    try {
-      await navigator.clipboard.writeText(msg);
-      setCopiedReminder(true);
-      toast.success(isEs ? 'Recordatorio de seguimiento copiado ✓' : 'Follow-up schedule copied ✓');
-      setTimeout(() => setCopiedReminder(false), 2500);
-    } catch {
-      toast.error(isEs ? 'No se pudo copiar al portapapeles' : 'Could not copy to clipboard');
-    }
-  };
+  const followUpReminderText = isEs
+    ? `📅 *Atlas Health Services — Calendario de Seguimiento de Pellets (BHRT)*\n• *Analítica de control en pico (Sem 4–6)*: entre el *${followUpSchedule.labStart}* y el *${followUpSchedule.labEnd}*.\n• *Ventana estimada de renovación de ciclo*: entre el *${followUpSchedule.reimplantStart}* y el *${followUpSchedule.reimplantEnd}*.`
+    : `📅 *Atlas Health Services — Hormone Pellet Follow-Up Schedule (BHRT)*\n• *Peak Serum Lab Panel (Wk 4–6)*: between *${followUpSchedule.labStart}* and *${followUpSchedule.labEnd}*.\n• *Estimated Next Cycle Window*: between *${followUpSchedule.reimplantStart}* and *${followUpSchedule.reimplantEnd}*.`;
 
   const completedChecklistCount = Object.values(checkedItems).filter(Boolean).length;
 
@@ -388,30 +379,19 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
     });
   };
 
-  const handleCopyPatientCare = async () => {
-    const text = isEs
-      ? `🏥 *Atlas Health Services — Pautas Post-Implante de Pellets Hormonales (BHRT)*
+  const patientCareText = isEs
+    ? `🏥 *Atlas Health Services — Pautas Post-Implante de Pellets Hormonales (BHRT)*
 1. *Primeras 48 Horas*: Mantener el vendaje impermeable completamente seco e intacto. Aplicar frío local breve (15 min) si hay ligera molestia.
 2. *Reposo de Zona Glútea*: Evitar sentadillas, peso muerto, ciclismo, correr o inmersión en agua (piscina/mar/bañera) durante *3–5 días (mujeres)* o *5–7 días (hombres)*.
 3. *Ducha*: Permitida suavemente a partir de las 48h sin frotar ni retirar las tiras Steri-Strips. Secar a toques suaves.
 4. *Retirada de Tiras*: Las Steri-Strips se desprenden solas entre los días 5 y 7.
 5. *Seguimiento*: Analítica hormonal de control en pico a las *4–6 semanas*.`
-      : `🏥 *Atlas Health Services — Post-Trocar Hormone Pellet Patient Care (BHRT)*
+    : `🏥 *Atlas Health Services — Post-Trocar Hormone Pellet Patient Care (BHRT)*
 1. *First 48 Hours*: Keep the waterproof pressure dressing completely dry and intact. Brief cold pack (15 min) if mild soreness occurs.
 2. *Gluteal Rest Window*: Avoid squats, deadlifts, cycling, running, or water submersion (pool/hot tub/sea) for *3–5 days (female)* or *5–7 days (male)*.
 3. *Showering*: Gentle shower allowed after 48h without rubbing or peeling Steri-Strips. Pat dry gently.
 4. *Steri-Strip Removal*: Strips fall off naturally between days 5 and 7.
 5. *Follow-Up*: Scheduled peak serum hormone bloodwork at *4–6 weeks*.`;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedPatientCare(true);
-      toast.success(isEs ? 'Pautas para WhatsApp copiadas ✓' : 'WhatsApp patient care copied ✓');
-      setTimeout(() => setCopiedPatientCare(false), 2500);
-    } catch {
-      toast.error(isEs ? 'No se pudo copiar al portapapeles' : 'Could not copy to clipboard');
-    }
-  };
 
   const breadcrumbItems = useMemo(() => [
     { label: isEs ? 'Catálogo' : 'Catalog', href: '/catalog' },
@@ -936,48 +916,30 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
                 <span className="pellet-planner-label" id="planner-profile-label">
                   {isEs ? '1. Perfil clínico' : '1. Clinical profile'}
                 </span>
-                <div className="pellet-planner-pills" role="radiogroup" aria-labelledby="planner-profile-label">
-                  {CLINICAL_PROFILES.map((p) => {
-                    const isSel = selectedProfileId === p.id;
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={isSel}
-                        onClick={() => setSelectedProfileId(p.id)}
-                        className={`pellet-guide-pill-btn ${isSel ? 'active' : ''}`}
-                      >
-                        {isSel && <Check size={13} style={{ flexShrink: 0 }} />}
-                        <span>{isEs ? p.labelEs : p.labelEn}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <OptionChipGroup
+                  ariaLabelledBy="planner-profile-label"
+                  value={selectedProfileId}
+                  onChange={setSelectedProfileId}
+                  options={CLINICAL_PROFILES.map((p) => ({
+                    id: p.id,
+                    label: isEs ? p.labelEs : p.labelEn,
+                  }))}
+                />
               </div>
 
               <div className="pellet-planner-row">
                 <span className="pellet-planner-label" id="planner-habitus-label">
                   {isEs ? '2. Composición corporal' : '2. Body habitus'}
                 </span>
-                <div className="pellet-planner-pills pellet-planner-pills--3" role="radiogroup" aria-labelledby="planner-habitus-label">
-                  {BODY_HABITUS.map((h) => {
-                    const isSel = selectedHabitusId === h.id;
-                    return (
-                      <button
-                        key={h.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={isSel}
-                        onClick={() => setSelectedHabitusId(h.id)}
-                        className={`pellet-guide-pill-btn ${isSel ? 'active' : ''}`}
-                      >
-                        {isSel && <Check size={13} style={{ flexShrink: 0 }} />}
-                        <span>{isEs ? h.labelEs : h.labelEn}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <OptionChipGroup
+                  ariaLabelledBy="planner-habitus-label"
+                  value={selectedHabitusId}
+                  onChange={setSelectedHabitusId}
+                  options={BODY_HABITUS.map((h) => ({
+                    id: h.id,
+                    label: isEs ? h.labelEs : h.labelEn,
+                  }))}
+                />
               </div>
             </div>
 
@@ -1037,46 +999,34 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
             </div>
 
             {/* Mandatory Clinical Safety Banner for selected profile */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '10px',
-              background: '#fffbeb',
-              border: '1px solid #fde68a',
-              borderRadius: '8px',
-              padding: '10px 14px',
-              fontSize: '0.78rem',
-              color: '#92400e',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flex: 1, minWidth: '240px' }}>
-                <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <strong>{isEs ? 'Seguridad Clínica Obligatoria:' : 'Mandatory Clinical Safeguard:'}</strong>{' '}
-                  {isEs ? activeProfile.safetyEs : activeProfile.safetyEn}{' '}
-                  <span style={{ color: '#78350f' }}>
-                    ({isEs ? 'Reposo:' : 'Rest:'} {isEs ? activeProfile.restEs : activeProfile.restEn})
-                  </span>
-                </div>
-              </div>
-              <Link
-                href="/pricing/pellets"
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  color: '#1a73e8',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                <span>{isEs ? 'Ver dosis en Tarifa' : 'View Strengths in Tariff'}</span>
-                <ArrowRight size={13} />
-              </Link>
-            </div>
+            <InlineAlert
+              compact
+              variant="warning"
+              title={isEs ? 'Seguridad Clínica Obligatoria:' : 'Mandatory Clinical Safeguard:'}
+              action={
+                <Link
+                  href="/pricing/pellets"
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: '#1a73e8',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <span>{isEs ? 'Ver dosis en Tarifa' : 'View Strengths in Tariff'}</span>
+                  <ArrowRight size={13} />
+                </Link>
+              }
+            >
+              {isEs ? activeProfile.safetyEs : activeProfile.safetyEn}{' '}
+              <span style={{ color: '#78350f' }}>
+                ({isEs ? 'Reposo:' : 'Rest:'} {isEs ? activeProfile.restEs : activeProfile.restEn})
+              </span>
+            </InlineAlert>
 
             {/* Value-Add Physician Tools: Titration Load Estimator + Re-Implant Calendar */}
             <div className="pellet-guide-complications-grid" style={{ paddingTop: '4px' }}>
@@ -1181,15 +1131,13 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
                   <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
                     {isEs ? 'Fideliza al paciente agendando su control antes de salir.' : 'Boost clinic retention by scheduling follow-up at discharge.'}
                   </span>
-                  <button
-                    type="button"
-                    onClick={handleCopyFollowUpReminder}
-                    className="gcp-btn-secondary"
-                    style={{ padding: '6px 11px', minHeight: '36px', fontSize: '0.74rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}
-                  >
-                    {copiedReminder ? <Check size={13} /> : <Copy size={13} />}
-                    <span>{copiedReminder ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Fechas WhatsApp' : 'Copy WhatsApp Dates')}</span>
-                  </button>
+                  <CopyActionButton
+                    text={followUpReminderText}
+                    label={isEs ? 'Copiar Fechas WhatsApp' : 'Copy WhatsApp Dates'}
+                    copiedLabel={isEs ? 'Copiado ✓' : 'Copied ✓'}
+                    toastMessage={isEs ? 'Recordatorio de seguimiento copiado ✓' : 'Follow-up schedule copied ✓'}
+                    errorMessage={isEs ? 'No se pudo copiar al portapapeles' : 'Could not copy to clipboard'}
+                  />
                 </div>
               </div>
             </div>
@@ -1664,15 +1612,16 @@ export default function PelletImplantationGuideClient({ initialLang = 'en' }) {
                       : 'Provide these instructions at discharge or send via WhatsApp in 1 click to maintain an extrusion rate < 0.3%.'}
                   </span>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      type="button"
-                      onClick={handleCopyPatientCare}
-                      className="gcp-btn-primary"
-                      style={{ padding: '7px 14px', fontSize: '0.76rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      {copiedPatientCare ? <Check size={14} /> : <Copy size={14} />}
-                      <span>{copiedPatientCare ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar para WhatsApp' : 'Copy for WhatsApp')}</span>
-                    </button>
+                    <CopyActionButton
+                      variant="primary"
+                      size="md"
+                      text={patientCareText}
+                      label={isEs ? 'Copiar para WhatsApp' : 'Copy for WhatsApp'}
+                      copiedLabel={isEs ? 'Copiado ✓' : 'Copied ✓'}
+                      toastMessage={isEs ? 'Pautas para WhatsApp copiadas ✓' : 'WhatsApp patient care copied ✓'}
+                      errorMessage={isEs ? 'No se pudo copiar al portapapeles' : 'Could not copy to clipboard'}
+                      style={{ padding: '7px 14px', fontSize: '0.76rem', fontWeight: 700 }}
+                    />
                     <button
                       type="button"
                       onClick={() => typeof window !== 'undefined' && window.print()}

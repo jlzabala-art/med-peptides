@@ -17,6 +17,7 @@ import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
 import notifier from '../../services/NotificationService';
+import EmptyState from '../ui/EmptyState';
 
 
 
@@ -49,12 +50,6 @@ const ProtocolHistoryModal = ({ isOpen, onClose, onSelect, onCompare }) => {
   const [activeMenu, setActiveMenu] = useState(null); // card ID with open action menu
   const menuRef = useRef(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadProtocols();
-    }
-  }, [isOpen]);
-
   const loadProtocols = async () => {
     setLoading(true);
     try {
@@ -68,6 +63,12 @@ const ProtocolHistoryModal = ({ isOpen, onClose, onSelect, onCompare }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      loadProtocols();
+    }
+  }, [isOpen]);
 
   const handleDelete = async (id) => {
     notifier.confirmCritical(
@@ -212,11 +213,11 @@ const ProtocolHistoryModal = ({ isOpen, onClose, onSelect, onCompare }) => {
                <p style={{ fontWeight: 700 }}>Accessing Vault...</p>
              </div>
           ) : filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-              <Clock size={48} style={{ margin: '0 auto 1rem', opacity: 0.2 }} />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>No results mapping criteria</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Try adjusting your search or filters.</p>
-            </div>
+            <EmptyState
+              icon={Clock}
+              title="No matching protocols"
+              subtitle="Try adjusting your search or filter criteria."
+            />
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
               {filtered.map(p => {
