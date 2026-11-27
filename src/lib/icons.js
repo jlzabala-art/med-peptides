@@ -164,6 +164,7 @@ export { default as Syringe } from 'lucide-react/dist/esm/icons/syringe';
 export { default as Tag } from 'lucide-react/dist/esm/icons/tag';
 export { default as Tags } from 'lucide-react/dist/esm/icons/tags';
 export { default as Target } from 'lucide-react/dist/esm/icons/target';
+export { default as Type } from 'lucide-react/dist/esm/icons/type';
 export { default as TerminalSquare } from 'lucide-react/dist/esm/icons/terminal-square';
 export { default as TestTube } from 'lucide-react/dist/esm/icons/test-tube';
 export { default as ThermometerSnowflake } from 'lucide-react/dist/esm/icons/thermometer-snowflake';
