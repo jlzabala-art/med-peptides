@@ -11,7 +11,7 @@
     "build:webpack": "next build --webpack",
     "start": "next start",
     "lint": "eslint src",
-    "lint:core": "eslint --max-warnings 0 src/constants src/lib/pricing src/hooks/usePricing.js src/hooks/useSurfacePolicy.js src/hooks/useRoleAccess.js src/components/pricing/shared src/components/shared/RoleScopedNavBar.jsx src/components/shared/AtlasAiFooterBar.jsx src/app/s src/app/api/shares/pricing-link src/app/b2b/quotes/magenta",
+    "lint:core": "eslint --max-warnings 0 src/constants src/lib/pricing src/schemas/canonicalSchemas.js src/hooks/usePricing.js src/hooks/useSurfacePolicy.js src/hooks/useRoleAccess.js src/hooks/pricing/usePricingViewMode.js src/components/pricing/shared src/components/shared/RoleScopedNavBar.jsx src/components/shared/AtlasAiFooterBar.jsx src/components/admin/AdminShareLinksPanel.jsx src/app/s src/app/api/shares/pricing-link src/app/b2b/quotes/magenta",
     "test": "node --test tests/*.test.mjs",
     "audit:rules": "node scripts/audit-golden-rules.mjs",
     "manuals:refresh": "node scripts/generate-manuals.mjs",

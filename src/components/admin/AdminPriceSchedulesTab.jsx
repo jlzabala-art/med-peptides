@@ -31,6 +31,7 @@ import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import MetricCard from '@/components/ui/MetricCard';
 import KpiScopeBar from '@/components/ui/KpiScopeBar';
 import AdminAgreementModal from './AdminAgreementModal';
+import AdminShareLinksPanel from './AdminShareLinksPanel';
 import UnifiedPriceHub from '@/components/pricing/UnifiedPriceHub';
 
 const PRICE_SCHEDULES = [
@@ -621,6 +622,8 @@ export default function AdminPriceSchedulesTab() {
       </div>
       </>
       )}
+
+      <AdminShareLinksPanel />
 
       {/* Firestore SSOT Agreement Modal */}
       {editingAgreementSlug && (

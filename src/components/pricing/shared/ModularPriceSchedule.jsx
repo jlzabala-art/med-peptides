@@ -10,6 +10,7 @@ import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { usePricing } from '@/hooks/usePricing';
 import { getPricingMarketMeta } from '@/constants/roles';
 import { useCurrencyConverter } from '@/hooks/pricing/useCurrencyConverter';
+import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
 import { useBrandPriceSchedule } from '@/hooks/pricing/useBrandPriceSchedule';
 import { updateProductSchedulePriceAction } from '@/actions/pricingActions';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
@@ -74,7 +75,7 @@ export default function ModularPriceSchedule({
   const [copied, setCopied] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
-  const [viewMode, setViewMode] = useState(config.defaultViewMode || 'table');
+  const { viewMode, handleViewModeChange: setViewMode } = usePricingViewMode(config.defaultViewMode || 'table');
   const showLandedCost = true;
 
   const { currency, setCurrency, fxRate, formatPrice } = useCurrencyConverter({

@@ -11,10 +11,28 @@ export function usePricingViewMode(initialMode = 'table') {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    let active = true;
     const raw = new URLSearchParams(window.location.search).get('view')?.toLowerCase();
+    const isMobile = window.innerWidth <= 768;
+
+    let nextMode = null;
     if (raw === 'cards' || raw === 'catalog') {
-      setViewMode('cards');
+      nextMode = 'cards';
+    } else if (raw === 'table') {
+      nextMode = 'table';
+    } else if (isMobile) {
+      nextMode = 'cards';
     }
+
+    if (nextMode) {
+      Promise.resolve().then(() => {
+        if (active) setViewMode(nextMode);
+      });
+    }
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleViewModeChange = useCallback((nextMode) => {
@@ -23,7 +41,7 @@ export function usePricingViewMode(initialMode = 'table') {
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       if (normalized === 'cards') url.searchParams.set('view', 'cards');
-      else url.searchParams.delete('view');
+      else url.searchParams.set('view', 'table');
       window.history.replaceState({}, '', url.toString());
     }
   }, []);

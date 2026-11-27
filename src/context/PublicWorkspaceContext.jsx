@@ -86,7 +86,7 @@ export function PublicWorkspaceProvider({ children }) {
         try { parsed = JSON.parse(raw); } catch { /* ignore */ }
       }
 
-      const validCurrencies = ['USD', 'EUR', 'AED'];
+      const validCurrencies = ['USD', 'EUR', 'AED', 'QAR'];
       const resolvedCurrency = validCurrencies.includes(urlCur)
         ? urlCur
         : validCurrencies.includes(parsed.currency)
@@ -122,7 +122,7 @@ export function PublicWorkspaceProvider({ children }) {
 
     const onCurChanged = (e) => {
       const nextCur = (e?.detail || '').toUpperCase();
-      if (['USD', 'EUR', 'AED'].includes(nextCur)) {
+      if (['USD', 'EUR', 'AED', 'QAR'].includes(nextCur)) {
         setState((prev) => (prev.currency === nextCur ? prev : { ...prev, currency: nextCur }));
       }
     };
@@ -197,7 +197,7 @@ export function PublicWorkspaceProvider({ children }) {
   const setCurrency = useCallback((newCur) => {
     if (!newCur) return;
     const upper = String(newCur).toUpperCase();
-    if (!['USD', 'EUR', 'AED'].includes(upper)) return;
+    if (!['USD', 'EUR', 'AED', 'QAR'].includes(upper)) return;
 
     setState((prev) => (prev.currency === upper ? prev : { ...prev, currency: upper }));
     if (typeof window !== 'undefined') {

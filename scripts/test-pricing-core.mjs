@@ -21,6 +21,8 @@ import {
 } from '../src/lib/pricing/pricingCore.js';
 import { convertCurrency, FX_RATES_FROM_EUR } from '../src/constants/fxRates.js';
 import { getPricingMarketMeta } from '../src/constants/roles.js';
+import { resolveCanonicalCollection } from '../src/constants/canonicalCollections.js';
+import { validatePricingBlock } from '../src/schemas/canonicalSchemas.js';
 
 const sampleProduct = {
   id: 'test-prod-1',
@@ -108,4 +110,15 @@ const sampleProduct = {
   assert.equal(getPricingMarketMeta(null).id, 'global');
 }
 
-console.log('✅ All 7 Atlas Pricing Core invariants PASSED (15%+15% wholeseller, global isolation, regional overrides, simulation precedence, FX, safe market metadata).');
+// 8. Canonical collection alias resolution
+assert.equal(resolveCanonicalCollection('product_catalog'), 'products', 'Deprecated alias maps to products');
+assert.equal(resolveCanonicalCollection('pricing_agreements'), 'client_agreements', 'Deprecated alias maps to client_agreements');
+assert.equal(resolveCanonicalCollection('orders'), 'orders', 'Canonical collection name preserved');
+
+// 9. Canonical pricing schema validator
+assert.equal(validatePricingBlock({ baseCostUsd: 100, distributorUsd: 115, clinicUsd: 132.25, currency: 'QAR' }).valid, true);
+assert.equal(validatePricingBlock({ distributorUsd: 200, clinicUsd: 150 }).valid, false, 'distributorUsd > clinicUsd fails validation');
+assert.equal(validatePricingBlock({ baseCostUsd: -1 }).valid, false, 'negative price fails validation');
+assert.equal(validatePricingBlock({ currency: 'BTC' }).valid, false, 'unsupported currency fails validation');
+
+console.log('✅ All 9 Atlas Pricing Core & Canonical Data invariants PASSED (15%+15% wholeseller, global isolation, regional overrides, simulation precedence, FX, safe market metadata, canonical collections, pricing block validation).');
