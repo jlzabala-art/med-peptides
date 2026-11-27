@@ -39,6 +39,7 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
+import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
 import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
@@ -337,6 +338,7 @@ export default function PelletsPriceListClient({
   initialCategoryCounts = null,
   initialKpiStats = null,
 }) {
+  const { viewMode, handleViewModeChange } = usePricingViewMode();
   const workspace = usePublicWorkspace();
   const { is } = useRoleAccess();
   const isAdmin = is('admin');
@@ -1004,7 +1006,12 @@ export default function PelletsPriceListClient({
       />
 
       {/* ── UNIFIED CLINICAL FORMAT SWITCHER (1-Click Navigation Across Vials, Pens & Pellets) ── */}
-      <CatalogPricingBridgeBar activeMode="pricing" slug="pellets" lang={lang} />
+      <CatalogPricingBridgeBar
+        activeMode={viewMode === 'cards' ? 'catalog' : 'pricing'}
+        slug="pellets"
+        lang={lang}
+        onViewModeChange={handleViewModeChange}
+      />
 
       {/* ── MAIN CONTENT CONTAINER ── */}
       <main className="pellets-price-container">
@@ -1526,6 +1533,7 @@ export default function PelletsPriceListClient({
                 columns={columns}
                 data={filteredProducts}
                 expandableRender={expandableRender}
+                forceCardsView={viewMode === 'cards'}
                 mobileCardComponent={PelletMobileCard}
                 mobileCardProps={{
                   formatPrice,

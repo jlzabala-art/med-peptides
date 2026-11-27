@@ -97,6 +97,7 @@ export default function DataTable({
   askAtlasTopic = 'record',
   // Mobile View
   mobileView = 'cards',  // 'cards' | 'scroll'
+  forceCardsView = false, // Force responsive cards grid even on desktop (e.g. Cards | B2B Table toggle)
   mobileCardComponent = null, // Optional custom card component; falls back to MobileRecordCard
   mobileCardProps = {},       // Extra props forwarded to every mobile card instance
   bulkActions = [],           // [{label, icon?, onClick, variant?}] — reused for mobile bulk sheet
@@ -121,8 +122,8 @@ export default function DataTable({
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
-  // Render card list when on mobile AND caller hasn't opted out via mobileView='scroll'
-  const showMobileCards = isMobileViewport && mobileView !== 'scroll';
+  // Render card list when forced by caller (desktop/mobile Cards view) OR on mobile viewport
+  const showMobileCards = Boolean(forceCardsView) || (isMobileViewport && mobileView !== 'scroll');
 
   const [expandedId, setExpandedId] = useState(null);
   const [hoveredRowId, setHoveredRowId] = useState(null);
@@ -562,7 +563,15 @@ export default function DataTable({
 
         {/* Card list */}
         {!isLoading && !isSearching && paginatedData.length > 0 && (
-          <div className="data-table-mobile-cards">
+          <div
+            className="data-table-mobile-cards"
+            style={forceCardsView && !isMobileViewport ? {
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))',
+              gap: '12px',
+              padding: '12px'
+            } : undefined}
+          >
             {paginatedData.map((row, idx) => {
               const rowKey = row[keyField] ?? idx;
               const cardReactKey = `${rowKey}_${idx}`;

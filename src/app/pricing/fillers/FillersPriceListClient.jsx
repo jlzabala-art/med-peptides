@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
+import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
 import PageHeroCard from '@/components/ui/PageHeroCard';
 import MetricCard from '@/components/ui/MetricCard';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
@@ -40,6 +41,7 @@ export default function FillersPriceListClient({
   initialCurrency = 'EUR',
   initialLang = 'en'
 }) {
+  const { viewMode, handleViewModeChange } = usePricingViewMode();
   const workspace = usePublicWorkspace?.() || null;
   const [localLang, setLocalLang] = useState(initialLang);
   const [localCurrency, setLocalCurrency] = useState(initialCurrency);
@@ -398,7 +400,12 @@ export default function FillersPriceListClient({
         ]}
       />
 
-      <CatalogPricingBridgeBar activeMode="pricing" slug="fillers" lang={lang} />
+      <CatalogPricingBridgeBar
+        activeMode={viewMode === 'cards' ? 'catalog' : 'pricing'}
+        slug="fillers"
+        lang={lang}
+        onViewModeChange={handleViewModeChange}
+      />
 
       <main className="atlas-page-shell" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         <PageHeroCard
@@ -690,6 +697,7 @@ export default function FillersPriceListClient({
             pageSize={100}
             stickyTopOffset={64}
             groupByKey="brandGroup"
+            forceCardsView={viewMode === 'cards'}
             mobileCardComponent={PricingScheduleMobileCard}
             mobileCardProps={{
               isEs,

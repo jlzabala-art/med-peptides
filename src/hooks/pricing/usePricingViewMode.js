@@ -1,0 +1,32 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+
+/**
+ * Shared hook for unified Cards | B2B Table view toggle across all /pricing/* pages.
+ * Syncs `?view=cards` with the URL without reloading or losing cart/filter state.
+ */
+export function usePricingViewMode(initialMode = 'table') {
+  const [viewMode, setViewMode] = useState(initialMode === 'cards' ? 'cards' : 'table');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = new URLSearchParams(window.location.search).get('view')?.toLowerCase();
+    if (raw === 'cards' || raw === 'catalog') {
+      setViewMode('cards');
+    }
+  }, []);
+
+  const handleViewModeChange = useCallback((nextMode) => {
+    const normalized = nextMode === 'cards' ? 'cards' : 'table';
+    setViewMode(normalized);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (normalized === 'cards') url.searchParams.set('view', 'cards');
+      else url.searchParams.delete('view');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
+  return { viewMode, handleViewModeChange };
+}

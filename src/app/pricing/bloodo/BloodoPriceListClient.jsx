@@ -30,6 +30,7 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
+import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 
@@ -50,6 +51,7 @@ export default function BloodoPriceListClient({
   initialLang = 'en',
   initialCurrency = 'EUR',
 }) {
+  const { viewMode, handleViewModeChange } = usePricingViewMode();
   const [localLang, setLocalLang] = useState(initialLang);
   const [localCurrency, setLocalCurrency] = useState(initialCurrency);
   const [searchQuery, setSearchQuery] = useState('');
@@ -341,7 +343,12 @@ export default function BloodoPriceListClient({
         ]}
       />
 
-      <CatalogPricingBridgeBar activeMode="pricing" slug="bloodo" lang={lang} />
+      <CatalogPricingBridgeBar
+        activeMode={viewMode === 'cards' ? 'catalog' : 'pricing'}
+        slug="bloodo"
+        lang={lang}
+        onViewModeChange={handleViewModeChange}
+      />
 
       <main className="atlas-page-shell" style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '88px' }}>
         <PageHeroCard
@@ -460,6 +467,7 @@ export default function BloodoPriceListClient({
               columns={columns}
               data={filteredProducts}
               rowKey={(row) => row.id}
+              forceCardsView={viewMode === 'cards'}
               mobileCardComponent={PricingScheduleMobileCard}
               mobileCardProps={{
                 isEs,

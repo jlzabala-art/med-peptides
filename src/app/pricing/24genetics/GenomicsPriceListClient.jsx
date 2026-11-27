@@ -38,6 +38,7 @@ import { useRoleAccess } from '@/hooks/useRoleAccess';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
+import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
 import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 import DataTable from '@/components/ui/DataTable';
 import PricingScheduleMobileCard from '@/components/pricing/shared/PricingScheduleMobileCard';
@@ -58,6 +59,7 @@ export default function GenomicsPriceListClient({
   initialCurrency = 'EUR',
   initialLang = 'en',
 }) {
+  const { viewMode, handleViewModeChange } = usePricingViewMode();
   const router = useRouter();
   const { user } = useAuth();
   const { is, effectiveRole } = useRoleAccess();
@@ -651,7 +653,12 @@ export default function GenomicsPriceListClient({
         ]}
       />
 
-      <CatalogPricingBridgeBar activeMode="pricing" slug="24genomics" lang={lang} />
+      <CatalogPricingBridgeBar
+        activeMode={viewMode === 'cards' ? 'catalog' : 'pricing'}
+        slug="24genomics"
+        lang={lang}
+        onViewModeChange={handleViewModeChange}
+      />
 
       <main className="atlas-page-shell">
         <PageHeroCard
@@ -924,6 +931,7 @@ export default function GenomicsPriceListClient({
               pageSize={20}
               showPagination={true}
               sortable={true}
+              forceCardsView={viewMode === 'cards'}
               mobileCardComponent={PricingScheduleMobileCard}
               mobileCardProps={{
                 isEs: lang === 'es',
