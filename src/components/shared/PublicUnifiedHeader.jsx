@@ -847,7 +847,7 @@ export default function PublicUnifiedHeader({
                   type="button"
                   className="puh-btn puh-btn-contact hide-on-mobile-header"
                   onClick={handleContactClick}
-                  title={isSpanish ? 'Consulta Médica e Institucional (business@atlas-services.com)' : 'Contact Medical Affairs (business@atlas-services.com)'}
+                  title={isSpanish ? 'Consulta Médica e Institucional (info@atlashealth-services.com)' : 'Contact Medical Affairs (info@atlashealth-services.com)'}
                 >
                   <Mail size={14} />
                   <span className="puh-btn-label">{isSpanish ? 'Contacto' : 'Contact'}</span>
@@ -869,18 +869,16 @@ export default function PublicUnifiedHeader({
                 <HelpCircle size={15} />
               </button>
 
-              {/* Google Cloud Console UX Standard User Badge (with Language & Currency inside Avatar menu per Rule #74) */}
-              {!purePublic && (
-                <GcpUserBadge
-                  variant="dark"
-                  lang={effectiveLang}
-                  onLangChange={handleLanguageChange}
-                  currency={effectiveCurrency}
-                  onCurrencyChange={handleCurrencyChange}
-                  hideCurrencySelector={effectiveHideCurrencySelector}
-                  loginRedirect={resolvedRedirect}
-                />
-              )}
+              {/* Google Cloud Console UX Standard User Badge — ALWAYS visible on every screen */}
+              <GcpUserBadge
+                variant="dark"
+                lang={effectiveLang}
+                onLangChange={handleLanguageChange}
+                currency={effectiveCurrency}
+                onCurrencyChange={handleCurrencyChange}
+                hideCurrencySelector={effectiveHideCurrencySelector}
+                loginRedirect={resolvedRedirect}
+              />
             </div>
           </div>
         </div>

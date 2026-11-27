@@ -141,16 +141,18 @@ function walkCss(dir) {
 }
 walkCss(path.join(ROOT, 'src'));
 
-// 4. Enforce canonical brand domain in brandConfig.js & manifest.json
+// 4. Enforce canonical brand domain across all src/ & manifest.json (no legacy atlas-services.com)
 const legacyBrandRefs = [];
-for (const brandFile of ['src/config/brandConfig.js', 'public/manifest.json']) {
-  const full = path.join(ROOT, brandFile);
-  if (fs.existsSync(full)) {
-    const text = fs.readFileSync(full, 'utf8');
-    if (/atlas-services\.com/i.test(text)) {
-      legacyBrandRefs.push(brandFile);
-    }
+for (const file of srcFiles) {
+  const rel = path.relative(ROOT, file);
+  const text = fs.readFileSync(file, 'utf8');
+  if (/atlas-services\.com/i.test(text)) {
+    legacyBrandRefs.push(rel);
   }
+}
+const manifestFull = path.join(ROOT, 'public/manifest.json');
+if (fs.existsSync(manifestFull) && /atlas-services\.com/i.test(fs.readFileSync(manifestFull, 'utf8'))) {
+  legacyBrandRefs.push('public/manifest.json');
 }
 
 console.log(`CSS .gcp-btn-* collisions: ${cssBtnCollisions.length} (enforced = 0)`);

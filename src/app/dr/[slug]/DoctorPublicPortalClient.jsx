@@ -8058,7 +8058,7 @@ export default function DoctorPublicPortalClient({
       </div>
 
       {/* ── Google Cloud Console Standard Unified Footer (100% Full-Width) ── */}
-      <PublicUnifiedFooter lang={lang || 'en'} minimal={isAuthorizedViewer} />
+      <PublicUnifiedFooter lang={lang || 'en'} />
 
       {/* ── Practice Spotlight Search Palette (Rule #7 & Spotlight standard) ── */}
       <DoctorPracticeSearchModal

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   ChevronDown,
   FlaskConical,
@@ -120,7 +121,6 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
     <footer
       id="public-unified-footer"
       className="public-unified-footer"
-      style={{ pointerEvents: 'none', userSelect: 'none' }}
     >
       <div className="public-footer-container">
         
@@ -208,17 +208,21 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
           </div>
 
           <div className="public-footer-legal-links">
-            <span className="public-footer-legal-link" style={textStyle}>
+            <Link href="/privacy" className="public-footer-legal-link" style={{ color: '#5f6368', textDecoration: 'none' }}>
               {isEs ? 'Privacidad' : 'Privacy Policy'}
-            </span>
+            </Link>
             <span className="public-footer-separator">•</span>
-            <span className="public-footer-legal-link" style={textStyle}>
+            <Link href="/terms" className="public-footer-legal-link" style={{ color: '#5f6368', textDecoration: 'none' }}>
               {isEs ? 'Términos' : 'Terms of Service'}
-            </span>
+            </Link>
             <span className="public-footer-separator">•</span>
-            <span className="public-footer-legal-link" style={textStyle}>
+            <Link href="/regulatory" className="public-footer-legal-link" style={{ color: '#5f6368', textDecoration: 'none' }}>
               {isEs ? 'Estándares Regulatorios (CPNP / CE-IVDR)' : 'Regulatory (CPNP / CE-IVDR)'}
-            </span>
+            </Link>
+            <span className="public-footer-separator">•</span>
+            <Link href={`/brand?lang=${isEs ? 'es' : 'en'}`} className="public-footer-legal-link" style={{ color: '#003666', fontWeight: 600, textDecoration: 'none' }}>
+              {isEs ? 'Brandbook' : 'Brandbook'}
+            </Link>
           </div>
         </div>
 

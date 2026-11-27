@@ -1014,10 +1014,10 @@ export default function PublicInstitutionalInquiryDrawer({
       message || '(Inquiry text)',
       '',
       `Source Page: ${typeof window !== 'undefined' ? window.location.href : ''}`,
-      'Sent via Atlas Services Institutional Portal'
+      'Sent via Atlas Health Services Institutional Portal'
     ].filter(Boolean).join('\n');
 
-    return `mailto:business@atlas-services.com?subject=${subject}&body=${encodeURIComponent(bodyLines)}`;
+    return `mailto:info@atlashealth-services.com?subject=${subject}&body=${encodeURIComponent(bodyLines)}`;
   }, [name, organization, email, phonePrefix, phoneNumber, activeTopicObj, attachedEntity, message]);
 
   const handleSubmit = async (e) => {
@@ -1067,8 +1067,8 @@ export default function PublicInstitutionalInquiryDrawer({
         triggerHaptic('success');
         toast.success(
           lang === 'es'
-            ? 'Consulta enviada a business@atlas-services.com. Le responderemos en breve.'
-            : 'Inquiry submitted to business@atlas-services.com. Medical affairs will respond shortly.'
+            ? 'Consulta enviada a info@atlashealth-services.com. Le responderemos en breve.'
+            : 'Inquiry submitted to info@atlashealth-services.com. Medical affairs will respond shortly.'
         );
       } else {
         throw new Error(data.error || 'Submission error');

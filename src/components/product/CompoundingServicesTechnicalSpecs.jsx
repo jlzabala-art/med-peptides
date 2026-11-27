@@ -130,9 +130,9 @@ export default function CompoundingServicesTechnicalSpecs({
             </div>
             <div className="channel-content">
               <h4>Vía Email al Despacho Clínico</h4>
-              <p>Envía las recetas directamente a nuestro equipo de farmacéuticos a través de <strong>kasia@mediluxeme.com</strong> o <strong>business@atlas-services.com</strong>.</p>
+              <p>Envía las recetas directamente a nuestro equipo de farmacéuticos a través de <strong>info@atlashealth-services.com</strong>.</p>
               <a 
-                href="mailto:kasia@mediluxeme.com?subject=Solicitud%20de%20Compounding%20Farmaceutico%20-%20Prescripcion" 
+                href="mailto:info@atlashealth-services.com?subject=Solicitud%20de%20Compounding%20Farmaceutico%20-%20Prescripcion" 
                 className="channel-link"
               >
                 Enviar Prescripción por Email <ExternalLink size={14} />
@@ -221,7 +221,7 @@ export default function CompoundingServicesTechnicalSpecs({
               <div className="step-detail-tag">Etapa 1 · Solicitud & Prescripción</div>
               <h4>Recepción de la Prescripción Médica</h4>
               <p>
-                El médico tratante remite la prescripción con dosificación, volumen y concentración deseada. Se puede efectuar cómodamente mediante la <strong>Aplicación Móvil</strong> dedicada o enviando un correo a <strong>kasia@mediluxeme.com</strong> con copia a <strong>business@atlas-services.com</strong>.
+                El médico tratante remite la prescripción con dosificación, volumen y concentración deseada. Se puede efectuar cómodamente mediante la <strong>Aplicación Móvil</strong> dedicada o enviando un correo a <strong>info@atlashealth-services.com</strong>.
               </p>
               <ul className="step-bullets">
                 <li><CheckCircle2 size={16} /> Aceptación de recetas clínicas con firma médica colegiada.</li>
@@ -483,7 +483,7 @@ export default function CompoundingServicesTechnicalSpecs({
           {[
             {
               q: "¿Cómo enviamos las solicitudes o prescripciones para compounding?",
-              a: "Se ofrecen dos métodos ágiles: a través de nuestra Aplicación Móvil dedicada (donde puedes seleccionar productos del catálogo y subir recetas) o enviando un email especificando moléculas, concentraciones y recetas a kasia@mediluxeme.com y business@atlas-services.com."
+              a: "Se ofrecen dos métodos ágiles: a través de nuestra Aplicación Móvil dedicada (donde puedes seleccionar productos del catálogo y subir recetas) o enviando un email especificando moléculas, concentraciones y recetas a info@atlashealth-services.com."
             },
             {
               q: "¿Cómo funciona la facturación si paga la clínica o si paga el paciente?",

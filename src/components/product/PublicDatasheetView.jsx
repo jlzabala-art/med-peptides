@@ -2081,7 +2081,7 @@ export default function PublicDatasheetView({
         } : isCompoundingService ? {
           service: 'European Pharmaceutical Compounding & Custom Formulation',
           pharmacyStandards: 'EU Ph. Eur. & GMP Certified European Compounding Laboratory',
-          orderChannels: 'Dedicated Mobile Application or Direct Email to kasia@mediluxeme.com / business@atlas-services.com',
+          orderChannels: 'Dedicated Mobile Application or Direct Email to info@atlashealth-services.com',
           turnaroundTime: '5 to 7 working days from European compounding facility to destination',
           invoicingFlexibility: 'Clinic Wholesale Price (if clinic pays) vs Recommended Patient Price RRP (if patient pays directly)',
           destinationFlexibility: 'Shipped directly to Clinic or dropshipped to Patient home address with validated cold-chain',

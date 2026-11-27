@@ -32,6 +32,7 @@ import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
 import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
 import AtlasAiLotuslandDrawer from '@/components/pricing/AtlasAiLotuslandDrawer';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import toast from 'react-hot-toast';
 
 /**
@@ -1689,6 +1690,8 @@ export default function LotuslandPublicPortalClient() {
         isOpen={isAtlasAiOpen}
         onClose={() => setIsAtlasAiOpen(false)}
       />
+
+      <PublicUnifiedFooter lang="en" />
     </div>
   );
 }

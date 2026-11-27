@@ -1,6 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -176,7 +178,9 @@ export default async function PeptideProtocolsComparisonPage({ searchParams }) {
   };
 
   return (
-    <main style={{ minHeight: '100vh', background: '#f8fafc', padding: '28px 16px 64px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+    <div className="atlas-page-bg">
+      <PublicUnifiedHeader />
+      <main className="atlas-page-shell" style={{ paddingTop: '24px', paddingBottom: '64px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div style={{ maxWidth: '980px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <section style={{ background: '#003666', color: '#fff', borderRadius: '14px', padding: '24px' }}>
@@ -245,6 +249,8 @@ export default async function PeptideProtocolsComparisonPage({ searchParams }) {
           </section>
         ))}
       </div>
-    </main>
+      </main>
+      <PublicUnifiedFooter lang={isEs ? 'es' : 'en'} />
+    </div>
   );
 }
