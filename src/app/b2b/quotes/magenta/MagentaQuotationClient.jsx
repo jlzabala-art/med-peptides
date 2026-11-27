@@ -25,12 +25,22 @@ import CopyableId from '@/components/ui/CopyableId';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import { MAGENTA_OFFICIAL_QUOTATION_202611 } from '@/services/lotuslandProcurementService';
+import { useSurfacePolicy } from '@/hooks/useSurfacePolicy';
+import {
+  MAGENTA_OFFICIAL_QUOTATION_202611,
+  MAGENTA_OFFICIAL_QUOTATION_20261127,
+} from '@/services/lotuslandProcurementService';
 
 export default function MagentaQuotationClient() {
-  const quote = MAGENTA_OFFICIAL_QUOTATION_202611;
+  const { canSeeCostTier } = useSurfacePolicy();
+  const [selectedQuoteId, setSelectedQuoteId] = useState('QT-MAG-20261127');
+  const quote =
+    selectedQuoteId === 'QT-MAG-20261127'
+      ? MAGENTA_OFFICIAL_QUOTATION_20261127
+      : MAGENTA_OFFICIAL_QUOTATION_202611;
   const [copied, setCopied] = useState(false);
-  const [showInternalAudit, setShowInternalAudit] = useState(true);
+  const [showInternalAudit, setShowInternalAudit] = useState(false);
+  const showAudit = Boolean(canSeeCostTier && showInternalAudit);
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
@@ -67,9 +77,36 @@ export default function MagentaQuotationClient() {
       width: '28%',
       render: (_val, row) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-          <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.90rem' }}>
-            {row.apiName}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.90rem' }}>
+              {row.apiName}
+            </span>
+            {row.datasheetHref && (
+              <Link
+                href={row.datasheetHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#1a73e8',
+                  backgroundColor: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  padding: '2px 7px',
+                  borderRadius: '999px',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+                title={`Open shareable technical datasheet for ${row.apiName}`}
+              >
+                <FileText size={11} />
+                <span>Technical Datasheet</span>
+              </Link>
+            )}
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.70rem', color: '#64748b' }}>
             <span>CAS: {row.casNumber}</span>
             <span>·</span>
@@ -114,11 +151,11 @@ export default function MagentaQuotationClient() {
         </div>
       )
     },
-    ...(showInternalAudit ? [
+    ...(showAudit ? [
       {
         key: 'lotuslandUnitCostUSD',
-        header: 'Lotusland Cost / g',
-        label: 'Lotusland Cost / g',
+        header: 'Net Cost / g (-25%)',
+        label: 'Net Cost / g (-25%)',
         width: '12%',
         align: 'right',
         render: (val) => (
@@ -127,7 +164,7 @@ export default function MagentaQuotationClient() {
               ${val.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </span>
             <div style={{ fontSize: '0.64rem', color: '#64748b' }}>
-              Base Cost
+              Internal Cost
             </div>
           </div>
         )
@@ -135,18 +172,24 @@ export default function MagentaQuotationClient() {
     ] : []),
     {
       key: 'unitPriceUSD',
-      header: showInternalAudit ? 'Invoiced / g (+6%)' : 'Invoiced Price / g',
-      label: 'Invoiced Price / g',
-      width: showInternalAudit ? '12%' : '18%',
+      header: showAudit ? 'Offered / g (+6%)' : 'Special Volume Price / g',
+      label: 'Special Volume Price / g',
+      width: showAudit ? '12%' : '18%',
       align: 'right',
       render: (val, row) => (
         <div style={{ textAlign: 'right' }}>
           <span style={{ fontWeight: 800, color: '#166534', fontSize: '0.92rem' }}>
             ${val.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
-          <div style={{ fontSize: '0.64rem', color: '#16a34a', fontWeight: 650 }}>
-            ${row.lineTotalUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })} total
-          </div>
+          {row.listPriceUSD ? (
+            <div style={{ fontSize: '0.64rem', color: '#64748b', textDecoration: 'line-through' }}>
+              List: ${row.listPriceUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}/g
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.64rem', color: '#16a34a', fontWeight: 650 }}>
+              ${row.lineTotalUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })} total
+            </div>
+          )}
         </div>
       )
     },
@@ -179,16 +222,18 @@ export default function MagentaQuotationClient() {
         ]}
         extraActions={
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <button
-              type="button"
-              onClick={() => setShowInternalAudit(!showInternalAudit)}
-              className="puh-btn puh-btn-ghost"
-              title="Toggle internal Mediluxe 6% margin audit column"
-            >
-              <span className="puh-btn-label">
-                {showInternalAudit ? 'Internal Margin (ON)' : 'Client View'}
-              </span>
-            </button>
+            {canSeeCostTier && (
+              <button
+                type="button"
+                onClick={() => setShowInternalAudit(!showInternalAudit)}
+                className="puh-btn puh-btn-ghost"
+                title="Admin only: toggle internal cost & 6% commission audit"
+              >
+                <span className="puh-btn-label">
+                  {showAudit ? 'Admin Audit (ON)' : 'Client View'}
+                </span>
+              </button>
+            )}
             <button
               type="button"
               onClick={handlePrint}
@@ -215,6 +260,35 @@ export default function MagentaQuotationClient() {
           { label: 'Lotusland Sourcing Corridor', href: '/lotusland' },
           { label: `Quotation ${quote.quoteId}` }
         ]} />
+
+        {/* Quote Switcher (Admin & Client) */}
+        <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {[
+            { id: 'QT-MAG-20261127', label: 'QT-MAG-20261127 · Metabolic & Incretin Bulk (270g · $303,690)' },
+            { id: 'QT-MAG-20261104', label: 'QT-MAG-20261104 · Previous Allocation (60.2g · $37,179.50)' },
+          ].map((opt) => {
+            const active = selectedQuoteId === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setSelectedQuoteId(opt.id)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '999px',
+                  fontSize: '0.76rem',
+                  fontWeight: active ? 700 : 600,
+                  cursor: 'pointer',
+                  backgroundColor: active ? '#003666' : '#ffffff',
+                  color: active ? '#ffffff' : '#3c4043',
+                  border: `1px solid ${active ? '#003666' : '#dadce0'}`,
+                }}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
 
         {/* ── Header Metadata Box (Google Cloud Console Card Pattern) ── */}
         <div style={{
@@ -248,7 +322,7 @@ export default function MagentaQuotationClient() {
                 Magenta Pharma Medicine Trading LLC · API Sourcing Allocation
               </h1>
               <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#64748b' }}>
-                Issued by {quote.issuer.companyName} ({quote.issuer.jurisdiction}) under contractual transfer cap (+6.00%).
+                Issued by {quote.issuer.companyName} ({quote.issuer.jurisdiction}) — Official Institutional API Volume Proposal.
               </p>
             </div>
 
@@ -284,9 +358,11 @@ export default function MagentaQuotationClient() {
               <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
                 TRN: {quote.issuer.trn} · {quote.issuer.facility}
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#0284c7', marginTop: '2px' }}>
-                Source: {quote.supplier.companyName} ({quote.supplier.allocationSource})
-              </div>
+              {showAudit && (
+                <div style={{ fontSize: '0.72rem', color: '#0284c7', marginTop: '2px' }}>
+                  Internal Source: {quote.supplier.companyName} ({quote.supplier.allocationSource})
+                </div>
+              )}
             </div>
 
             <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 12px' }}>
@@ -332,33 +408,65 @@ export default function MagentaQuotationClient() {
               {quote.totals.totalQuantityGrams} g
             </div>
             <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
-              4 Specialized Active Principles
+              {quote.items.length} Specialized Active Principles
             </div>
           </div>
 
-          <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '12px 14px', boxShadow: '0 1px 2px rgba(60,64,67,0.06)' }}>
-            <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              Lotusland Net Allocation
-            </span>
-            <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#0284c7', marginTop: '3px' }}>
-              ${quote.totals.lotuslandNetCostUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-            </div>
-            <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
-              Net Stock Purchase Cost
-            </div>
-          </div>
+          {showAudit ? (
+            <>
+              <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '12px 14px', boxShadow: '0 1px 2px rgba(60,64,67,0.06)' }}>
+                <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                  Net Cost Allocation (-25%)
+                </span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#0284c7', marginTop: '3px' }}>
+                  ${quote.totals.lotuslandNetCostUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </div>
+                <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                  Admin Internal Cost Basis
+                </div>
+              </div>
 
-          <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '12px 14px', boxShadow: '0 1px 2px rgba(60,64,67,0.06)' }}>
-            <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              Mediluxe Contractual Margin
-            </span>
-            <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#16a34a', marginTop: '3px' }}>
-              +${quote.totals.mediluxeGrossMarginUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-            </div>
-            <div style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 700, marginTop: '2px' }}>
-              Strict +6.00% Corridor Cap
-            </div>
-          </div>
+              <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '12px 14px', boxShadow: '0 1px 2px rgba(60,64,67,0.06)' }}>
+                <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                  Atlas Net Commission (+6%)
+                </span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#16a34a', marginTop: '3px' }}>
+                  +${quote.totals.mediluxeGrossMarginUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </div>
+                <div style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 700, marginTop: '2px' }}>
+                  Admin Only · +6.00% over Net
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '12px 14px', boxShadow: '0 1px 2px rgba(60,64,67,0.06)' }}>
+                <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                  Standard List Reference
+                </span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#475569', marginTop: '3px', textDecoration: quote.totals.listSubtotalUSD ? 'line-through' : 'none' }}>
+                  ${(quote.totals.listSubtotalUSD || quote.totals.grandTotalUSD).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </div>
+                <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                  Published Catalog Reference (USD)
+                </div>
+              </div>
+
+              <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '12px 14px', boxShadow: '0 1px 2px rgba(60,64,67,0.06)' }}>
+                <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                  Volume Allocation Savings
+                </span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#16a34a', marginTop: '3px' }}>
+                  {quote.totals.clientSavingsVsListUSD
+                    ? `-$${quote.totals.clientSavingsVsListUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                    : 'Preferred Rate'}
+                </div>
+                <div style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 700, marginTop: '2px' }}>
+                  {quote.totals.clientSavingsVsListUSD ? '-20.5% Net vs. List Price' : 'Verified Partner Allocation'}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* ── Quotation Items Table ── */}
