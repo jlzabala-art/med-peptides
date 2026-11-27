@@ -15,6 +15,7 @@ export const ALL_ROLES = [
   { id: 'sales',            label: 'Sales',             emoji: '📈',  color: '#ef4444', bg: '#fee2e2' },
   { id: 'operations',       label: 'Operations',        emoji: '⚙️',  color: '#64748b', bg: '#f1f5f9' },
   { id: 'finance',          label: 'Finance',           emoji: '💰',  color: '#22c55e', bg: '#dcfce7' },
+  { id: 'distributor',      label: 'Distributor (+15%)', emoji: '📦', color: '#0369a1', bg: '#e0f2fe' },
   { id: 'wholesaler',       label: 'Wholesaler',        emoji: '🏭',  color: '#c2410c', bg: '#ffedd5' },
   { id: 'supplier',         label: 'Supplier',          emoji: '🏭',  color: '#c2410c', bg: '#ffedd5' },
   { id: 'patient',          label: 'Patient',           emoji: '🧬',  color: '#7c3aed', bg: '#ede9fe' },
@@ -30,11 +31,13 @@ export const ALL_ROLES = [
 export const useSimulationStore = create(
   persist(
     (set) => ({
-      simulatedRole: null, // string id like 'doctor' | null
+      simulatedRole: null,   // string id like 'doctor' | 'distributor' | 'wholesaler' | null
+      simulatedMarket: null, // 'global' | 'uae' | 'qatar' | 'us' | null
 
       setSimulatedRole: (roleId) => set({ simulatedRole: roleId }),
+      setSimulatedMarket: (marketId) => set({ simulatedMarket: marketId === 'global' ? null : marketId }),
 
-      exitSimulation: () => set({ simulatedRole: null }),
+      exitSimulation: () => set({ simulatedRole: null, simulatedMarket: null }),
     }),
     {
       name: 'atlas-role-simulation', // localStorage key

@@ -40,6 +40,7 @@ import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
 import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
+import { usePricing } from '@/hooks/usePricing';
 import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
@@ -339,6 +340,7 @@ export default function PelletsPriceListClient({
   initialKpiStats = null,
 }) {
   const { viewMode, handleViewModeChange } = usePricingViewMode();
+  const { pricingRole, resolve: resolveProduct } = usePricing();
   const workspace = usePublicWorkspace();
   const { is } = useRoleAccess();
   const isAdmin = is('admin');
@@ -392,7 +394,8 @@ export default function PelletsPriceListClient({
     if (!workspace?.syncRfqItem) return;
     const prod = initialProducts.find((p) => p.id === productId);
     if (!prod) return;
-    const unitEur = prod.pricing?.wholesalePriceEur || prod.pricing?.price_eur || prod.pricing?.costPriceEur || 0;
+    const resolved = resolveProduct(prod);
+    const unitEur = resolved.primaryPrice ?? prod.pricing?.wholesalePriceEur ?? prod.pricing?.price_eur ?? prod.pricing?.costPriceEur ?? 0;
     const pack10Eur = prod.pricing?.pack10PriceEur || Number((unitEur * 10 * 0.90).toFixed(2));
     const rawEur = type === 'pack10' ? pack10Eur : unitEur;
     workspace.syncRfqItem(
@@ -493,7 +496,8 @@ export default function PelletsPriceListClient({
       const product = initialProducts.find(p => p.id === prodId);
       if (!product) return;
 
-      const singlePriceEur = product.pricing?.wholesalePriceEur || product.pricing?.price_eur || product.pricing?.costPriceEur || 0;
+      const resolved = resolveProduct(product);
+      const singlePriceEur = resolved.primaryPrice ?? product.pricing?.wholesalePriceEur ?? product.pricing?.price_eur ?? product.pricing?.costPriceEur ?? 0;
       const pack10PriceEur = product.pricing?.pack10PriceEur || (singlePriceEur * 10 * 0.90); // 10% discount for pack ×10
 
       if (counts.single > 0) {
@@ -698,11 +702,19 @@ export default function PelletsPriceListClient({
     },
     {
       key: 'singlePrice',
-      label: isEs ? 'Tarifa Unitaria' : 'Single Unit',
+      label:
+        pricingRole === 'distributor'
+          ? 'Distributor (+15%)'
+          : pricingRole === 'clinic'
+            ? (isEs ? 'Clínica (1u)' : 'Clinic (1u)')
+            : pricingRole === 'retail'
+              ? (isEs ? 'PVP (1u)' : 'Retail (1u)')
+              : (isEs ? 'Tarifa Unitaria' : 'Single Unit'),
       width: '120px',
       align: 'right',
       render: (_, row) => {
-        const eur = row.pricing?.wholesalePriceEur || row.pricing?.price_eur || row.pricing?.costPriceEur || 0;
+        const resolved = resolveProduct(row);
+        const eur = resolved.primaryPrice ?? row.pricing?.wholesalePriceEur ?? row.pricing?.price_eur ?? row.pricing?.costPriceEur ?? 0;
         const currentQty = cartItems[row.id]?.single || 0;
         const isKit = row.category === 'Trocar Kits' || row.hormoneType === 'instrument';
         const durMatch = String(row.duration || '').match(/(\d+(?:\.\d+)?)\s*(?:to|-|a)\s*(\d+(?:\.\d+)?)/i);

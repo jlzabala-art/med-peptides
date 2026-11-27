@@ -5,6 +5,7 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
 import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
+import { usePricing } from '@/hooks/usePricing';
 import PageHeroCard from '@/components/ui/PageHeroCard';
 import MetricCard from '@/components/ui/MetricCard';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
@@ -42,6 +43,7 @@ export default function FillersPriceListClient({
   initialLang = 'en'
 }) {
   const { viewMode, handleViewModeChange } = usePricingViewMode();
+  const { isAdmin, pricingRole, resolve: resolveProduct } = usePricing();
   const workspace = usePublicWorkspace?.() || null;
   const [localLang, setLocalLang] = useState(initialLang);
   const [localCurrency, setLocalCurrency] = useState(initialCurrency);
@@ -82,32 +84,26 @@ export default function FillersPriceListClient({
 
   const enrichedRows = useMemo(() => {
     return initialProducts.map((p) => {
-      const pPricing = p.pricing || {};
-      const baseCostEur = Number(
-        pPricing.masterPrice ??
-        p.cost ??
-        p.costPrice ??
-        p.unit_price ??
-        p.price ??
-        0
-      );
-
-      const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
-      const masterEur = round2(baseCostEur);
-      const mediluxeEur = round2(pPricing.mediluxePrice ?? masterEur * 1.15);
-      const wholesaleEur = round2(pPricing.wholesalePrice ?? mediluxeEur * 1.15);
-      const clinicEur = round2(pPricing.clinicPrice ?? masterEur * 1.45);
+      const resolved = resolveProduct(p);
+      const masterEur = resolved.cost ?? 0;
+      const distributorEur = resolved.distributor ?? 0;
+      const wholesaleEur = resolved.wholeseller ?? 0;
+      const primaryEur = resolved.primaryPrice ?? wholesaleEur;
+      const retailEur = resolved.retail ?? resolved.clinic ?? wholesaleEur;
 
       return {
         ...p,
         code: p.atlas_product_code || p.sku || p.id,
         masterPrice: convertFromEur(masterEur, currency),
-        wholesalePrice: convertFromEur(mediluxeEur, currency),
-        clinicPrice: convertFromEur(wholesaleEur, currency),
-        retailPrice: convertFromEur(clinicEur, currency)
+        distributorPrice: convertFromEur(distributorEur, currency),
+        wholesalePrice: convertFromEur(wholesaleEur, currency),
+        clinicPrice: convertFromEur(primaryEur, currency),
+        retailPrice: convertFromEur(retailEur, currency),
+        primaryLabel: resolved.primaryLabel,
+        isMarketOverride: resolved.isMarketOverride,
       };
     });
-  }, [initialProducts, currency]);
+  }, [initialProducts, currency, resolveProduct]);
 
   const filteredRows = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -182,9 +178,41 @@ export default function FillersPriceListClient({
       }
     ];
 
+    if (isAdmin) {
+      cols.push({
+        key: 'masterPrice',
+        label: isEs ? `Coste (${currency})` : `Cost (${currency})`,
+        width: '115px',
+        render: (_val, row) => (
+          <span style={{ fontWeight: 650, color: '#475569', fontSize: '0.84rem', fontFamily: 'monospace' }}>
+            {formatMoney(row.masterPrice, currency)}
+          </span>
+        )
+      });
+      cols.push({
+        key: 'distributorPrice',
+        label: isEs ? `Distributor +15% (${currency})` : `Distributor +15% (${currency})`,
+        width: '145px',
+        render: (_val, row) => (
+          <span style={{ fontWeight: 700, color: '#1d4ed8', fontSize: '0.86rem', fontFamily: 'monospace' }}>
+            {formatMoney(row.distributorPrice, currency)}
+          </span>
+        )
+      });
+    }
+
+    const activeTierLabel =
+      pricingRole === 'distributor'
+        ? `Distributor +15% (${currency})`
+        : pricingRole === 'clinic'
+          ? (isEs ? `Clínica (${currency})` : `Clinic Rate (${currency})`)
+          : pricingRole === 'retail'
+            ? (isEs ? `PVP (${currency})` : `Retail (${currency})`)
+            : (isEs ? `Wholeseller (${currency})` : `Wholeseller (${currency})`);
+
     cols.push({
       key: 'clinicPrice',
-      label: isEs ? `Wholeseller (${currency})` : `Wholeseller Price (${currency})`,
+      label: activeTierLabel,
       width: '165px',
       render: (_val, row) => (
         <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.92rem' }}>
@@ -217,7 +245,7 @@ export default function FillersPriceListClient({
     });
 
     return cols;
-  }, [isEs, currency]);
+  }, [isEs, currency, isAdmin, pricingRole]);
 
   const tableRows = useMemo(() => {
     return [...filteredRows]

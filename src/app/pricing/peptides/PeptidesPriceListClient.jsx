@@ -556,7 +556,16 @@ export default function PeptidesPriceListClient({
     }
   };
 
-  const { isAdmin, pricingRole, resolve: resolveProduct } = usePricing();
+  const { isAdmin, pricingRole, market: sessionMarket, isSimulating, resolve: resolveProduct } = usePricing();
+
+  // Sync shipping corridor automatically when Admin simulates a Market or logged-in user has a regional market
+  useEffect(() => {
+    if (!isSimulating && sessionMarket === 'global') return;
+    const mappedDest = sessionMarket === 'us' ? 'US' : (sessionMarket === 'uae' || sessionMarket === 'qatar') ? 'AE' : 'EU';
+    if (mappedDest !== shippingDest) {
+      handleShippingDestChange(mappedDest);
+    }
+  }, [sessionMarket, isSimulating]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const columns = useMemo(() => {
     return getPeptidesColumns({

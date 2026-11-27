@@ -2,21 +2,22 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
-import { Users, ChevronDown, Eye, X } from '@/lib/icons';
+import { PRICING_MARKETS } from '../../../constants/roles';
+import { Users, ChevronDown, Eye, X, Globe } from '@/lib/icons';
 
 /**
  * RoleSimulationDropdown
  * ─────────────────────────────────────────────────────────────────────────────
- * Header dropdown that lets an Admin view the app as any of the 11 roles.
- * Shows a "View As" button. On click, opens a role picker menu.
- * When a simulation is active, the button turns colored and shows the active role.
+ * Header dropdown that lets an Admin view the app as any Role + Market/Country.
  */
 export default function RoleSimulationDropdown() {
-  const { simulatedRole, setSimulatedRole, exitSimulation } = useSimulationStore();
+  const { simulatedRole, simulatedMarket, setSimulatedRole, setSimulatedMarket, exitSimulation } = useSimulationStore();
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef(null);
 
   const activeRoleData = ALL_ROLES.find((r) => r.id === simulatedRole);
+  const activeMarketData = PRICING_MARKETS.find((m) => m.id === simulatedMarket);
+  const hasSimulation = Boolean(simulatedRole || simulatedMarket);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -157,15 +158,18 @@ export default function RoleSimulationDropdown() {
 
       {/* Trigger Button */}
       <button
-        className={`role-sim-btn ${simulatedRole ? 'active' : ''}`}
-        style={simulatedRole ? { '--sim-color': activeRoleData?.color } : {}}
+        className={`role-sim-btn ${hasSimulation ? 'active' : ''}`}
+        style={hasSimulation ? { '--sim-color': activeRoleData?.color || '#0284c7' } : {}}
         onClick={() => setIsOpen((o) => !o)}
-        title="View app as different role"
+        title="View app as different role & market"
       >
-        {simulatedRole ? (
+        {hasSimulation ? (
           <>
-            <span>{activeRoleData?.emoji}</span>
-            <span>Viewing as {activeRoleData?.label}</span>
+            <span>{activeRoleData?.emoji || '🌍'}</span>
+            <span>
+              {activeRoleData ? activeRoleData.label : 'Admin'}
+              {activeMarketData ? ` · ${activeMarketData.badge}` : ''}
+            </span>
           </>
         ) : (
           <>
@@ -176,8 +180,10 @@ export default function RoleSimulationDropdown() {
         <ChevronDown size={12} />
 
         {/* Exit button (inline) */}
-        {simulatedRole && (
-          <button
+        {hasSimulation && (
+          <span
+            role="button"
+            tabIndex={0}
             className="role-sim-exit"
             title="Exit simulation"
             onClick={(e) => {
@@ -186,39 +192,78 @@ export default function RoleSimulationDropdown() {
             }}
           >
             <X size={12} />
-          </button>
+          </span>
         )}
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="role-sim-dropdown">
+        <div className="role-sim-dropdown" style={{ minWidth: '250px' }}>
+          {/* Market / Country Switcher */}
+          <div style={{ padding: '0.65rem 0.85rem', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Globe size={11} />
+              <span>Market / Country Pricing</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '4px' }}>
+              {PRICING_MARKETS.map((mkt) => {
+                const isMktSel = (simulatedMarket || 'global') === mkt.id;
+                return (
+                  <button
+                    key={mkt.id}
+                    type="button"
+                    onClick={() => setSimulatedMarket(mkt.id)}
+                    style={{
+                      padding: '4px 7px',
+                      borderRadius: '6px',
+                      border: isMktSel ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                      background: isMktSel ? '#e8f0fe' : '#ffffff',
+                      color: isMktSel ? '#1967d2' : '#334155',
+                      fontSize: '0.72rem',
+                      fontWeight: isMktSel ? 700 : 500,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <span>{mkt.labelEn}</span>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 700, opacity: 0.8 }}>{mkt.badge}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="role-sim-dropdown__header">
             <Users size={12} style={{ display: 'inline', marginRight: 4 }} />
             Simulate Role View
           </div>
 
-          {ALL_ROLES.map((role) => {
-            const isSelected = simulatedRole === role.id;
-            return (
-              <div
-                key={role.id}
-                className={`role-sim-item ${isSelected ? 'selected' : ''}`}
-                style={{ '--item-color': role.color }}
-                onClick={() => handleSelect(role.id)}
-              >
-                <span
-                  className="role-sim-item__dot"
-                  style={{ backgroundColor: role.color }}
-                />
-                <span>{role.emoji}</span>
-                <span>{role.label}</span>
-                {isSelected && <span className="role-sim-item__check">✓ Active</span>}
-              </div>
-            );
-          })}
+          <div style={{ maxHeight: '260px', overflowY: 'auto' }}>
+            {ALL_ROLES.map((role) => {
+              const isSelected = simulatedRole === role.id;
+              return (
+                <div
+                  key={role.id}
+                  className={`role-sim-item ${isSelected ? 'selected' : ''}`}
+                  style={{ '--item-color': role.color }}
+                  onClick={() => handleSelect(role.id)}
+                >
+                  <span
+                    className="role-sim-item__dot"
+                    style={{ backgroundColor: role.color }}
+                  />
+                  <span>{role.emoji}</span>
+                  <span>{role.label}</span>
+                  {isSelected && <span className="role-sim-item__check">✓ Active</span>}
+                </div>
+              );
+            })}
+          </div>
 
-          {simulatedRole && (
+          {hasSimulation && (
             <div className="role-sim-footer">
               <button className="role-sim-footer-btn" onClick={() => { exitSimulation(); setIsOpen(false); }}>
                 <X size={14} />

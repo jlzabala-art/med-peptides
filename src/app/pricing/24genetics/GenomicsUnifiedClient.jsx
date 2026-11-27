@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import GenomicsPriceListClient from './GenomicsPriceListClient';
 import PricingMarketSwitcherBar from '@/components/pricing/shared/PricingMarketSwitcherBar';
+import { usePricing } from '@/hooks/usePricing';
 
 const QatarGenomicsPriceListClient = dynamic(
   () => import('../24genomics-qatar/QatarGenomicsPriceListClient'),
@@ -16,6 +17,7 @@ export default function GenomicsUnifiedClient({
   initialLang = 'en',
   initialMarket = 'global',
 }) {
+  const { market: sessionMarket, isSimulating } = usePricing();
   const [market, setMarket] = useState(initialMarket === 'qatar' ? 'qatar' : 'global');
 
   useEffect(() => {
@@ -23,6 +25,13 @@ export default function GenomicsUnifiedClient({
     const raw = (new URLSearchParams(window.location.search).get('market') || '').toLowerCase();
     if (raw === 'qatar' || raw === 'qa') setMarket('qatar');
   }, []);
+
+  // Automatically reflect Admin Role/Market simulation or logged-in user's assigned market
+  useEffect(() => {
+    if (isSimulating || sessionMarket === 'qatar') {
+      setMarket(sessionMarket === 'qatar' ? 'qatar' : 'global');
+    }
+  }, [sessionMarket, isSimulating]);
 
   const handleMarketChange = useCallback((nextMarket) => {
     const normalized = nextMarket === 'qatar' ? 'qatar' : 'global';

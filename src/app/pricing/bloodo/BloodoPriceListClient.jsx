@@ -31,6 +31,7 @@ import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
 import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
+import { usePricing } from '@/hooks/usePricing';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 
@@ -52,6 +53,7 @@ export default function BloodoPriceListClient({
   initialCurrency = 'EUR',
 }) {
   const { viewMode, handleViewModeChange } = usePricingViewMode();
+  const { isAdmin, pricingRole, resolve: resolveProduct } = usePricing();
   const [localLang, setLocalLang] = useState(initialLang);
   const [localCurrency, setLocalCurrency] = useState(initialCurrency);
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,17 +117,18 @@ export default function BloodoPriceListClient({
         return next;
       });
       if (delta > 0 && typeof addToWorkspaceCart === 'function') {
+        const resolved = resolveProduct(product);
         addToWorkspaceCart({
           id: product.id,
           name: product.name,
           sku: product.sku,
-          priceEur: product.wholesalePriceEur,
+          priceEur: resolved.primaryPrice ?? product.wholesalePriceEur,
           quantity: 1,
           type: 'diagnostic',
         });
       }
     },
-    [addToWorkspaceCart]
+    [addToWorkspaceCart, resolveProduct]
   );
 
   const filteredProducts = useMemo(() => {
@@ -146,11 +149,12 @@ export default function BloodoPriceListClient({
     Object.entries(cartItems).forEach(([id, qty]) => {
       const item = initialProducts.find((p) => p.id === id);
       if (!item || !qty) return;
+      const resolved = resolveProduct(item);
       count += qty;
-      totalEur += qty * (Number(item.wholesalePriceEur) || 0);
+      totalEur += qty * (Number(resolved.primaryPrice ?? item.wholesalePriceEur) || 0);
     });
     return { count, totalEur, formatted: formatPrice(totalEur) };
-  }, [cartItems, initialProducts, formatPrice]);
+  }, [cartItems, initialProducts, formatPrice, resolveProduct]);
 
   const handleShare = async () => {
     const url = `https://www.atlashealth-services.com/pricing/bloodo?lang=${lang}&currency=${currency}`;
@@ -239,19 +243,32 @@ export default function BloodoPriceListClient({
       },
       {
         key: 'wholesalePriceEur',
-        label: isEs ? 'Tarifa B2B' : 'B2B Wholesale',
+        label:
+          pricingRole === 'distributor'
+            ? 'Distributor (+15%)'
+            : pricingRole === 'clinic'
+              ? (isEs ? 'Tarifa Clínica' : 'Clinic Rate')
+              : pricingRole === 'retail'
+                ? (isEs ? 'PVP / Paciente' : 'Retail Rate')
+                : (isEs ? 'Wholeseller B2B' : 'B2B Wholeseller'),
         align: 'right',
         width: '16%',
-        render: (_val, row) => (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-            <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-              {formatPrice(row.wholesalePriceEur)}
-            </span>
-            <span style={{ fontSize: '0.68rem', color: '#15803d', fontWeight: 600 }}>
-              {isEs ? 'Tarifa B2B Oficial' : 'Official B2B Rate'}
-            </span>
-          </div>
-        ),
+        render: (_val, row) => {
+          const resolved = resolveProduct(row);
+          const activePrice = resolved.primaryPrice ?? row.wholesalePriceEur;
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                {formatPrice(activePrice)}
+              </span>
+              <span style={{ fontSize: '0.68rem', color: '#15803d', fontWeight: 600 }}>
+                {isAdmin && resolved.cost
+                  ? `Cost ${formatPrice(resolved.cost)} · Dist ${formatPrice(resolved.distributor)}`
+                  : (resolved.primaryLabel || (isEs ? 'Tarifa B2B Oficial' : 'Official B2B Rate'))}
+              </span>
+            </div>
+          );
+        },
       },
       {
         key: 'clinicPriceEur',

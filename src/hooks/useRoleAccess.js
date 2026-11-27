@@ -115,6 +115,14 @@ const ROLE_ACTION_PERMISSIONS = Object.freeze({
     'export:catalog',
   ],
 
+  distributor: [
+    'view:products',
+    'create:orders', 'view:orders',
+    'view:clients',
+    'view:quotations', 'create:quotations',
+    'export:catalog',
+  ],
+
   supplier: [
     'view:products', 'edit:products',
     'view:orders', 'edit:orders',
@@ -165,7 +173,7 @@ export function useRoleAccess() {
   );
   const effectiveRole = useMemo(() => {
     if (isDevBypass) return 'admin';
-    const raw = isSimulating
+    const raw = (isSimulating && simulatedRole)
       ? simulatedRole
       : (isAdmin ? 'admin' : (activeRole || userProfile?.role || 'guest'));
     return normalizeRole(raw);

@@ -23,6 +23,7 @@ export const CANONICAL_ROLES = Object.freeze({
   COMPOUNDING_PHARMACY: 'compounding_pharmacy',
 
   // Tier 3: Commercial B2B & Supply Chain
+  DISTRIBUTOR:         'distributor',
   WHOLESALER:          'wholesaler',
   SUPPLIER:            'supplier',
   ACCOUNT_MANAGER:     'account_manager',
@@ -40,6 +41,7 @@ export const CANONICAL_ROLES = Object.freeze({
  */
 export const ROLE_ALIASES = Object.freeze({
   wholeseller:          CANONICAL_ROLES.WHOLESALER,
+  distribuitor:         CANONICAL_ROLES.DISTRIBUTOR,
   pharmacy:             CANONICAL_ROLES.COMPOUNDING_PHARMACY,
   medical:              CANONICAL_ROLES.MEDICAL_DIRECTOR,
   physician:            CANONICAL_ROLES.DOCTOR,
@@ -103,9 +105,18 @@ export const ROLE_METADATA = Object.freeze({
     description: 'Authorized compounding laboratory fulfilling custom formulations and sterile batches.',
     canSimulateRoles: false,
   },
+  [CANONICAL_ROLES.DISTRIBUTOR]: {
+    id: CANONICAL_ROLES.DISTRIBUTOR,
+    label: 'Distributor (+15%)',
+    tier: ROLE_TIERS.TIER_3_COMMERCIAL,
+    badgeColor: '#0369a1',
+    homeRoute: '/wholesaler',
+    description: 'Regional exclusive distributor tier (+15% over base cost) with market-specific schedules.',
+    canSimulateRoles: false,
+  },
   [CANONICAL_ROLES.WHOLESALER]: {
     id: CANONICAL_ROLES.WHOLESALER,
-    label: 'Wholesaler / Distributor',
+    label: 'Wholesaler (+32.25%)',
     tier: ROLE_TIERS.TIER_3_COMMERCIAL,
     badgeColor: '#c2410c',
     homeRoute: '/wholesaler',
@@ -212,4 +223,30 @@ export function isClinicalRole(role) {
 export function isCommercialRole(role) {
   const meta = ROLE_METADATA[normalizeRole(role)];
   return meta?.tier === ROLE_TIERS.TIER_3_COMMERCIAL;
+}
+
+/**
+ * Canonical Commercial Markets / Countries for Role + Market pricing resolution.
+ */
+export const PRICING_MARKETS = Object.freeze([
+  { id: 'global', countryCode: 'EU', labelEn: 'Global / EU', labelEs: 'Global / UE', defaultCurrency: 'EUR', badge: 'EU' },
+  { id: 'uae',    countryCode: 'AE', labelEn: 'UAE / GCC',   labelEs: 'EAU / GCC',   defaultCurrency: 'AED', badge: 'AE' },
+  { id: 'qatar',  countryCode: 'QA', labelEn: 'Qatar',       labelEs: 'Qatar',       defaultCurrency: 'USD', badge: 'QA' },
+  { id: 'us',     countryCode: 'US', labelEn: 'USA',         labelEs: 'EE.UU.',      defaultCurrency: 'USD', badge: 'US' },
+]);
+
+export function normalizePricingMarket(raw) {
+  const s = String(raw || '').trim().toLowerCase();
+  if (s === 'qa' || s === 'qatar') return 'qatar';
+  if (s === 'ae' || s === 'uae' || s === 'dubai' || s === 'gcc') return 'uae';
+  if (s === 'us' || s === 'usa') return 'us';
+  return 'global';
+}
+
+export function marketToCountryCode(market) {
+  const norm = normalizePricingMarket(market);
+  if (norm === 'qatar') return 'QA';
+  if (norm === 'uae') return 'AE';
+  if (norm === 'us') return 'US';
+  return 'EU';
 }

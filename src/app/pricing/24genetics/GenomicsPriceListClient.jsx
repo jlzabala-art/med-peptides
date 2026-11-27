@@ -39,6 +39,7 @@ import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
 import { usePricingViewMode } from '@/hooks/pricing/usePricingViewMode';
+import { usePricing } from '@/hooks/usePricing';
 import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 import DataTable from '@/components/ui/DataTable';
 import PricingScheduleMobileCard from '@/components/pricing/shared/PricingScheduleMobileCard';
@@ -60,6 +61,7 @@ export default function GenomicsPriceListClient({
   initialLang = 'en',
 }) {
   const { viewMode, handleViewModeChange } = usePricingViewMode();
+  const { resolve: resolveProduct } = usePricing();
   const router = useRouter();
   const { user } = useAuth();
   const { is, effectiveRole } = useRoleAccess();
@@ -346,7 +348,8 @@ export default function GenomicsPriceListClient({
       width: (canViewCost && showCostBasis) ? '15%' : '18%',
       sortable: true,
       render: (val, row) => {
-        const wsPrice = val ?? row.wholesalePriceEur ?? (row.costPriceEur ? Number((row.costPriceEur * 1.3225).toFixed(2)) : null);
+        const resolved = resolveProduct(row);
+        const wsPrice = resolved.wholeseller ?? val ?? row.wholesalePriceEur ?? (row.costPriceEur ? Number((row.costPriceEur * 1.3225).toFixed(2)) : null);
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontFamily: 'monospace', fontWeight: 750, color: '#0f766e', fontSize: '0.90rem' }}>
@@ -379,7 +382,8 @@ export default function GenomicsPriceListClient({
         width: '14%',
         sortable: true,
         render: (val, row) => {
-          const distPrice = val ?? row.distributorPriceEur ?? (row.costPriceEur ? Number((row.costPriceEur * 1.15).toFixed(2)) : null);
+          const resolved = resolveProduct(row);
+          const distPrice = resolved.distributor ?? val ?? row.distributorPriceEur ?? (row.costPriceEur ? Number((row.costPriceEur * 1.15).toFixed(2)) : null);
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               <span style={{ fontFamily: 'monospace', fontWeight: 750, color: '#1d4ed8', fontSize: '0.90rem' }}>

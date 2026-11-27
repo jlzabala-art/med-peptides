@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { ATLAS_MARGIN_RATES } from '@/lib/pricing/pricingCore';
+import { ATLAS_MARGIN_RATES, resolveAllPrices } from '@/lib/pricing/pricingCore';
+import { usePricing } from '@/hooks/usePricing';
 import { useSyncedTableParams } from '@/hooks/useSyncedTableParams';
 
 export function useBrandPriceSchedule({
@@ -10,6 +11,7 @@ export function useBrandPriceSchedule({
   defaultMarkupPct = 32.25,
   fxRate = 1,
 } = {}) {
+  const { market: sessionMarket, countryCode } = usePricing();
   const [markupPct, setMarkupPct] = useState(defaultMarkupPct);
   const {
     searchQuery,
@@ -96,16 +98,22 @@ export function useBrandPriceSchedule({
   const processedProducts = useMemo(() => {
     return initialProducts.map((p, idx) => {
       const ov = itemOverrides[p.id] || {};
-      const landed = ov.landedCostAed ?? Number(p.landedCostAed || 0);
+      const resolvedMarket = resolveAllPrices(p, { market: sessionMarket, countryCode });
+      const useRegional = resolvedMarket.isMarketOverride;
+      const landed = ov.landedCostAed ?? Number((useRegional && resolvedMarket.cost != null ? resolvedMarket.cost : p.landedCostAed) || 0);
       const itemMarkupPct = ov.wholesaleMarkupPct ?? markupPct;
 
       const distributor =
         ov.distributorPrice ??
-        Number((landed * (1 + ATLAS_MARGIN_RATES.DISTRIBUTOR_MARKUP)).toFixed(2));
+        (useRegional && resolvedMarket.distributor != null
+          ? resolvedMarket.distributor
+          : Number((landed * (1 + ATLAS_MARGIN_RATES.DISTRIBUTOR_MARKUP)).toFixed(2)));
 
       const wholesale =
         ov.wholesalePrice ??
-        Number((landed * ATLAS_MARGIN_RATES.WHOLESELLER_COMPOUND).toFixed(2));
+        (useRegional && resolvedMarket.wholeseller != null
+          ? resolvedMarket.wholeseller
+          : Number((landed * ATLAS_MARGIN_RATES.WHOLESELLER_COMPOUND).toFixed(2)));
 
       const marginAed = Number((wholesale - landed).toFixed(2));
       const marginPct =
@@ -113,15 +121,19 @@ export function useBrandPriceSchedule({
 
       const recommendedClinic =
         ov.clinicPrice ??
-        (p.clinicPriceAed != null
-          ? Number(p.clinicPriceAed)
-          : Number((wholesale * 1.25).toFixed(2)));
+        (useRegional && resolvedMarket.clinic != null
+          ? resolvedMarket.clinic
+          : (p.clinicPriceAed != null
+            ? Number(p.clinicPriceAed)
+            : Number((wholesale * 1.25).toFixed(2))));
 
       const recommendedRetail =
         ov.retailPrice ??
-        (p.retailPriceAed != null
-          ? Number(p.retailPriceAed)
-          : Number((recommendedClinic * 1.3).toFixed(2)));
+        (useRegional && resolvedMarket.retail != null
+          ? resolvedMarket.retail
+          : (p.retailPriceAed != null
+            ? Number(p.retailPriceAed)
+            : Number((recommendedClinic * 1.3).toFixed(2))));
 
       const retailMarginPct =
         recommendedRetail > 0
@@ -145,7 +157,7 @@ export function useBrandPriceSchedule({
         hasCustomOverride: Boolean(itemOverrides[p.id]),
       };
     });
-  }, [initialProducts, markupPct, itemOverrides]);
+  }, [initialProducts, markupPct, itemOverrides, sessionMarket, countryCode]);
 
   const filteredProducts = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();

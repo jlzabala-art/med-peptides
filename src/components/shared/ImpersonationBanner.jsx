@@ -5,11 +5,11 @@ import { usePathname } from 'next/navigation';
 import { useAdminRoleSimulation } from '@/hooks/admin/useAdminRoleSimulation';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, X, ShieldAlert, LogOut } from '@/lib/icons';
-import { normalizeRole, ROLE_METADATA } from '@/constants/roles';
+import { normalizeRole, ROLE_METADATA, PRICING_MARKETS } from '@/constants/roles';
 
 export default function ImpersonationBanner() {
   const pathname = usePathname();
-  const { isSimulating, simulatedRole, impersonatedUser, exitImpersonation } = useAdminRoleSimulation();
+  const { isSimulating, simulatedRole, simulatedMarket, impersonatedUser, exitImpersonation } = useAdminRoleSimulation();
   const { user, switchActiveRole } = useAuth();
   const [sessionImpersonating, setSessionImpersonating] = useState(false);
 
@@ -39,6 +39,7 @@ export default function ImpersonationBanner() {
 
   const canonicalRoleKey = normalizeRole(simulatedRole);
   const roleLabel = ROLE_METADATA[canonicalRoleKey]?.label || simulatedRole?.toUpperCase() || 'PREVIEW';
+  const marketMeta = PRICING_MARKETS.find((m) => m.id === simulatedMarket);
 
   return (
     <div
@@ -69,7 +70,9 @@ export default function ImpersonationBanner() {
             </>
           ) : (
             <>
-              Simulating Role View: <strong>{roleLabel}</strong> · <em>RBAC Preview Mode (Scoped Permissions)</em>
+              Simulating View: <strong>{roleLabel}</strong>
+              {marketMeta ? <> · Market: <strong>{marketMeta.labelEn} ({marketMeta.badge})</strong></> : null}
+              {' '}· <em>RBAC &amp; Pricing Preview Mode</em>
             </>
           )}
         </span>

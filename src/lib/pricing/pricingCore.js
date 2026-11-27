@@ -10,6 +10,8 @@
  *   3. Admin                   -> Always exposes all 3 prices: Cost, Wholeseller, Distributor
  */
 
+import { marketToCountryCode, normalizePricingMarket } from '@/constants/roles';
+
 export const ATLAS_MARGIN_RATES = Object.freeze({
   DISTRIBUTOR_MARKUP: 0.15,      // +15% over cost (× 1.15)
   WHOLESELLER_COMPOUND: 1.3225,  // +15% + 15% compounded (1.15 × 1.15)
@@ -77,6 +79,11 @@ export function extractCost(item) {
  */
 export function resolveAllPrices(item, options = {}) {
   const defaultCurrency = options.currency || 'EUR';
+  const normalizedMarket = normalizePricingMarket(options.market || options.countryCode || 'global');
+  const countryCode = options.countryCode
+    ? String(options.countryCode).toUpperCase()
+    : marketToCountryCode(normalizedMarket);
+
   if (!item) {
     return {
       cost: null,
@@ -85,6 +92,9 @@ export function resolveAllPrices(item, options = {}) {
       clinic: null,
       retail: null,
       currency: defaultCurrency,
+      market: normalizedMarket,
+      countryCode,
+      isMarketOverride: false,
     };
   }
 
@@ -93,9 +103,38 @@ export function resolveAllPrices(item, options = {}) {
   const v0p = v0?.pricing || {};
   const fx = Number(options.fxRate) > 0 ? Number(options.fxRate) : 1;
 
-  const cost = extractCost(item);
+  // Market / country override extraction.
+  // Business invariant: when market === 'global' (no specific market assigned),
+  // NEVER apply regional overrides — always keep the general base rule intact.
+  const isRegionalMarket = normalizedMarket !== 'global';
+  const marketBlock = isRegionalMarket
+    ? (
+      item.byCountry?.[countryCode] ||
+      item.pricingByCountry?.[countryCode] ||
+      item.byMarket?.[normalizedMarket] ||
+      p.byCountry?.[countryCode] ||
+      p.byMarket?.[normalizedMarket] ||
+      null
+    )
+    : null;
+
+  const tierCountryVal = (tierKey) => {
+    if (!isRegionalMarket) return null;
+    return firstPositive(
+      p[tierKey]?.byCountry?.[countryCode]?.perUnit,
+      p[tierKey]?.byCountry?.[countryCode]?.base,
+      p[tierKey]?.byCountry?.[countryCode],
+      v0p[tierKey]?.byCountry?.[countryCode]?.perUnit,
+      v0p[tierKey]?.byCountry?.[countryCode],
+      marketBlock?.[tierKey]?.perUnit,
+      marketBlock?.[tierKey]
+    );
+  };
+
+  const cost = firstPositive(tierCountryVal('master'), extractCost(item));
 
   const explicitDistributor = firstPositive(
+    tierCountryVal('distributor'),
     item.distributorPriceEur,
     item.distributorPrice,
     item.mediluxePrice,
@@ -108,6 +147,7 @@ export function resolveAllPrices(item, options = {}) {
   );
 
   const explicitWholeseller = firstPositive(
+    tierCountryVal('wholesale'),
     item.wholesalePriceEur,
     item.wholesalePrice,
     item.wholesellerPrice,
@@ -121,6 +161,7 @@ export function resolveAllPrices(item, options = {}) {
   );
 
   const explicitClinic = firstPositive(
+    tierCountryVal('clinic'),
     item.clinicPriceEur,
     item.clinicPrice,
     item.recommendedClinic,
@@ -133,6 +174,7 @@ export function resolveAllPrices(item, options = {}) {
   );
 
   const explicitRetail = firstPositive(
+    tierCountryVal('retail'),
     item.retailPriceEur,
     item.retailPrice,
     item.recommendedRetail,
@@ -142,6 +184,15 @@ export function resolveAllPrices(item, options = {}) {
     p.retail,
     v0?.retailPrice,
     v0p.retail?.perUnit
+  );
+
+  const isMarketOverride = Boolean(
+    marketBlock ||
+    tierCountryVal('master') ||
+    tierCountryVal('distributor') ||
+    tierCountryVal('wholesale') ||
+    tierCountryVal('clinic') ||
+    tierCountryVal('retail')
   );
 
   const effectiveCost =
@@ -183,10 +234,14 @@ export function resolveAllPrices(item, options = {}) {
     clinic: scale(clinic),
     retail: scale(retail),
     currency:
+      marketBlock?.currency ||
       item.currency ||
       p.wholesale?.currency ||
       p.retail?.currency ||
       defaultCurrency,
+    market: normalizedMarket,
+    countryCode,
+    isMarketOverride,
   };
 }
 
@@ -194,7 +249,16 @@ export function resolveAllPrices(item, options = {}) {
  * Normalizes any role / priceTier string into:
  * 'admin' | 'distributor' | 'wholeseller' | 'clinic' | 'retail' | 'guest'
  */
-export function normalizePricingRole(role, user = null) {
+export function normalizePricingRole(role, user = null, { isSimulating = false } = {}) {
+  if (isSimulating && role) {
+    const simRaw = String(role).toLowerCase().trim();
+    if (simRaw === 'guest') return 'guest';
+    if (['admin', 'superadmin', 'medical_director'].includes(simRaw)) return 'admin';
+    if (['distributor', 'distribuitor', 'mediluxe', 'master'].includes(simRaw)) return 'distributor';
+    if (['wholeseller', 'wholesaler', 'wholesale', 'supplier'].includes(simRaw)) return 'wholeseller';
+    if (['clinic', 'doctor', 'physician', 'fagron_clinic', 'pharmacy', 'compounding_pharmacy', 'hospital', 'professional', 'verified_medical', 'clinic_manager', 'pharmacist'].includes(simRaw)) return 'clinic';
+    if (['patient', 'retail', 'b2c'].includes(simRaw)) return 'retail';
+  }
   if (!user && (!role || String(role).toLowerCase() === 'guest')) {
     return 'guest';
   }
@@ -235,10 +299,10 @@ export function normalizePricingRole(role, user = null) {
  */
 export function resolvePriceForSession(
   item,
-  { user = null, role = null, isAdmin = false, customMarkupPercent = null, fxRate = 1, currency = 'EUR' } = {}
+  { user = null, role = null, isAdmin = false, isSimulating = false, market = 'global', countryCode = null, customMarkupPercent = null, fxRate = 1, currency = 'EUR' } = {}
 ) {
-  const tiers = resolveAllPrices(item, { fxRate, currency });
-  const normalizedRole = isAdmin ? 'admin' : normalizePricingRole(role, user);
+  const tiers = resolveAllPrices(item, { fxRate, currency, market, countryCode });
+  const normalizedRole = isAdmin && !isSimulating ? 'admin' : normalizePricingRole(role, user, { isSimulating });
 
   if (normalizedRole === 'admin') {
     return {
@@ -252,7 +316,7 @@ export function resolvePriceForSession(
     };
   }
 
-  if (normalizedRole === 'guest' || !user) {
+  if (normalizedRole === 'guest' || (!user && !isSimulating)) {
     return {
       mode: 'guest_wholeseller',
       showTriple: false,
@@ -262,14 +326,18 @@ export function resolvePriceForSession(
       primaryLabel: 'Wholeseller',
       wholeseller: tiers.wholeseller,
       currency: tiers.currency,
+      market: tiers.market,
+      countryCode: tiers.countryCode,
+      isMarketOverride: tiers.isMarketOverride,
     };
   }
 
-  const userMarkup =
-    customMarkupPercent ??
-    user?.priceMarkupPercent ??
-    user?.appliedMarkupPercent ??
-    null;
+  const userMarkup = isSimulating
+    ? null
+    : (customMarkupPercent ??
+      user?.priceMarkupPercent ??
+      user?.appliedMarkupPercent ??
+      null);
 
   if (userMarkup != null && Number.isFinite(Number(userMarkup)) && tiers.cost != null) {
     const customPrice = round2(tiers.cost * (1 + Number(userMarkup) / 100));
@@ -301,6 +369,9 @@ export function resolvePriceForSession(
     primaryPrice: selected.price,
     primaryLabel: selected.label,
     currency: tiers.currency,
+    market: tiers.market,
+    countryCode: tiers.countryCode,
+    isMarketOverride: tiers.isMarketOverride,
   };
 }
 

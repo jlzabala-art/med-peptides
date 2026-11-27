@@ -61,9 +61,22 @@ export const ADMIN_ROLES = {
       'logistics',
     ],
   },
+  [CANONICAL_ROLES.DISTRIBUTOR]: {
+    id: CANONICAL_ROLES.DISTRIBUTOR,
+    label: 'Distributor (+15%)',
+    allowedTabs: [
+      'dashboard',
+      'orders',
+      'products',
+      'purchase-orders',
+      'wholesellers',
+      'logistics',
+      'quotations',
+    ],
+  },
   [CANONICAL_ROLES.WHOLESALER]: {
     id: CANONICAL_ROLES.WHOLESALER,
-    label: 'Wholesaler / Distributor',
+    label: 'Wholesaler (+32.25%)',
     allowedTabs: [
       'dashboard',
       'orders',
@@ -168,7 +181,9 @@ const listeners = new Set();
  */
 export function useAdminRoleSimulation() {
   const storeSimulatedRole = useSimulationStore((state) => state.simulatedRole);
+  const storeSimulatedMarket = useSimulationStore((state) => state.simulatedMarket);
   const setStoreSimulatedRole = useSimulationStore((state) => state.setSimulatedRole);
+  const setStoreSimulatedMarket = useSimulationStore((state) => state.setSimulatedMarket);
   const exitStoreSimulation = useSimulationStore((state) => state.exitSimulation);
 
   const [impersonatedUser, setImpersonatedUser] = useState(globalImpersonatedUser);
@@ -179,6 +194,11 @@ export function useAdminRoleSimulation() {
     setStoreSimulatedRole(newRoleId === 'admin' ? null : newRoleId);
     listeners.forEach((listener) => listener());
   }, [setStoreSimulatedRole]);
+
+  const setSimulatedMarket = useCallback((newMarketId) => {
+    setStoreSimulatedMarket(!newMarketId || newMarketId === 'global' ? null : newMarketId);
+    listeners.forEach((listener) => listener());
+  }, [setStoreSimulatedMarket]);
 
   const impersonateUser = useCallback((userObj) => {
     globalImpersonatedUser = userObj;
@@ -202,10 +222,12 @@ export function useAdminRoleSimulation() {
   return {
     simulatedRole: normalizedRole,
     setSimulatedRole,
+    simulatedMarket: storeSimulatedMarket || null,
+    setSimulatedMarket,
     impersonatedUser,
     impersonateUser,
     exitImpersonation,
     allowedAdminTabs: currentRoleConfig.allowedTabs,
-    isSimulating: role !== 'admin' || Boolean(impersonatedUser),
+    isSimulating: role !== 'admin' || Boolean(storeSimulatedMarket) || Boolean(impersonatedUser),
   };
 }

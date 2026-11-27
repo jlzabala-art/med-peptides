@@ -3,6 +3,8 @@
 import { useMemo, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { useAdminRoleSimulation } from '@/hooks/admin/useAdminRoleSimulation';
+import { normalizePricingMarket, marketToCountryCode } from '@/constants/roles';
 import {
   ATLAS_MARGIN_RATES,
   extractCost,
@@ -13,35 +15,55 @@ import {
 } from '@/lib/pricing/pricingCore';
 
 /**
- * usePricing — Hook único de precios para toda la plataforma.
+ * usePricing — Hook único de precios por Rol + Mercado para toda la plataforma.
  *  - No registrado: Wholeseller = Cost + 15% + 15% (× 1.3225)
- *  - Registrado:    Margen/tarifa del role
- *  - Admin:         Coste, Wholeseller y Distribuitor
+ *  - Registrado:    Margen/tarifa del role + overrides de su mercado/país
+ *  - Admin:         Coste, Wholeseller y Distributor (o vista simulada por Rol + Mercado)
  */
-export function usePricing({ currency = 'EUR', fxRate = 1 } = {}) {
-  const { user, activeRole, loading } = useAuth();
+export function usePricing({ currency = 'EUR', fxRate = 1, market: marketOverride = null } = {}) {
+  const { user, userProfile, activeRole, loading } = useAuth();
   const { is, effectiveRole } = useRoleAccess();
+  const { isSimulating, simulatedMarket, setSimulatedMarket } = useAdminRoleSimulation();
 
-  const isAdmin = is('admin') || is('medical_director');
+  const isAdmin = (is('admin') || is('medical_director')) && !isSimulating;
   const rawRole = effectiveRole || activeRole || user?.role || 'guest';
 
-  const pricingRole = useMemo(
-    () => (isAdmin ? 'admin' : normalizePricingRole(rawRole, user)),
-    [isAdmin, rawRole, user]
+  const market = useMemo(
+    () =>
+      normalizePricingMarket(
+        simulatedMarket ||
+          marketOverride ||
+          userProfile?.market ||
+          userProfile?.countryCode ||
+          userProfile?.country ||
+          user?.market ||
+          'global'
+      ),
+    [simulatedMarket, marketOverride, userProfile?.market, userProfile?.countryCode, userProfile?.country, user?.market]
   );
 
-  const isGuest = !user || pricingRole === 'guest';
+  const countryCode = useMemo(() => marketToCountryCode(market), [market]);
+
+  const pricingRole = useMemo(
+    () => (isAdmin ? 'admin' : normalizePricingRole(rawRole, userProfile || user, { isSimulating })),
+    [isAdmin, rawRole, userProfile, user, isSimulating]
+  );
+
+  const isGuest = (!user && !isSimulating) || pricingRole === 'guest';
 
   const resolve = useCallback(
     (item, opts = {}) =>
       resolvePriceForSession(item, {
-        user,
+        user: userProfile || user,
         role: rawRole,
         isAdmin,
+        isSimulating,
+        market: opts.market || market,
+        countryCode: opts.countryCode || countryCode,
         currency: opts.currency || currency,
         fxRate: opts.fxRate ?? fxRate,
       }),
-    [user, rawRole, isAdmin, currency, fxRate]
+    [userProfile, user, rawRole, isAdmin, isSimulating, market, countryCode, currency, fxRate]
   );
 
   const format = useCallback(
@@ -53,7 +75,11 @@ export function usePricing({ currency = 'EUR', fxRate = 1 } = {}) {
     isLoading: loading,
     isAdmin,
     isGuest,
+    isSimulating,
     pricingRole,
+    market,
+    countryCode,
+    setSimulatedMarket,
     rates: ATLAS_MARGIN_RATES,
     resolve,
     resolveAllPrices,

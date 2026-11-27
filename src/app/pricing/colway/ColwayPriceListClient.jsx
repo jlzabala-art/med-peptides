@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import ModularPriceSchedule from '@/components/pricing/shared/ModularPriceSchedule';
 import PricingMarketSwitcherBar from '@/components/pricing/shared/PricingMarketSwitcherBar';
+import { usePricing } from '@/hooks/usePricing';
 import './ColwayPriceList.css';
 
 const QatarColwayPriceListClient = dynamic(
@@ -18,6 +19,7 @@ export default function ColwayPriceListClient({
   initialCurrency = null,
   initialMarket = 'uae',
 }) {
+  const { market: sessionMarket, isSimulating } = usePricing();
   const [market, setMarket] = useState(initialMarket === 'qatar' ? 'qatar' : 'uae');
 
   useEffect(() => {
@@ -25,6 +27,13 @@ export default function ColwayPriceListClient({
     const raw = (new URLSearchParams(window.location.search).get('market') || '').toLowerCase();
     if (raw === 'qatar' || raw === 'qa') setMarket('qatar');
   }, []);
+
+  // Automatically reflect Admin Role/Market simulation or logged-in user's assigned market
+  useEffect(() => {
+    if (isSimulating || sessionMarket === 'qatar') {
+      setMarket(sessionMarket === 'qatar' ? 'qatar' : 'uae');
+    }
+  }, [sessionMarket, isSimulating]);
 
   const handleMarketChange = useCallback((nextMarket) => {
     const normalized = nextMarket === 'qatar' ? 'qatar' : 'uae';
