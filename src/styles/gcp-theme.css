@@ -119,9 +119,86 @@
   border: 1px solid var(--gcp-border);
   color: var(--gcp-danger);
 }
-.gcp-btn-danger:hover {
+.gcp-btn-danger:hover:not(:disabled) {
   background-color: #fce8e6;
   border-color: #fad2cf;
+}
+.gcp-btn-danger:disabled,
+.gcp-action-thumb-btn:disabled {
+  color: #a8aab0;
+  border-color: #e8eaed;
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Unified GCP keyboard focus ring across all interactive controls */
+.gcp-btn-primary:focus-visible,
+.gcp-btn-secondary:focus-visible,
+.gcp-btn-danger:focus-visible,
+.gcp-action-thumb-btn:focus-visible,
+.gcp-chip-btn:focus-visible {
+  outline: 2px solid var(--gcp-blue, #1a73e8);
+  outline-offset: 2px;
+}
+
+/* Unified GCP Option Chip Group (accessible radiogroup / segmented selector) */
+.gcp-chip-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.gcp-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--gcp-border, #dadce0);
+  background: var(--gcp-bg-card, #ffffff);
+  color: #3c4043;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  line-height: 1.25;
+}
+.gcp-chip-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #93c5fd;
+}
+.gcp-chip-btn.is-active {
+  background: #e8f0fe;
+  border-color: var(--gcp-blue, #1a73e8);
+  color: var(--gcp-blue, #1a73e8);
+  font-weight: 700;
+}
+.gcp-chip-btn:disabled {
+  color: #a8aab0;
+  border-color: #e8eaed;
+  background: #f8f9fa;
+  cursor: not-allowed;
+}
+@media (max-width: 768px) {
+  .gcp-chip-group--grid-mobile {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+  .gcp-chip-group--grid-mobile.gcp-chip-group--odd-last > :last-child {
+    grid-column: 1 / -1;
+  }
+  .gcp-chip-btn {
+    min-height: 44px;
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    text-align: center;
+  }
 }
 
 /* Quick Actions Thumbnail Buttons */
@@ -247,6 +324,13 @@
   outline: none;
   border-color: var(--gcp-blue);
   box-shadow: inset 0 0 0 1px var(--gcp-blue);
+}
+
+.gcp-input:disabled {
+  background-color: #f1f3f4;
+  color: #80868b;
+  border-color: #e8eaed;
+  cursor: not-allowed;
 }
 
 .gcp-label {

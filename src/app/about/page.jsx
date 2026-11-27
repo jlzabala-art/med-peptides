@@ -1,4 +1,6 @@
 import About from '../../templates/About';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
 export async function generateMetadata({ searchParams }) {
@@ -21,5 +23,11 @@ export async function generateMetadata({ searchParams }) {
 }
 
 export default function AboutPage() {
-  return <About />;
+  return (
+    <div className="atlas-page-bg">
+      <PublicUnifiedHeader />
+      <About />
+      <PublicUnifiedFooter />
+    </div>
+  );
 }

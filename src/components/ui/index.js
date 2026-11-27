@@ -22,6 +22,8 @@ export { default as StatusChip } from './StatusChip';
 export { default as StatusBadge } from './StatusBadge';
 export { default as RoleBadge } from './RoleBadge';
 export { default as CopyableId } from './CopyableId';
+export { default as CopyActionButton } from './CopyActionButton';
+export { default as OptionChipGroup } from './OptionChipGroup';
 export { default as FilterBar } from './FilterBar';
 export { default as Autocomplete } from './Autocomplete';
 export { default as SearchableSelect } from './SearchableSelect';

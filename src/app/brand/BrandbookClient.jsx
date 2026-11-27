@@ -298,6 +298,22 @@ export default function BrandbookClient({ initialLang = 'es', partnerName = '' }
       logosFolder.file(`${partnerSlug}-x-atlas-health-lockup-light.svg`, buildCoBrandedLockupSvg(false));
       logosFolder.file(`${partnerSlug}-x-atlas-health-lockup-dark.svg`, buildCoBrandedLockupSvg(true));
 
+      // Include editable vector corporate templates (16:9 Deck Cover, A4 Letterhead & 85x55mm Business Card)
+      const templatesFolder = zip.folder('templates');
+      const templateFiles = [
+        { href: '/brand/templates/atlas-slide-cover-16x9.svg', name: 'atlas-slide-cover-16x9.svg' },
+        { href: '/brand/templates/atlas-letterhead-a4.svg', name: 'atlas-letterhead-a4.svg' },
+      ];
+      await Promise.all(
+        templateFiles.map(async (tpl) => {
+          const res = await fetch(tpl.href);
+          if (res.ok) {
+            templatesFolder.file(tpl.name, await res.blob());
+          }
+        })
+      );
+      templatesFolder.file('atlas-business-card-85x55mm.svg', buildBusinessCardSvg());
+
       const cssTokens = `:root {
   /* Atlas Health Services — Official Brand Tokens */
   --atlas-brand-navy: #003666;
@@ -387,6 +403,46 @@ Co-Branding   : ${partnerLabel} × Atlas Health Services
     } finally {
       setDownloadingZip(false);
     }
+  };
+
+  const buildBusinessCardSvg = () => {
+    const safeName = (sigName.trim() || 'Atlas Health Services').replace(/[<>&"']/g, '');
+    const safeRole = (sigRole.trim() || 'Institutional Clinical & B2B Supply').replace(/[<>&"']/g, '');
+    const safeEmail = (sigEmail.trim() || BRAND_CONFIG.supportEmail).replace(/[<>&"']/g, '');
+    const safePhone = (sigPhone.trim() || '').replace(/[<>&"']/g, '');
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 220" width="340" height="220" role="img" aria-label="Atlas Health Services Business Card 85x55mm">
+  <rect width="340" height="220" rx="10" fill="#003666" />
+  <rect x="0" y="0" width="8" height="220" fill="#1A73E8" />
+  <g transform="translate(24, 22) scale(0.75)">
+    <path d="M10 40 L24 8 L38 40" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <path d="M15 27 L18 27 L20 22 L22 32 L24 20 L26 30 L28 27 L33 27" stroke="#00BCD4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <circle cx="24" cy="8" r="2.1" fill="#FFFFFF" opacity="0.85" />
+    <text x="56" y="34" font-family="Inter, -apple-system, sans-serif" font-size="22" letter-spacing="-0.5">
+      <tspan font-weight="800" fill="#FFFFFF">Atlas Health</tspan>
+      <tspan font-weight="600" fill="#38BDF8"> Services</tspan>
+    </text>
+  </g>
+  <line x1="24" y1="74" x2="316" y2="74" stroke="rgba(148,163,184,0.28)" stroke-width="1" />
+  <text x="24" y="108" font-family="Inter, -apple-system, sans-serif" font-size="16" font-weight="800" fill="#FFFFFF">${safeName}</text>
+  <text x="24" y="128" font-family="Inter, -apple-system, sans-serif" font-size="10.5" font-weight="500" fill="#CBD5E1">${safeRole}</text>
+  <text x="24" y="168" font-family="JetBrains Mono, monospace" font-size="10" fill="#38BDF8">${safeEmail}</text>
+  ${safePhone ? `<text x="24" y="184" font-family="JetBrains Mono, monospace" font-size="10" fill="#E2E8F0">${safePhone}</text>` : ''}
+  <text x="24" y="202" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94A3B8">www.atlashealth-services.com</text>
+</svg>`;
+  };
+
+  const handleDownloadBusinessCardSvg = () => {
+    const svg = buildBusinessCardSvg();
+    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'atlas-health-business-card-85x55mm.svg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(isEs ? 'Tarjeta de Visita 85×55 mm (SVG) descargada' : 'Business Card 85×55 mm (SVG) downloaded');
   };
 
   const buildEmailSignatureHtml = () => {
@@ -1001,15 +1057,44 @@ Co-Branding   : ${partnerLabel} × Atlas Health Services
                   {isEs ? '6. Generador de Firma de Email Institucional' : '6. Institutional Email Signature Generator'}
                 </h2>
               </div>
-              <button
-                type="button"
-                className="gcp-btn-primary"
-                onClick={handleCopySignatureHtml}
-                style={{ minHeight: '34px', padding: '0 14px', fontSize: '0.78rem', backgroundColor: '#003666' }}
-              >
-                {copiedKey === 'email-sig' ? <Check size={14} /> : <Copy size={14} />}
-                {isEs ? 'Copiar Firma para Gmail / Outlook' : 'Copy Signature for Gmail / Outlook'}
-              </button>
+              <div className="bb-no-print" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <a
+                  href="/brand/templates/atlas-slide-cover-16x9.svg"
+                  download="atlas-slide-cover-16x9.svg"
+                  className="gcp-btn-secondary"
+                  style={{ minHeight: '34px', padding: '0 12px', fontSize: '0.76rem', textDecoration: 'none' }}
+                >
+                  <Download size={14} />
+                  {isEs ? 'Portada Deck 16:9 (SVG)' : '16:9 Deck Cover (SVG)'}
+                </a>
+                <a
+                  href="/brand/templates/atlas-letterhead-a4.svg"
+                  download="atlas-letterhead-a4.svg"
+                  className="gcp-btn-secondary"
+                  style={{ minHeight: '34px', padding: '0 12px', fontSize: '0.76rem', textDecoration: 'none' }}
+                >
+                  <Download size={14} />
+                  {isEs ? 'Membrete A4 (SVG)' : 'A4 Letterhead (SVG)'}
+                </a>
+                <button
+                  type="button"
+                  className="gcp-btn-secondary"
+                  onClick={handleDownloadBusinessCardSvg}
+                  style={{ minHeight: '34px', padding: '0 12px', fontSize: '0.76rem' }}
+                >
+                  <Download size={14} />
+                  {isEs ? 'Tarjeta 85×55 mm (SVG)' : 'Business Card (SVG)'}
+                </button>
+                <button
+                  type="button"
+                  className="gcp-btn-primary"
+                  onClick={handleCopySignatureHtml}
+                  style={{ minHeight: '34px', padding: '0 14px', fontSize: '0.78rem', backgroundColor: '#003666' }}
+                >
+                  {copiedKey === 'email-sig' ? <Check size={14} /> : <Copy size={14} />}
+                  {isEs ? 'Copiar Firma Email' : 'Copy Email Signature'}
+                </button>
+              </div>
             </div>
 
             <div className="bb-grid-2">
@@ -1057,6 +1142,36 @@ Co-Branding   : ${partnerLabel} × Atlas Health Services
                 }}
                 dangerouslySetInnerHTML={{ __html: buildEmailSignatureHtml() }}
               />
+            </div>
+          </section>
+
+          {/* PHARMACEUTICAL DOCUMENT CONTROL BLOCK (VISIBLE ON SCREEN & PRINT A4) */}
+          <section
+            style={{
+              padding: '0.85rem 1.1rem',
+              borderRadius: '10px',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+              fontSize: '0.73rem',
+              color: '#475569',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: 'var(--atlas-font-mono)', fontWeight: 700, color: '#003666' }}>
+                DOC ID: AHS-BRAND-2026-V2
+              </span>
+              <span>·</span>
+              <span>{isEs ? 'Estado: Aprobado para Distribución Externa' : 'Status: Approved for External Distribution'}</span>
+              <span>·</span>
+              <span>{BRAND_CONFIG.supportEmail}</span>
+            </div>
+            <div style={{ fontFamily: 'var(--atlas-font-mono)', fontSize: '0.7rem', color: '#64748b' }}>
+              SSOT · {BRAND_CONFIG.url}/brand
             </div>
           </section>
         </div>

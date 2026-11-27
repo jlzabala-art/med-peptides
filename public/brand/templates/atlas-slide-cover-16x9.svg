@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" role="img" aria-label="Atlas Health Services 16:9 Presentation Cover Template">
+  <defs>
+    <linearGradient id="bgNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#002244" />
+      <stop offset="55%" stop-color="#003666" />
+      <stop offset="100%" stop-color="#07172D" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bgNavy)" />
+  <rect x="0" y="0" width="16" height="1080" fill="#1A73E8" />
+  <rect x="120" y="92" width="280" height="40" rx="20" fill="rgba(56,189,248,0.16)" stroke="#38BDF8" stroke-width="1.5" />
+  <text x="148" y="118" font-family="Inter, -apple-system, sans-serif" font-size="18" font-weight="800" letter-spacing="2" fill="#38BDF8">INSTITUTIONAL PRESENTATION</text>
+
+  <!-- Logo Top Right -->
+  <g transform="translate(1420, 84)">
+    <path d="M10 40 L24 8 L38 40" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <path d="M15 27 L18 27 L20 22 L22 32 L24 20 L26 30 L28 27 L33 27" stroke="#00BCD4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <circle cx="24" cy="8" r="2.1" fill="#FFFFFF" opacity="0.85" />
+    <text x="58" y="34" font-family="Inter, -apple-system, sans-serif" font-size="26" letter-spacing="-0.6">
+      <tspan font-weight="800" fill="#FFFFFF">Atlas Health</tspan>
+      <tspan font-weight="600" fill="#38BDF8"> Services</tspan>
+    </text>
+  </g>
+
+  <!-- Main Editable Headline -->
+  <text x="120" y="470" font-family="Inter, -apple-system, sans-serif" font-size="84" font-weight="800" letter-spacing="-2" fill="#FFFFFF">Clinical Protocol &amp;</text>
+  <text x="120" y="570" font-family="Inter, -apple-system, sans-serif" font-size="84" font-weight="800" letter-spacing="-2" fill="#38BDF8">Pharmaceutical Supply</text>
+  <text x="120" y="650" font-family="Inter, -apple-system, sans-serif" font-size="30" font-weight="400" fill="#CBD5E1">EU GMP &amp; cGMP Formularies · Cold-Chain Logistics · Clinical Intelligence</text>
+
+  <!-- Bottom Institutional Bar -->
+  <line x1="120" y1="930" x2="1800" y2="930" stroke="rgba(148,163,184,0.3)" stroke-width="1.5" />
+  <text x="120" y="982" font-family="JetBrains Mono, monospace" font-size="20" font-weight="600" fill="#94A3B8">atlashealth-services.com  ·  info@atlashealth-services.com</text>
+  <text x="1800" y="982" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="20" font-weight="600" fill="#38BDF8">CONFIDENTIAL · INSTITUTIONAL B2B</text>
+</svg>

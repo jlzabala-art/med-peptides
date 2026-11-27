@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 794 1123" width="794" height="1123" role="img" aria-label="Atlas Health Services A4 Institutional Letterhead Template">
+  <rect width="794" height="1123" fill="#FFFFFF" />
+  <!-- Top Navy Accent Rule -->
+  <rect x="0" y="0" width="794" height="8" fill="#003666" />
+  <rect x="0" y="8" width="220" height="3" fill="#1A73E8" />
+
+  <!-- Header Logo -->
+  <g transform="translate(56, 44)">
+    <path d="M10 40 L24 8 L38 40" stroke="#003666" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <path d="M15 27 L18 27 L20 22 L22 32 L24 20 L26 30 L28 27 L33 27" stroke="#00BCD4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <circle cx="24" cy="8" r="2.1" fill="#003666" opacity="0.65" />
+    <text x="58" y="34" font-family="Inter, -apple-system, sans-serif" font-size="22" letter-spacing="-0.5">
+      <tspan font-weight="800" fill="#003666">Atlas Health</tspan>
+      <tspan font-weight="600" fill="#0284C7"> Services</tspan>
+    </text>
+  </g>
+
+  <!-- Right Metadata Block -->
+  <text x="738" y="62" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#003666">INSTITUTIONAL CORRESPONDENCE</text>
+  <text x="738" y="79" text-anchor="end" font-family="Inter, sans-serif" font-size="10.5" fill="#475569">info@atlashealth-services.com</text>
+  <text x="738" y="95" text-anchor="end" font-family="Inter, sans-serif" font-size="10.5" fill="#1A73E8">www.atlashealth-services.com</text>
+
+  <line x1="56" y1="120" x2="738" y2="120" stroke="#E2E8F0" stroke-width="1" />
+
+  <!-- Editable Content Guide Area -->
+  <text x="56" y="168" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#64748B">Date: DD / MM / YYYY  ·  Ref: AHS-DOC-2026-001</text>
+  <text x="56" y="218" font-family="Inter, sans-serif" font-size="18" font-weight="800" fill="#003666">Document Title / Clinical Memorandum</text>
+  <text x="56" y="254" font-family="Inter, sans-serif" font-size="12" fill="#475569">Editable A4 letterhead body area (Margins: 20 mm left/right · Font: Inter 10.5–11 pt · Line height: 1.5).</text>
+
+  <!-- Institutional Footer -->
+  <line x1="56" y1="1046" x2="738" y2="1046" stroke="#E2E8F0" stroke-width="1" />
+  <text x="56" y="1072" font-family="Inter, sans-serif" font-size="9.5" font-weight="700" fill="#003666">Atlas Health Services</text>
+  <text x="168" y="1072" font-family="Inter, sans-serif" font-size="9.5" fill="#64748B">· Precision Peptide &amp; Clinical Protocol Intelligence · EU GMP &amp; cGMP Supply Network</text>
+  <text x="738" y="1072" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="9" fill="#64748B">A4 · 210 × 297 mm</text>
+</svg>

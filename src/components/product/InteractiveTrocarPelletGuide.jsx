@@ -4,19 +4,15 @@ import React, { useState, useRef } from 'react';
 import {
   Syringe,
   CheckCircle2,
-  AlertTriangle,
-  Info,
   Layers,
   ChevronRight,
   ChevronLeft,
-  Copy,
-  Check,
-  Sparkles,
   RotateCcw,
   ArrowRight
 } from '@/lib/icons';
-import toast from 'react-hot-toast';
 import MobileConnectedStepper from '@/components/ui/MobileConnectedStepper';
+import InlineAlert from '@/components/ui/InlineAlert';
+import CopyActionButton from '@/components/ui/CopyActionButton';
 import './InteractiveTrocarPelletGuide.css';
 
 const STEPS_DATA = [
@@ -144,7 +140,6 @@ const STEPS_DATA = [
  */
 export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMatrix = true, completeAction = null }) {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
-  const [copiedPatientGuide, setCopiedPatientGuide] = useState(false);
   const containerRef = useRef(null);
   const isEs = lang === 'es';
 
@@ -167,30 +162,19 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
     }
   };
 
-  const handleCopyPatientCare = async () => {
-    const text = isEs
-      ? `🏥 *Atlas Health Services — Pautas Post-Implante de Pellets Hormonales (BHRT)*
+  const patientCareText = isEs
+    ? `🏥 *Atlas Health Services — Pautas Post-Implante de Pellets Hormonales (BHRT)*
 1. *Primeras 48 Horas*: Mantener el apósito impermeable completamente seco e intacto. Aplicar frío local intermitente (15 min) si hay ligera molestia.
 2. *Reposo de Zona Glútea*: Evitar sentadillas, peso muerto, ciclismo, correr o inmersión (piscina/mar/bañera) durante *3–5 días (mujeres)* o *5–7 días (hombres)*.
 3. *Ducha*: Permitida suavemente a partir de las 48h sin frotar ni retirar las tiras Steri-Strips. Secar a toques suaves.
 4. *Retirada de Tiras*: Las Steri-Strips se desprenden solas entre los días 5 y 7.
 5. *Seguimiento Clínico*: Analítica hormonal de control en pico a las *4–6 semanas*.`
-      : `🏥 *Atlas Health Services — Post-Trocar Hormone Pellet Patient Care (BHRT)*
+    : `🏥 *Atlas Health Services — Post-Trocar Hormone Pellet Patient Care (BHRT)*
 1. *First 48 Hours*: Keep the waterproof pressure dressing completely dry and intact. Apply brief cold pack (15 min) if mild soreness occurs.
 2. *Gluteal Rest Window*: Avoid squats, deadlifts, cycling, running, or water submersion (pools/hot tubs/sea) for *3–5 days (female)* or *5–7 days (male)*.
 3. *Showering*: Gentle shower allowed after 48h without rubbing or peeling Steri-Strips. Pat dry gently.
 4. *Steri-Strip Removal*: Strips fall off naturally between days 5 and 7.
 5. *Clinical Follow-Up*: Scheduled peak serum hormone lab panel at *4–6 weeks*.`;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedPatientGuide(true);
-      toast.success(isEs ? 'Pautas para el paciente copiadas ✓' : 'Patient discharge instructions copied ✓');
-      setTimeout(() => setCopiedPatientGuide(false), 2500);
-    } catch {
-      toast.error(isEs ? 'No se pudieron copiar las pautas' : 'Could not copy instructions');
-    }
-  };
 
   return (
     <div className="trocar-guide-container" ref={containerRef}>
@@ -508,28 +492,25 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
           </p>
 
           {/* Safety first: critical precautions lead, before specs and trends (GCP severity ordering) */}
-          <div className="trocar-info-callout trocar-callout-warning" role="note">
-            <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div>
-              <strong>{isEs ? 'Alerta de Seguridad:' : 'Safety Precaution:'}</strong>{' '}
-              {isEs ? currentStep.dangerWarningEs : currentStep.dangerWarningEn}
-            </div>
-          </div>
+          <InlineAlert
+            compact
+            variant="warning"
+            title={isEs ? 'Alerta de Seguridad:' : 'Safety Precaution:'}
+          >
+            {isEs ? currentStep.dangerWarningEs : currentStep.dangerWarningEn}
+          </InlineAlert>
 
-          <div className="trocar-info-callout trocar-callout-spec">
-            <Info size={16} style={{ flexShrink: 0, marginTop: '2px', color: '#0284c7' }} />
-            <div>
-              <strong>{isEs ? 'Especificación Técnica:' : 'Technical Specification:'}</strong>{' '}
-              {isEs ? currentStep.clinicalSpecsEs : currentStep.clinicalSpecsEn}
-            </div>
-          </div>
+          <InlineAlert
+            compact
+            variant="info"
+            title={isEs ? 'Especificación Técnica:' : 'Technical Specification:'}
+          >
+            {isEs ? currentStep.clinicalSpecsEs : currentStep.clinicalSpecsEn}
+          </InlineAlert>
 
-          <div className="trocar-info-callout trocar-callout-trend">
-            <Sparkles size={16} style={{ flexShrink: 0, marginTop: '2px', color: '#15803d' }} />
-            <div>
-              {isEs ? currentStep.trendEs : currentStep.trendEn}
-            </div>
-          </div>
+          <InlineAlert compact variant="tip">
+            {isEs ? currentStep.trendEs : currentStep.trendEn}
+          </InlineAlert>
 
         </div>
       </div>
@@ -607,15 +588,14 @@ export default function InteractiveTrocarPelletGuide({ lang = 'en', showDosingMa
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleCopyPatientCare}
-              className="gcp-btn-secondary"
-              style={{ padding: '5px 12px', fontSize: '0.74rem', fontWeight: 700 }}
-            >
-              {copiedPatientGuide ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
-              <span>{copiedPatientGuide ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Pautas Paciente' : 'Copy Patient Care')}</span>
-            </button>
+            <CopyActionButton
+              text={patientCareText}
+              label={isEs ? 'Copiar Pautas Paciente' : 'Copy Patient Care'}
+              copiedLabel={isEs ? 'Copiado ✓' : 'Copied ✓'}
+              toastMessage={isEs ? 'Pautas para el paciente copiadas ✓' : 'Patient discharge instructions copied ✓'}
+              errorMessage={isEs ? 'No se pudieron copiar las pautas' : 'Could not copy instructions'}
+              style={{ padding: '5px 12px', minHeight: '32px' }}
+            />
           </div>
 
           <div className="trocar-calc-grid">

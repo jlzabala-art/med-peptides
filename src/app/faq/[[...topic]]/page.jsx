@@ -1,5 +1,7 @@
 import React from 'react';
 import FAQTemplate from '../../../templates/FAQTemplate';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import { getFeaturedProductsServer } from '../../../repositories/productRepository';
 import { sanitizePublicProduct } from '../../../repositories/publicDataSanitizer';
 import { sanitizeForClient } from '../../../utils/sanitizeForClient';
@@ -19,5 +21,11 @@ export default async function FAQPage() {
   const safeCatalog = (catalog || []).map(p => sanitizePublicProduct(p, p.variants || []));
   const serializedCatalog = sanitizeForClient(safeCatalog);
 
-  return <FAQTemplate initialProducts={serializedCatalog} />;
+  return (
+    <div className="atlas-page-bg">
+      <PublicUnifiedHeader />
+      <FAQTemplate initialProducts={serializedCatalog} />
+      <PublicUnifiedFooter />
+    </div>
+  );
 }

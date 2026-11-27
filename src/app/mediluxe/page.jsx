@@ -1,4 +1,6 @@
 import MediluxeCompanyProfile from '../../templates/MediluxeCompanyProfile';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 
 export const revalidate = 86400; // 24h CDN static cache
 
@@ -33,5 +35,11 @@ export const metadata = {
 };
 
 export default function MediluxePage() {
-  return <MediluxeCompanyProfile />;
+  return (
+    <div className="atlas-page-bg">
+      <PublicUnifiedHeader />
+      <MediluxeCompanyProfile />
+      <PublicUnifiedFooter />
+    </div>
+  );
 }

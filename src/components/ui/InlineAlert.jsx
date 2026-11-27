@@ -1,61 +1,99 @@
 "use client";
 
-
-
-
-
-
-
-import React, { useState, useEffect } from 'react';
-
-
-
-
-
-
+import React, { useState } from 'react';
 import './ui.css';
 import { CheckCircle, Info, AlertTriangle, XCircle, Sparkles, X } from '@/lib/icons';
 
-const ICONS = {
-  success: CheckCircle,
-  info: Info,
-  warning: AlertTriangle,
-  error: XCircle,
-  ai: Sparkles,
+/**
+ * InlineAlert — Unified Google Cloud Console Callout / Banner
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Variants: 'info' | 'warning' | 'critical' | 'error' | 'success' | 'tip' | 'ai'
+ * Modes: compact (single-line / dense clinical callout) vs default (16px padded banner)
+ * Features: 3px left severity accent bar, optional right-hand action slot, optional dismiss.
+ */
+const VARIANTS = {
+  info: {
+    Icon: Info,
+    accent: '#1a73e8',
+    border: '#bfdbfe',
+    bg: '#f8fafc',
+    text: '#334155',
+    titleColor: '#003666',
+    role: 'status',
+  },
+  warning: {
+    Icon: AlertTriangle,
+    accent: '#d97706',
+    border: '#fde68a',
+    bg: '#fffbeb',
+    text: '#92400e',
+    titleColor: '#78350f',
+    role: 'note',
+  },
+  critical: {
+    Icon: AlertTriangle,
+    accent: '#dc2626',
+    border: '#fecaca',
+    bg: '#fef2f2',
+    text: '#991b1b',
+    titleColor: '#7f1d1d',
+    role: 'alert',
+  },
+  error: {
+    Icon: XCircle,
+    accent: '#dc2626',
+    border: '#fecaca',
+    bg: '#fef2f2',
+    text: '#991b1b',
+    titleColor: '#7f1d1d',
+    role: 'alert',
+  },
+  success: {
+    Icon: CheckCircle,
+    accent: '#16a34a',
+    border: '#bbf7d0',
+    bg: '#f0fdf4',
+    text: '#166534',
+    titleColor: '#14532d',
+    role: 'status',
+  },
+  tip: {
+    Icon: Sparkles,
+    accent: '#15803d',
+    border: '#bbf7d0',
+    bg: '#f0fdf4',
+    text: '#166534',
+    titleColor: '#14532d',
+    role: 'note',
+  },
+  ai: {
+    Icon: Sparkles,
+    accent: '#7c3aed',
+    border: '#ddd6fe',
+    bg: '#faf5ff',
+    text: '#4c1d95',
+    titleColor: '#4c1d95',
+    role: 'status',
+  },
 };
 
-const COLORS = {
-  success: 'var(--color-success)',
-  info: 'var(--color-primary)',
-  warning: 'var(--color-warning)',
-  error: 'var(--color-danger)',
-  ai: 'var(--color-accent)',
-};
-
-const BG_COLORS = {
-  success: 'rgba(16, 185, 129, 0.1)',
-  info: 'rgba(59, 130, 246, 0.1)',
-  warning: 'rgba(245, 158, 11, 0.1)',
-  error: 'rgba(239, 68, 68, 0.1)',
-  ai: 'rgba(139, 92, 246, 0.1)',
-};
-
-export default function InlineAlert({ 
-  variant = 'info', 
-  title, 
-  children, 
-  dismissible = false, 
+export default function InlineAlert({
+  variant = 'info',
+  title,
+  children,
+  action = null,
+  compact = false,
+  dismissible = false,
   onDismiss,
   className = '',
-  style = {}
+  style = {},
 }) {
   const [isVisible, setIsVisible] = useState(true);
 
   if (!isVisible) return null;
 
-  const Icon = ICONS[variant] || Info;
-  const color = COLORS[variant] || COLORS.info;
-  const bgColor = BG_COLORS[variant] || BG_COLORS.info;
+  const cfg = VARIANTS[variant] || VARIANTS.info;
+  const Icon = cfg.Icon;
 
   const handleDismiss = () => {
     setIsVisible(false);
@@ -63,52 +101,62 @@ export default function InlineAlert({
   };
 
   return (
-    <div 
-      className={`inline-alert fade-in ${className}`} 
-      role="alert"
+    <div
+      className={`inline-alert fade-in ${className}`.trim()}
+      role={cfg.role}
       style={{
         display: 'flex',
         alignItems: 'flex-start',
-        gap: '12px',
-        padding: '16px',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: compact ? '8px' : '12px',
+        padding: compact ? '9px 12px' : '12px 14px',
         borderRadius: '8px',
-        backgroundColor: bgColor,
-        border: `1px solid ${color}`,
-        marginBottom: '16px',
-        ...style
+        backgroundColor: cfg.bg,
+        border: `1px solid ${cfg.border}`,
+        borderLeft: `3px solid ${cfg.accent}`,
+        color: cfg.text,
+        fontSize: compact ? '0.78rem' : '0.84rem',
+        lineHeight: 1.5,
+        ...style,
       }}
     >
-      <Icon size={20} color={color} style={{ flexShrink: 0, marginTop: '2px' }} />
-      <div style={{ flex: 1 }}>
-        {title && (
-          <h4 style={{ margin: '0 0 4px 0', color: color, fontSize: '14px', fontWeight: 600 }}>
-            {title}
-          </h4>
-        )}
-        <div style={{ color: 'var(--color-text-main)', fontSize: '14px', lineHeight: 1.5 }}>
-          {children}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flex: 1, minWidth: '200px' }}>
+        <Icon size={compact ? 16 : 18} color={cfg.accent} style={{ flexShrink: 0, marginTop: '2px' }} />
+        <div style={{ flex: 1 }}>
+          {title && !compact && (
+            <h4 style={{ margin: '0 0 3px 0', color: cfg.titleColor, fontSize: '0.86rem', fontWeight: 700 }}>
+              {title}
+            </h4>
+          )}
+          <div>
+            {title && compact && <strong style={{ color: cfg.titleColor }}>{title} </strong>}
+            {children}
+          </div>
         </div>
       </div>
 
+      {action && <div style={{ flexShrink: 0, alignSelf: 'center' }}>{action}</div>}
+
       {dismissible && (
-        <button 
+        <button
+          type="button"
           onClick={handleDismiss}
           aria-label="Dismiss alert"
           style={{
             background: 'none',
             border: 'none',
-            color: 'var(--color-text-muted)',
+            color: cfg.text,
             cursor: 'pointer',
             padding: '4px',
-            marginLeft: '8px',
+            marginLeft: '4px',
             flexShrink: 0,
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
             borderRadius: '4px',
+            opacity: 0.75,
           }}
-          onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
-          onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           <X size={16} />
         </button>

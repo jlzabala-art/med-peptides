@@ -1,5 +1,7 @@
 import React from 'react';
 import BlogPage from '../../templates/BlogPage';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 
 export const revalidate = 3600; // 1-hour ISR cache
 
@@ -19,5 +21,11 @@ export const metadata = {
 };
 
 export default function BlogIndex() {
-  return <BlogPage />;
+  return (
+    <div className="atlas-page-bg">
+      <PublicUnifiedHeader />
+      <BlogPage />
+      <PublicUnifiedFooter />
+    </div>
+  );
 }

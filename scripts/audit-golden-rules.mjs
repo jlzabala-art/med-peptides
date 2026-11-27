@@ -155,8 +155,38 @@ if (fs.existsSync(manifestFull) && /atlas-services\.com/i.test(fs.readFileSync(m
   legacyBrandRefs.push('public/manifest.json');
 }
 
+// 5. Enforce @/lib/icons export integrity (prevents Turbopack build failures on missing icon exports)
+const missingIconImports = [];
+const iconsFile = path.join(ROOT, 'src/lib/icons.js');
+if (fs.existsSync(iconsFile)) {
+  const iconsSource = fs.readFileSync(iconsFile, 'utf8');
+  const exportedIcons = new Set([
+    ...[...iconsSource.matchAll(/export\s+\{\s*default\s+as\s+(\w+)\s*\}/g)].map((m) => m[1]),
+    ...[...iconsSource.matchAll(/export\s+(?:const|function|let|var)\s+(\w+)/g)].map((m) => m[1]),
+  ]);
+  for (const file of srcFiles) {
+    const rel = path.relative(ROOT, file);
+    if (rel === 'src/lib/icons.js') continue;
+    const text = fs.readFileSync(file, 'utf8');
+    const importMatches = text.matchAll(/import\s*\{([^}]+)\}\s*from\s*['"]@\/lib\/icons['"]/g);
+    for (const m of importMatches) {
+      const names = m[1]
+        .split(',')
+        .map((s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '').trim())
+        .filter(Boolean)
+        .map((s) => s.split(/\s+as\s+/)[0].trim());
+      for (const name of names) {
+        if (name && !exportedIcons.has(name)) {
+          missingIconImports.push(`${rel} -> ${name}`);
+        }
+      }
+    }
+  }
+}
+
 console.log(`CSS .gcp-btn-* collisions: ${cssBtnCollisions.length} (enforced = 0)`);
 console.log(`Legacy brand domain SSOT : ${legacyBrandRefs.length} (enforced = 0)`);
+console.log(`Missing @/lib/icons exp. : ${missingIconImports.length} (enforced = 0)`);
 console.log(`Raw <table> (non-PDF)    : ${rawTables.length} (inventory)`);
 console.log(`Client-root page.jsx     : ${clientRootPages.length} (inventory)`);
 
@@ -194,6 +224,12 @@ if (cssBtnCollisions.length > 0) {
 if (legacyBrandRefs.length > 0) {
   console.error('❌ Legacy atlas-services.com domain found in brand SSOT:');
   legacyBrandRefs.forEach((x) => console.error('  -', x));
+  failed = true;
+}
+
+if (missingIconImports.length > 0) {
+  console.error('❌ Missing icon exports in src/lib/icons.js (will break Next.js build):');
+  missingIconImports.forEach((x) => console.error('  -', x));
   failed = true;
 }
 
