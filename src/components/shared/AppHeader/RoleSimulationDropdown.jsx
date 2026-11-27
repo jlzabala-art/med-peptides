@@ -3,7 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
 import { PRICING_MARKETS } from '../../../constants/roles';
-import { Users, ChevronDown, Eye, X, Globe } from '@/lib/icons';
+import { Users, ChevronDown, Eye, X, Globe, Share2, Check } from '@/lib/icons';
+import toast from 'react-hot-toast';
 
 /**
  * RoleSimulationDropdown
@@ -13,7 +14,36 @@ import { Users, ChevronDown, Eye, X, Globe } from '@/lib/icons';
 export default function RoleSimulationDropdown() {
   const { simulatedRole, simulatedMarket, setSimulatedRole, setSimulatedMarket, exitSimulation } = useSimulationStore();
   const [isOpen, setIsOpen] = useState(false);
+  const [creatingShare, setCreatingShare] = useState(false);
+  const [copiedShareUrl, setCopiedShareUrl] = useState(false);
   const ref = useRef(null);
+
+  const handleGenerateSignedShareLink = async () => {
+    if (creatingShare || typeof window === 'undefined') return;
+    setCreatingShare(true);
+    try {
+      const route = window.location.pathname || '/pricing/peptides';
+      const role = simulatedRole || 'wholesaler';
+      const market = simulatedMarket || 'global';
+      const res = await fetch('/api/shares/pricing-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ route, role, market, ttlDays: 14 }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.ok || !data?.url) {
+        throw new Error(data?.error || 'Could not generate share link');
+      }
+      await navigator.clipboard.writeText(data.url);
+      setCopiedShareUrl(true);
+      toast.success(`Share link copied (${role} · ${market.toUpperCase()} · 14d)`);
+      setTimeout(() => setCopiedShareUrl(false), 2500);
+    } catch (err) {
+      toast.error(err.message || 'Failed to create share link');
+    } finally {
+      setCreatingShare(false);
+    }
+  };
 
   const activeRoleData = ALL_ROLES.find((r) => r.id === simulatedRole);
   const activeMarketData = PRICING_MARKETS.find((m) => m.id === simulatedMarket);
@@ -263,14 +293,43 @@ export default function RoleSimulationDropdown() {
             })}
           </div>
 
-          {hasSimulation && (
-            <div className="role-sim-footer">
+          <div className="role-sim-footer" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <button
+              type="button"
+              disabled={creatingShare}
+              onClick={handleGenerateSignedShareLink}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '7px 10px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: copiedShareUrl ? '#ecfdf5' : '#f8fafc',
+                color: copiedShareUrl ? '#15803d' : '#0f172a',
+                fontSize: '0.76rem',
+                fontWeight: 650,
+                cursor: creatingShare ? 'wait' : 'pointer',
+              }}
+            >
+              {copiedShareUrl ? <Check size={13} /> : <Share2 size={13} />}
+              <span>
+                {creatingShare
+                  ? 'Creating link...'
+                  : copiedShareUrl
+                    ? 'Private Link Copied ✓'
+                    : `Share Link (${activeRoleData?.label?.split(' ')[0] || 'Wholesaler'} · ${(activeMarketData?.badge || 'GLB')})`}
+              </span>
+            </button>
+            {hasSimulation && (
               <button className="role-sim-footer-btn" onClick={() => { exitSimulation(); setIsOpen(false); }}>
                 <X size={14} />
                 Exit simulation — return to Admin view
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -5,6 +5,7 @@ import { getComparisonDataAction } from '@/app/actions/productActions';
 import PageHeader from '../ui/PageHeader';
 import DataTable from '../ui/DataTable';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
+import { resolveAllPrices } from '@/lib/pricing/pricingCore';
 import { AlertCircle, Package, ShieldCheck, Calculator, Truck, ShoppingCart, Plus, X, FileText } from 'lucide-react';
 import Badge from '../ui/Badge';
 
@@ -94,6 +95,34 @@ export default function AdminPricingEngineTabClient({ isMobile }) {
       };
     });
   }, [data, desiredVolume]);
+
+  const pricingAuditStats = useMemo(() => {
+    let totalVariants = 0;
+    let missingCost = 0;
+    let lowMargin = 0;
+    let regionalOverrides = 0;
+
+    processedData.forEach((group) => {
+      (group.variants || []).forEach((v) => {
+        totalVariants += 1;
+        const tiers = resolveAllPrices({
+          costPrice: v.effectivePriceUsd || v.price_usd,
+          byMarket: v.byMarket || v.pricing?.byMarket,
+          byCountry: v.byCountry || v.pricing?.byCountry,
+        });
+        if (!tiers.cost || tiers.cost <= 0) {
+          missingCost += 1;
+        } else if (tiers.wholeseller && ((tiers.wholeseller - tiers.cost) / tiers.cost) * 100 < 15) {
+          lowMargin += 1;
+        }
+        if (v.byMarket || v.pricing?.byMarket || v.byCountry || v.pricing?.byCountry) {
+          regionalOverrides += 1;
+        }
+      });
+    });
+
+    return { totalVariants, missingCost, lowMargin, regionalOverrides };
+  }, [processedData]);
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return processedData;
@@ -327,6 +356,34 @@ export default function AdminPricingEngineTabClient({ isMobile }) {
       
       <div className="flex-1 p-6 flex flex-col gap-4 max-w-7xl mx-auto w-full">
         {/* Dynamic Controls Bar */}
+        {/* Pricing & Margin Health Audit KPIs (Rule #22) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 print:hidden">
+          <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Audited SKUs</div>
+            <div className="text-xl font-bold text-slate-900 mt-1">{pricingAuditStats.totalVariants}</div>
+            <div className="text-xs text-slate-500 mt-0.5">Wholeseller 15%+15% (×1.3225)</div>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Missing Base Cost</div>
+            <div className={`text-xl font-bold mt-1 ${pricingAuditStats.missingCost > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+              {pricingAuditStats.missingCost}
+            </div>
+            <div className="text-xs text-slate-500 mt-0.5">Cannot compute 15%+15%</div>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Low Margin (&lt;15%)</div>
+            <div className={`text-xl font-bold mt-1 ${pricingAuditStats.lowMargin > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+              {pricingAuditStats.lowMargin}
+            </div>
+            <div className="text-xs text-slate-500 mt-0.5">Below Distributor floor</div>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Regional Overrides</div>
+            <div className="text-xl font-bold text-blue-700 mt-1">{pricingAuditStats.regionalOverrides}</div>
+            <div className="text-xs text-slate-500 mt-0.5">Active byMarket / byCountry</div>
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm print:hidden">
           <div className="flex-1 w-full">
             <GlobalSearchBar 

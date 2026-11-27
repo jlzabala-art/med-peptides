@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { usePricing } from '@/hooks/usePricing';
+import { PRICING_MARKETS } from '@/constants/roles';
 import { useCurrencyConverter } from '@/hooks/pricing/useCurrencyConverter';
 import { useBrandPriceSchedule } from '@/hooks/pricing/useBrandPriceSchedule';
 import { updateProductSchedulePriceAction } from '@/actions/pricingActions';
@@ -53,6 +55,7 @@ export default function ModularPriceSchedule({
 
   const { user } = useAuth();
   const { is, effectiveRole } = useRoleAccess();
+  const { pricingRole, market: sessionMarket } = usePricing();
   const workspace = usePublicWorkspace?.() || null;
   const t = workspace?.t || ((en) => en);
 
@@ -214,28 +217,32 @@ export default function ModularPriceSchedule({
       rightAlignCols.push(i);
     }
 
+    const marketMeta = PRICING_MARKETS[sessionMarket] || PRICING_MARKETS.global;
     const tierLabel = isAdmin
       ? 'Admin Master Schedule'
-      : isGuest
-        ? 'Public Wholeseller Schedule'
-        : showClinic
-          ? 'Authenticated Clinic & Partner Schedule'
-          : 'Authenticated Partner Schedule';
+      : pricingRole === 'distributor'
+        ? 'Distributor (+15%) Schedule'
+        : isGuest
+          ? 'Wholeseller Schedule (15%+15%)'
+          : showClinic
+            ? 'Authenticated Clinic & Partner Schedule'
+            : 'Wholeseller (15%+15%) Schedule';
 
     return buildSchedulePdfBlob({
       title: `${brandLeft} — ${brandRight}`,
       subtitle: documentSubtitle,
-      metaLine: `Ref: ${documentRef}  |  Currency: ${currency}  |  Items: ${filteredProducts.length}`,
+      metaLine: `Ref: ${documentRef}  |  Currency: ${currency}  |  Market: ${marketMeta.labelEn}  |  Items: ${filteredProducts.length}`,
       documentRef,
       currency,
       tierLabel,
+      marketLabel: `${marketMeta.labelEn} (${marketMeta.badge})`,
       isGuest,
       accountLabel: user?.email || user?.displayName || null,
       rightAlignCols,
       head,
       body,
     });
-  }, [isAdmin, isGuest, isClinicOrDoctor, currency, filteredProducts, skuPrefixPattern, formatPrice, brandLeft, brandRight, documentSubtitle, documentRef, user]);
+  }, [isAdmin, isGuest, isClinicOrDoctor, pricingRole, sessionMarket, currency, filteredProducts, skuPrefixPattern, formatPrice, brandLeft, brandRight, documentSubtitle, documentRef, user]);
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined' && navigator.clipboard) {

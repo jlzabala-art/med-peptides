@@ -983,13 +983,21 @@ GUIDELINES:
         parts: [{ text: message }]
       });
 
+      // Server-side Role + Market confidentiality guardrail (zero leak of internal costs/margins/suppliers to non-admins)
+      const requestedPricingRole = String(contextAnchor?.pricingRole || effectiveRole || 'guest').toLowerCase();
+      const requestedMarket = String(contextAnchor?.market || 'global').toLowerCase();
+      const isEffectiveAdminPrompt = isAdminSession && requestedPricingRole === 'admin';
+      const rolePolicyInstruction = isEffectiveAdminPrompt
+        ? `\n\n[SESSION CONTEXT: Verified Admin · Market: ${requestedMarket}. You may discuss internal unit costs, margin tiers (Distributor +15%, Wholeseller 15%+15%), and regional market overrides.]`
+        : `\n\n[STRICT COMMERCIAL CONFIDENTIALITY POLICY — NON-ADMIN SESSION (${requestedPricingRole} · Market: ${requestedMarket}): NEVER disclose internal supplier costs, landed costs, master prices, markup percentages (such as +15%, 15%+15%, or 32.25%), or internal upstream manufacturer/wholesaler names. Only reference the customer-facing schedule prices shown on their active screen and present all products strictly under Atlas Health Services white-label branding.]`;
+
       try {
         const { text: replyText, modelUsed } = await generateWithResilientGemini({
           tier: AI_TIER.FAST,
           apiKey: GEMINI_API_KEY,
           contents: validHistoryTurns,
           config: {
-            systemInstruction: systemPrompt,
+            systemInstruction: `${systemPrompt}${rolePolicyInstruction}`,
             temperature: 0.3,
             maxOutputTokens: 900,
           }

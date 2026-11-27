@@ -304,11 +304,18 @@ export default function GlobalBottomStickyBar() {
     pathname.startsWith('/vials') ||
     pathname.startsWith('/guides');
 
+  const hasUrgentAction = Boolean(
+    rfqItems.length > 0 ||
+    hasSectionsOutline ||
+    screenContext?.bottomBar?.primaryAction
+  );
+
   if (
     pathname?.startsWith('/labels') ||
     pathname?.startsWith('/rx') ||
     pathname?.startsWith('/verify') ||
-    resolvedConfig?.hidden
+    resolvedConfig?.hidden ||
+    !hasUrgentAction
   ) {
     return null;
   }

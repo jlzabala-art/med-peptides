@@ -20,6 +20,7 @@ export function buildSchedulePdfBlob({
   documentRef = '',
   currency = '',
   tierLabel = '',
+  marketLabel = '',
   isGuest = false,
   accountLabel = null,
   rightAlignCols = [],
@@ -30,12 +31,16 @@ export function buildSchedulePdfBlob({
   const doc = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
   const issuedDate = new Date().toISOString().slice(0, 10);
 
+  const resolvedTierLabel =
+    tierLabel || (isGuest ? 'Wholeseller Schedule (15%+15%)' : 'Authorized Partner Schedule');
+  const fullTierBadge = marketLabel ? `${resolvedTierLabel} · ${marketLabel}` : resolvedTierLabel;
+
   let nextY = drawAtlasInstitutionalHeader(doc, {
     title,
     subtitle,
     documentRef,
     issuedDate,
-    tierLabel: tierLabel || (isGuest ? 'Public Wholeseller Schedule' : 'Authenticated Partner Schedule'),
+    tierLabel: fullTierBadge,
   });
 
   // Parse KPI cards cleanly from structured props or fallback to metaLine
@@ -44,7 +49,7 @@ export function buildSchedulePdfBlob({
   kpiItems.push({ label: 'Catalog Scope', value: `${body.length} SKUs` });
   kpiItems.push({
     label: 'Access Tier',
-    value: isGuest ? 'Wholeseller (Public)' : tierLabel || 'Authorized Partner',
+    value: fullTierBadge,
   });
   if (!isGuest && accountLabel) {
     kpiItems.push({ label: 'Prepared For', value: accountLabel });

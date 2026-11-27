@@ -273,16 +273,25 @@ export default function FillersPriceListClient({
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const dateStr = new Date().toISOString().slice(0, 10);
 
+    const pdfTierLabel =
+      pricingRole === 'distributor'
+        ? 'Distributor (+15%)'
+        : pricingRole === 'clinic'
+          ? 'Clinic / Doctor Rate'
+          : pricingRole === 'retail'
+            ? 'Retail / Patient Rate'
+            : 'Wholeseller (15%+15%)';
+
     let nextY = chrome.drawAtlasInstitutionalHeader(doc, {
       title: isEs
         ? 'Inyectables Estéticos y Skin Boosters'
         : 'Aesthetic Injectables & Skin Boosters',
       subtitle: isEs
-        ? 'Tarifa Oficial B2B Wholeseller · Fillers Dérmicos, Skin Boosters, Bioestimuladores y Polinucleótidos'
-        : 'Official Wholeseller B2B Price Schedule · Dermal Fillers, Skin Boosters, Biostimulators & Polynucleotides',
+        ? `Tarifa Oficial ${pdfTierLabel} · Fillers Dérmicos, Skin Boosters, Bioestimuladores y Polinucleótidos`
+        : `Official ${pdfTierLabel} Price Schedule · Dermal Fillers, Skin Boosters, Biostimulators & Polynucleotides`,
       documentRef: 'B2B-FILLERS-2026',
       issuedDate: dateStr,
-      tierLabel: isEs ? 'Tarifa Oficial Wholeseller B2B' : 'Official Wholeseller B2B Schedule'
+      tierLabel: pdfTierLabel
     });
 
     nextY = chrome.drawAtlasKpiStrip(doc, {
