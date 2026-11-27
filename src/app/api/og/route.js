@@ -593,11 +593,21 @@ export async function GET(request) {
   const topic = searchParams.get('topic') || 'pricing';
   const lang = (searchParams.get('lang') || 'en').toLowerCase() === 'es' ? 'es' : 'en';
   const cur = (searchParams.get('cur') || searchParams.get('currency') || 'EUR').toUpperCase();
+  const partner = (searchParams.get('partner') || '').trim().slice(0, 32);
   const validCur = ['EUR', 'USD', 'AED'].includes(cur) ? cur : 'EUR';
   const showCurrency = !topic.endsWith('-guide') && topic !== 'brand' && topic !== 'rx';
 
   const cfg = TOPIC_CONFIG[topic] || TOPIC_CONFIG.pricing;
-  const copy = cfg[lang] || cfg.en;
+  const baseCopy = cfg[lang] || cfg.en;
+  const copy = topic === 'brand' && partner
+    ? {
+        ...baseCopy,
+        title1: `${partner} × Atlas Health`,
+        badge: lang === 'es'
+          ? `CO-BRANDING OFICIAL · ${partner.toUpperCase()}`
+          : `OFFICIAL CO-BRANDING · ${partner.toUpperCase()}`,
+      }
+    : baseCopy;
   const accent = cfg.accent || '#003666';
   const accentSoft = cfg.accentSoft || '#38bdf8';
 

@@ -6,11 +6,23 @@ export async function generateMetadata({ searchParams }) {
   const resolved = await searchParams;
   const lang = normalizeMetaLang(resolved);
   const partner = typeof resolved?.partner === 'string' ? resolved.partner.trim().slice(0, 40) : '';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
+  const ogImages = partner
+    ? [
+        {
+          url: `${baseUrl}/api/og?topic=brand&lang=${lang}&partner=${encodeURIComponent(partner)}`,
+          width: 1200,
+          height: 630,
+          alt: `${partner} × Atlas Health Services Brandbook`,
+        },
+      ]
+    : undefined;
 
   return buildBilingualMetadata({
     lang,
     topic: 'brand',
     path: partner ? `/brand?partner=${encodeURIComponent(partner)}` : '/brand',
+    images: ogImages,
     en: {
       title: partner
         ? `${partner} × Atlas Health Services — Official Brandbook & SVG Kit`

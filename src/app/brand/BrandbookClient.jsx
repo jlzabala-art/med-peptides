@@ -155,6 +155,30 @@ const LOGO_FILES = [
     preview: 'badge-svg',
   },
   {
+    id: 'mono-black-svg',
+    format: 'SVG',
+    titleEn: 'Monochrome 1-Ink Black (Print)',
+    titleEs: 'Monocromo 1 Tinta Negro (Imprenta)',
+    descEn: 'Pure #000000 vector for thermal labels, stamps & 1-ink packaging.',
+    descEs: 'Vector puro #000000 para etiquetas térmicas, sellos y packaging 1 tinta.',
+    href: '/brand/atlas-logo-mono-black.svg',
+    fileName: 'atlas-health-logo-mono-black.svg',
+    darkBg: false,
+    preview: 'mono-black',
+  },
+  {
+    id: 'mono-white-svg',
+    format: 'SVG',
+    titleEn: 'Monochrome 1-Ink White (Dark Print)',
+    titleEs: 'Monocromo 1 Tinta Blanco (Oscuro)',
+    descEn: 'Pure #FFFFFF vector for dark packaging, foil & watermarks.',
+    descEs: 'Vector puro #FFFFFF para cajas oscuras, estampado y marcas de agua.',
+    href: '/brand/atlas-logo-mono-white.svg',
+    fileName: 'atlas-health-logo-mono-white.svg',
+    darkBg: true,
+    preview: 'mono-white',
+  },
+  {
     id: 'horiz-png',
     format: 'PNG',
     titleEn: 'Horizontal PNG (Email & Docs)',
@@ -191,6 +215,44 @@ export default function BrandbookClient({ initialLang = 'es', partnerName = '' }
 
   const isEs = lang === 'es';
   const partnerLabel = partnerName || 'Mediluxe';
+
+  const buildCoBrandedLockupSvg = (dark = false) => {
+    const safePartner = partnerLabel.replace(/[<>&"']/g, '').toUpperCase();
+    const textMain = dark ? '#FFFFFF' : '#003666';
+    const textPartner = dark ? '#FFFFFF' : '#0F172A';
+    const textSecondary = dark ? '#38BDF8' : '#0284C7';
+    const crossColor = dark ? '#38BDF8' : '#94A3B8';
+    const bgRect = dark ? '<rect width="540" height="72" rx="10" fill="#003666" />' : '';
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 72" width="540" height="72" role="img" aria-label="${safePartner} × Atlas Health Services">
+  ${bgRect}
+  <text x="24" y="45" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" letter-spacing="1.2" fill="${textPartner}">${safePartner}</text>
+  <text x="176" y="44" font-family="Inter, sans-serif" font-size="22" font-weight="600" fill="${crossColor}">×</text>
+  <g transform="translate(206, 12)">
+    <path d="M10 40 L24 8 L38 40" stroke="${textMain}" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <path d="M15 27 L18 27 L20 22 L22 32 L24 20 L26 30 L28 27 L33 27" stroke="#00BCD4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <circle cx="24" cy="8" r="2.1" fill="${textMain}" opacity="0.75" />
+  </g>
+  <text x="262" y="45" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="23" letter-spacing="-0.5">
+    <tspan font-weight="800" fill="${textMain}">Atlas Health</tspan>
+    <tspan font-weight="600" fill="${textSecondary}"> Services</tspan>
+  </text>
+</svg>`;
+  };
+
+  const handleDownloadLockupSvg = (dark = false) => {
+    const svg = buildCoBrandedLockupSvg(dark);
+    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const slug = partnerLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    a.download = `${slug}-x-atlas-health-lockup-${dark ? 'dark' : 'light'}.svg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(isEs ? 'Lockup SVG descargado' : 'Lockup SVG downloaded');
+  };
 
   const handleCopy = async (text, key, label) => {
     try {
@@ -230,6 +292,11 @@ export default function BrandbookClient({ initialLang = 'es', partnerName = '' }
           }
         })
       );
+
+      // Include vector co-branded lockups (light & dark) directly in the ZIP
+      const partnerSlug = partnerLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      logosFolder.file(`${partnerSlug}-x-atlas-health-lockup-light.svg`, buildCoBrandedLockupSvg(false));
+      logosFolder.file(`${partnerSlug}-x-atlas-health-lockup-dark.svg`, buildCoBrandedLockupSvg(true));
 
       const cssTokens = `:root {
   /* Atlas Health Services — Official Brand Tokens */
@@ -560,6 +627,12 @@ Co-Branding   : ${partnerLabel} × Atlas Health Services
                     {item.preview === 'badge-svg' && (
                       <img src="/favicon.svg" alt="Atlas App Icon SVG" width={54} height={54} style={{ display: 'block' }} />
                     )}
+                    {item.preview === 'mono-black' && (
+                      <img src="/brand/atlas-logo-mono-black.svg" alt="Atlas Monochrome Black SVG" style={{ maxWidth: '100%', height: '38px' }} />
+                    )}
+                    {item.preview === 'mono-white' && (
+                      <img src="/brand/atlas-logo-mono-white.svg" alt="Atlas Monochrome White SVG" style={{ maxWidth: '100%', height: '38px' }} />
+                    )}
                   </div>
 
                   <div style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1 }}>
@@ -856,6 +929,26 @@ Co-Branding   : ${partnerLabel} × Atlas Health Services
                     <BrandLogo variant="light" size="compact" />
                   </div>
                 </div>
+                <div className="bb-no-print" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '0.65rem' }}>
+                  <button
+                    type="button"
+                    className="gcp-btn-secondary"
+                    onClick={() => handleDownloadLockupSvg(false)}
+                    style={{ minHeight: '32px', padding: '0 10px', fontSize: '0.73rem', flex: 1 }}
+                  >
+                    <Download size={13} />
+                    {isEs ? 'Lockup Claro (SVG)' : 'Light Lockup (SVG)'}
+                  </button>
+                  <button
+                    type="button"
+                    className="gcp-btn-secondary"
+                    onClick={() => handleDownloadLockupSvg(true)}
+                    style={{ minHeight: '32px', padding: '0 10px', fontSize: '0.73rem', flex: 1 }}
+                  >
+                    <Download size={13} />
+                    {isEs ? 'Lockup Oscuro (SVG)' : 'Dark Lockup (SVG)'}
+                  </button>
+                </div>
                 <div style={{ marginTop: '0.6rem', fontSize: '0.74rem', color: '#64748b' }}>
                   {isEs ? 'Contacto institucional oficial:' : 'Official institutional contact:'}{' '}
                   <strong style={{ color: '#003666' }}>{BRAND_CONFIG.supportEmail}</strong> · {BRAND_CONFIG.domain}
@@ -864,13 +957,48 @@ Co-Branding   : ${partnerLabel} × Atlas Health Services
             </div>
           </section>
 
-          {/* SECTION 5: INTERACTIVE EMAIL SIGNATURE GENERATOR */}
+          {/* SECTION 5: TONE OF VOICE & PRINT / PACKAGING MINIMUM SIZES */}
+          <section className="atlas-card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
+              <ShieldCheck size={18} color="#003666" />
+              <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>
+                {isEs ? '5. Tono de Voz Editorial y Especificaciones de Imprenta / Packaging' : '5. Editorial Tone of Voice & Print / Packaging Specs'}
+              </h2>
+            </div>
+
+            <div className="bb-grid-2">
+              <div style={{ padding: '0.95rem 1rem', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.79rem', color: '#334155', lineHeight: 1.55 }}>
+                <div style={{ fontWeight: 800, color: '#003666', marginBottom: '6px' }}>
+                  {isEs ? 'Voz Clínica e Institucional' : 'Clinical & Institutional Voice'}
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                  <li><strong>{isEs ? 'Sí usar:' : 'Use:'}</strong> {isEs ? 'Precisión analítica, trazabilidad EU GMP / cGMP, evidencia clínica, suministro institucional verificado.' : 'Analytical precision, EU GMP / cGMP traceability, clinical evidence, verified institutional supply.'}</li>
+                  <li><strong>{isEs ? 'Evitar:' : 'Avoid:'}</strong> {isEs ? 'Reclamos comerciales agresivos ("milagroso", "oferta flash"), emojis en documentos técnicos o promesas terapéuticas no respaldadas.' : 'Aggressive marketing claims ("miracle", "flash sale"), emojis in technical documents, or unsupported therapeutic promises.'}</li>
+                  <li><strong>{isEs ? 'Formato numérico:' : 'Numeric format:'}</strong> {isEs ? 'Usar JetBrains Mono y cifras tabulares para dosis (mg/mcg), pureza (≥99.0% HPLC) y lotes.' : 'Use JetBrains Mono and tabular numerals for dosages (mg/mcg), purity (≥99.0% HPLC), and batch codes.'}</li>
+                </ul>
+              </div>
+
+              <div style={{ padding: '0.95rem 1rem', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.79rem', color: '#334155', lineHeight: 1.55 }}>
+                <div style={{ fontWeight: 800, color: '#003666', marginBottom: '6px' }}>
+                  {isEs ? 'Tamaños Mínimos e Imprenta (Packaging / Etiquetas)' : 'Minimum Sizes & Print Specs (Packaging / Labels)'}
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                  <li><strong>{isEs ? 'Logo horizontal mínimo:' : 'Min horizontal logo:'}</strong> {isEs ? '24 mm en imprenta / 120 px en digital.' : '24 mm in print / 120 px digital.'}</li>
+                  <li><strong>{isEs ? 'Isotipo solo ("A" EKG):' : 'Min isotype ("A" EKG):'}</strong> {isEs ? '10 mm en imprenta / 24 px en digital.' : '10 mm in print / 24 px digital.'}</li>
+                  <li><strong>{isEs ? 'Etiquetas térmicas / 1 tinta:' : 'Thermal labels / 1-ink:'}</strong> {isEs ? 'Usar exclusivamente atlas-health-logo-mono-black.svg (incluido en el .ZIP).' : 'Use atlas-health-logo-mono-black.svg exclusively (included in the .ZIP).'}</li>
+                  <li><strong>{isEs ? 'Resolución y color:' : 'Resolution & color:'}</strong> {isEs ? 'Vector SVG preferente; si se rasteriza, mínimo 300 DPI en CMYK (Pantone 295 C / 2727 C).' : 'Vector SVG preferred; if rasterized, minimum 300 DPI CMYK (Pantone 295 C / 2727 C).'}</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 6: INTERACTIVE EMAIL SIGNATURE GENERATOR */}
           <section className="atlas-card bb-no-print" style={{ padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Mail size={18} color="#003666" />
                 <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>
-                  {isEs ? '5. Generador de Firma de Email Institucional' : '5. Institutional Email Signature Generator'}
+                  {isEs ? '6. Generador de Firma de Email Institucional' : '6. Institutional Email Signature Generator'}
                 </h2>
               </div>
               <button
