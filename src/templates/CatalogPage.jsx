@@ -485,7 +485,7 @@ function CatalogPage({ onOpenSearch }) {
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingBottom: '4rem' }}>
           <Link
-            href="/collection/peptides"
+            href="/pricing/peptides"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               color: '#7C3AED', fontWeight: 700, fontSize: '0.9rem',

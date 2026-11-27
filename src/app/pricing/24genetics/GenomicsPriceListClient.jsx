@@ -542,7 +542,7 @@ export default function GenomicsPriceListClient({
                 })()}
                 {row.id === 'skin' && (
                   <Link
-                    href="/pricing/colway-hair"
+                    href="/pricing/colway?category=hair"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',

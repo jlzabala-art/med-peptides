@@ -6,6 +6,7 @@ import { LayoutGrid, Table2 } from 'lucide-react';
 
 const UNIFIED_CATALOG_TRACKS = [
   { id: 'peptides', labelEn: 'Peptides', labelEs: 'Péptidos', collectionHref: '/pricing/peptides?view=cards', pricingHref: '/pricing/peptides' },
+  { id: 'pens', labelEn: 'U-100 Pens', labelEs: 'Plumas U-100', collectionHref: '/pricing/pens', pricingHref: '/pricing/pens' },
   { id: 'fillers', labelEn: 'Boosters & Fillers', labelEs: 'Boosters y Fillers', collectionHref: '/pricing/fillers', pricingHref: '/pricing/fillers' },
   { id: 'pellets', labelEn: 'Pellets HRT', labelEs: 'Pellets HRT', collectionHref: '/pricing/pellets', pricingHref: '/pricing/pellets' },
   { id: '24genomics', labelEn: '24Genetics', labelEs: '24Genetics', collectionHref: '/pricing/24genetics', pricingHref: '/pricing/24genetics' },
@@ -17,6 +18,7 @@ const UNIFIED_CATALOG_TRACKS = [
 function normalizeTrackId(slug = '') {
   const s = String(slug || '').toLowerCase();
   if (s.includes('bloodo')) return 'bloodo';
+  if (s.includes('pen')) return 'pens';
   if (s.includes('filler') || s.includes('injectable') || s.includes('booster')) return 'fillers';
   if (s.includes('pellet')) return 'pellets';
   if (s.includes('24gen')) return '24genomics';
@@ -118,7 +120,8 @@ export default function CatalogPricingBridgeBar({
           })}
         </div>
 
-        {/* Right: Dual View Switcher (Cards <-> B2B Table) */}
+        {/* Right: Dual View Switcher (only shown when inline toggle or distinct catalog/pricing view exists) */}
+        {(typeof onViewModeChange === 'function' || catalogUrl !== pricingUrl) && (
         <div
           role="group"
           aria-label={isEs ? 'Cambiar vista catálogo o tarifa' : 'Switch catalog or pricing table view'}
@@ -225,6 +228,7 @@ export default function CatalogPricingBridgeBar({
             </>
           )}
         </div>
+        )}
       </div>
     </div>
   );

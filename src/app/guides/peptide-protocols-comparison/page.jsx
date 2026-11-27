@@ -219,7 +219,7 @@ export default async function PeptideProtocolsComparisonPage({ searchParams }) {
               <Link href="/pricing/pens" className="gcp-btn-secondary" style={{ padding: '7px 12px', fontSize: '0.76rem', textDecoration: 'none' }}>
                 {isEs ? 'Plumas 3 mL' : '3 mL Pens'}
               </Link>
-              <Link href="/tools/peptide-calculator" className="gcp-btn-primary" style={{ padding: '7px 14px', fontSize: '0.76rem', fontWeight: 700, textDecoration: 'none' }}>
+              <Link href="/calculator" className="gcp-btn-primary" style={{ padding: '7px 14px', fontSize: '0.76rem', fontWeight: 700, textDecoration: 'none' }}>
                 {isEs ? 'Calculadora de Reconstitución' : 'Open Dosing Calculator'}
               </Link>
             </div>

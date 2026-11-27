@@ -763,7 +763,7 @@ export default function CosmeticsSidebarWidget({
 
         {/* 1. Link to Colway Collection */}
         <Link
-          href="/collection/colway"
+          href="/pricing/colway"
           style={{
             display: 'flex',
             alignItems: 'center',

@@ -29,9 +29,9 @@ export async function GET(request) {
 
     const staticRoutes = [
       '',
+      '/pricing',
       '/pricing/pellets',
       '/pricing/peptides',
-      '/vials',
       '/pricing/pens',
       '/pricing/bhrt',
       '/pricing/hormones',
@@ -41,6 +41,7 @@ export async function GET(request) {
       '/pricing/colway',
       '/proto',
       '/protocol-finder',
+      '/calculator',
       '/guides/hormone-pellets-implantation',
     ];
 

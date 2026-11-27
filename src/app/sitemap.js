@@ -7,9 +7,9 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-ser
 
 const STATIC_PUBLIC_ROUTES = [
   { path: '', changeFrequency: 'daily', priority: 1.0 },
+  { path: '/pricing', changeFrequency: 'daily', priority: 0.95 },
   { path: '/pricing/pellets', changeFrequency: 'daily', priority: 0.95 },
   { path: '/pricing/peptides', changeFrequency: 'daily', priority: 0.95 },
-  { path: '/vials', changeFrequency: 'daily', priority: 0.95 },
   { path: '/pricing/pens', changeFrequency: 'daily', priority: 0.9 },
   { path: '/pricing/bhrt', changeFrequency: 'daily', priority: 0.9 },
   { path: '/pricing/hormones', changeFrequency: 'daily', priority: 0.9 },
@@ -22,11 +22,11 @@ const STATIC_PUBLIC_ROUTES = [
   { path: '/guides/hormone-pellets-implantation', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/guides/peptide-reconstitution-dosing', changeFrequency: 'monthly', priority: 0.85 },
   { path: '/guides/peptide-protocols-comparison', changeFrequency: 'monthly', priority: 0.85 },
-  { path: '/tools/peptide-calculator', changeFrequency: 'monthly', priority: 0.9 },
+  { path: '/calculator', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/import-partner', changeFrequency: 'monthly', priority: 0.8 },
 ];
 
-const BLOCKED_SLUG_RE = /(pharmapolis|nplab|dnlab|bulgaria)/i;
+const BLOCKED_SLUG_RE = /(lotusland|pharmapolis|nplab|dnlab|bulgaria)/i;
 
 export default async function sitemap() {
   const now = new Date();

@@ -47,7 +47,7 @@ export default function BottomTabBar() {
       </Link>
 
       <Link 
-        href="/collection/peptides" 
+        href="/pricing/peptides" 
         className={`tab-item ${pathname?.startsWith('/collection') || pathname?.startsWith('/catalog') ? 'active' : ''}`}
       >
         <Grid size={20} strokeWidth={2.2} />

@@ -167,7 +167,7 @@ const About = () => {
               transition={{ delay: 0.4 }}
               className="about-hero__actions"
             >
-              <Link href="/collection/peptides" className="about-btn-primary">
+              <Link href="/pricing/peptides" className="about-btn-primary">
                 Explore Catalog <ArrowRight size={18} />
               </Link>
               <Link href="/contact" className="about-btn-ghost">

@@ -14,7 +14,7 @@ export default function ColwayPriceListClient({
     ? {
         sectionLabel: 'B2B Wholesale',
         navCurrentLabel: 'Colway Hair & Trichology',
-        loginRedirect: '/pricing/colway-hair',
+        loginRedirect: '/pricing/colway?category=hair',
         brandLeft: 'ATLAS HEALTH',
         brandRight: 'COLWAY TRICHOLOGY',
         documentTitle: 'COLWAY CLINICAL HAIR & TRICHOLOGY PORTFOLIO',

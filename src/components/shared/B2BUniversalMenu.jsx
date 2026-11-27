@@ -407,12 +407,12 @@ export default function B2BUniversalMenu({
                         title: isSpanish ? 'Péptidos: Especialidades y Filtros' : 'Peptides: Specialties & Filters',
                         aiSub: isSpanish ? 'Pregunta sobre reconstitución, pureza HPLC o protocolos' : 'Ask about reconstitution, HPLC purity, or specialty protocols',
                         chips: [
-                          { label: isSpanish ? 'Todos' : 'All Vials', href: '/vials' },
-                          { label: 'Gynecology', href: '/vials?specialty=gynecology' },
-                          { label: 'Dermatology', href: '/vials?specialty=dermatology' },
-                          { label: 'Longevity', href: '/vials?specialty=longevity' },
-                          { label: 'Metabolic', href: '/vials?specialty=metabolic' },
-                          { label: 'Urology', href: '/vials?specialty=urology' },
+                          { label: isSpanish ? 'Todos' : 'All Vials', href: '/pricing/peptides' },
+                          { label: 'Gynecology', href: '/pricing/peptides?specialty=gynecology' },
+                          { label: 'Dermatology', href: '/pricing/peptides?specialty=dermatology' },
+                          { label: 'Longevity', href: '/pricing/peptides?specialty=longevity' },
+                          { label: 'Metabolic', href: '/pricing/peptides?specialty=metabolic' },
+                          { label: 'Urology', href: '/pricing/peptides?specialty=urology' },
                         ],
                       }
                     : (pathname.startsWith('/pricing/pens') || pathname.startsWith('/pricing/dnlab-pens'))

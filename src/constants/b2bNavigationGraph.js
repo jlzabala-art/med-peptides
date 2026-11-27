@@ -26,7 +26,8 @@ export const B2B_NAV_DOMAINS = [
       { id: 'peptides', href: '/pricing/peptides', labelEs: 'Tarifa Péptidos', labelEn: 'Peptides Schedule' },
       { id: 'pellets', href: '/pricing/pellets', labelEs: 'Tarifa Pellets HRT', labelEn: 'Pellets Schedule' },
       { id: 'fillers', href: '/pricing/fillers', labelEs: 'Boosters & Fillers', labelEn: 'Boosters & Fillers' },
-      { id: 'vials', href: '/vials', labelEs: 'Directorio de Viales', labelEn: 'Peptide Vials' },
+      { id: 'vials', href: '/vials?view=patient', labelEs: 'Guías para Pacientes', labelEn: 'Patient Guides' },
+      { id: 'bloodo', href: '/pricing/bloodo', labelEs: 'Bloodo™ Diagnóstico', labelEn: 'Bloodo™ Diagnostics' },
       { id: 'genomics', href: '/pricing/24genetics', labelEs: '24Genetics ADN', labelEn: '24Genetics DNA' },
       { id: 'colway', href: '/pricing/colway', labelEs: 'Colway Tricología', labelEn: 'Colway Trichology' }
     ]
