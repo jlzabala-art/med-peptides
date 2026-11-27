@@ -1,0 +1,467 @@
+/* ==========================================================================
+   MediLuxe Health Solutions — Google Cloud Console (GCP) UX Stylesheet
+   Clean #f8f9fa canvas, #ffffff flat resource panels, #dadce0 hairline rules
+   ========================================================================== */
+
+.ml-gcp-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--gcp-bg-main, #f8f9fa);
+  color: var(--gcp-text-main, #202124);
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  padding-bottom: 4.5rem;
+  overflow-x: hidden;
+}
+
+.ml-gcp-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  box-sizing: border-box;
+}
+
+/* ── Flat GCP Resource Header ──────────────────────────────────────────────── */
+.ml-gcp-header {
+  background: var(--gcp-bg-card, #ffffff);
+  border-bottom: 1px solid var(--gcp-border, #dadce0);
+  padding: 1.15rem 0 0;
+}
+
+.ml-gcp-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding-bottom: 1rem;
+}
+
+.ml-gcp-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ml-gcp-logo-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #003666;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ml-gcp-title {
+  font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+  font-weight: 600;
+  color: #202124;
+  margin: 0;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.ml-gcp-subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #5f6368;
+  line-height: 1.5;
+  max-width: 720px;
+}
+
+.ml-gcp-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Secondary buttons stay monochrome neutral until :hover (Rule #57) */
+.ml-gcp-btn-neutral {
+  color: #5f6368 !important;
+  background-color: #ffffff !important;
+  border-color: #dadce0 !important;
+  padding: 0.45rem 0.9rem !important;
+  font-size: 0.8125rem !important;
+  min-height: 36px;
+}
+
+.ml-gcp-btn-neutral:hover:not(:disabled) {
+  background-color: #f8f9fa !important;
+  border-color: #bdc1c6 !important;
+  color: #202124 !important;
+}
+
+.ml-gcp-btn-wa:hover:not(:disabled) {
+  border-color: #16a34a !important;
+  color: #15803d !important;
+  background-color: #f0fdf4 !important;
+}
+
+/* ── GCP Tab Navigation Bar ────────────────────────────────────────────────── */
+.ml-gcp-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.ml-gcp-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ml-gcp-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.95rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #5f6368;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  min-height: 44px;
+}
+
+.ml-gcp-tab:hover {
+  color: #202124;
+  background-color: #f8f9fa;
+}
+
+.ml-gcp-tab.is-active {
+  color: #1a73e8;
+  font-weight: 600;
+  border-bottom-color: #1a73e8;
+}
+
+/* ── 4 KPI Band (MetricCard Grid) ──────────────────────────────────────────── */
+.ml-gcp-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Two-Column GCP Resource Layout ────────────────────────────────────────── */
+.ml-gcp-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.ml-gcp-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ml-gcp-section {
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.ml-gcp-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.85rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e8eaed;
+}
+
+.ml-gcp-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #202124;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ml-gcp-section-desc {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: #5f6368;
+  line-height: 1.5;
+}
+
+/* ── Clinical Pipeline Architecture Grid ───────────────────────────────────── */
+.ml-gcp-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.ml-gcp-flow-step {
+  background: #f8f9fa;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ml-gcp-flow-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #1a73e8;
+}
+
+.ml-gcp-flow-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #202124;
+}
+
+.ml-gcp-flow-sub {
+  font-size: 0.76rem;
+  color: #5f6368;
+  line-height: 1.45;
+}
+
+/* ── Shared Responsive Grids ───────────────────────────────────────────────── */
+.ml-gcp-two-col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.ml-gcp-three-col {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.ml-gcp-vault-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.ml-gcp-subpanel {
+  background: #f8f9fa;
+  border: 1px solid #e8eaed;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.ml-gcp-vault-card {
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+/* ── Right Sticky Details Pane (GCP Console Inspector) ─────────────────────── */
+.ml-gcp-details-pane {
+  position: sticky;
+  top: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ml-gcp-kv-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ml-gcp-kv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f1f3f4;
+  font-size: 0.8rem;
+}
+
+.ml-gcp-kv-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.ml-gcp-kv-label {
+  color: #5f6368;
+  font-weight: 500;
+}
+
+.ml-gcp-kv-value {
+  color: #202124;
+  font-weight: 600;
+  text-align: right;
+}
+
+.ml-gcp-mobile-summary {
+  display: none;
+  margin-bottom: 1rem;
+}
+
+/* ── Contact & QR Grid ─────────────────────────────────────────────────────── */
+.ml-gcp-contact-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 260px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.ml-gcp-qr-box {
+  background: #f8f9fa;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.65rem;
+}
+
+.ml-gcp-qr-frame {
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 0.65rem;
+  display: inline-flex;
+}
+
+.ml-gcp-iso-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #e8f0fe;
+  border: 1px solid #d2e3fc;
+  color: #1967d2;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.ml-gcp-bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ml-gcp-bullet-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: #3c4043;
+  line-height: 1.45;
+}
+
+/* ── Print-Only One-Pager Summary ──────────────────────────────────────────── */
+.ml-gcp-print-summary {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .ml-gcp-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ml-gcp-layout {
+    grid-template-columns: 1fr;
+  }
+  .ml-gcp-details-pane {
+    display: none;
+  }
+  .ml-gcp-mobile-summary {
+    display: block;
+  }
+  .ml-gcp-flow-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .ml-gcp-container {
+    padding: 0 0.85rem;
+  }
+  .ml-gcp-toolbar {
+    width: 100%;
+  }
+  .ml-gcp-toolbar > * {
+    flex: 1 1 auto;
+    min-height: 44px;
+  }
+  .ml-gcp-two-col,
+  .ml-gcp-three-col,
+  .ml-gcp-vault-grid,
+  .ml-gcp-contact-grid,
+  .ml-gcp-flow-grid {
+    grid-template-columns: 1fr;
+  }
+  .ml-gcp-kpi-grid {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .ml-gcp-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .ml-gcp-tabs,
+  .ml-gcp-toolbar,
+  .ml-gcp-details-pane,
+  .ml-gcp-mobile-summary,
+  .no-print {
+    display: none !important;
+  }
+  .ml-gcp-page {
+    background: #ffffff !important;
+    padding-bottom: 0 !important;
+  }
+  .ml-gcp-header {
+    border-bottom: 1px solid #dadce0 !important;
+    padding-bottom: 0.75rem !important;
+  }
+  .ml-gcp-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .ml-gcp-section {
+    border: 1px solid #dadce0 !important;
+    break-inside: avoid;
+  }
+  .ml-gcp-print-summary {
+    display: block !important;
+    margin-top: 1rem;
+  }
+}
