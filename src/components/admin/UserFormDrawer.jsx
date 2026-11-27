@@ -12,6 +12,7 @@ import ClinicFormDrawer from './clinics/ClinicFormDrawer';
 
 import { approveUserRoleAction } from '../../actions/adminActions';
 import { CANONICAL_ROLES, PRICING_MARKETS, normalizeRole, normalizePricingMarket } from '../../constants/roles';
+import { AVAILABLE_SCHEDULE_IDS } from '../../constants/roleNavigationRegistry';
 
 export default function UserFormDrawer({
   isOpen,
@@ -95,6 +96,16 @@ export default function UserFormDrawer({
         type: 'number',
         required: false,
       },
+      {
+        name: 'allowedSchedules',
+        label: 'Allowed Price Schedules (optional — blank = all schedules for role)',
+        type: 'checkbox-group',
+        required: false,
+        options: AVAILABLE_SCHEDULE_IDS.map((s) => ({
+          value: s.id,
+          label: s.labelEn,
+        })),
+      },
       { 
         name: 'institution', 
         label: 'Institution / Clinic', 
@@ -150,6 +161,7 @@ export default function UserFormDrawer({
           market: resolvedMarket,
           preferredCurrency: formData.preferredCurrency || '',
           ...(parsedMarkup != null ? { priceMarkupPercent: parsedMarkup } : {}),
+          allowedSchedules: Array.isArray(formData.allowedSchedules) ? formData.allowedSchedules : [],
           approved: true,
           createdAt: new Date().toISOString(),
           institution: formData.institution || '',
@@ -213,6 +225,7 @@ export default function UserFormDrawer({
           market: resolvedMarket,
           preferredCurrency: formData.preferredCurrency || '',
           priceMarkupPercent: parsedMarkup,
+          allowedSchedules: Array.isArray(formData.allowedSchedules) ? formData.allowedSchedules : [],
           institution: formData.institution || '',
           updatedAt: new Date().toISOString(),
         };
@@ -254,8 +267,9 @@ export default function UserFormDrawer({
                 market: normalizePricingMarket(user.market || user.countryCode || 'global'),
                 preferredCurrency: user.preferredCurrency || '',
                 priceMarkupPercent: user.priceMarkupPercent ?? '',
+                allowedSchedules: Array.isArray(user.allowedSchedules) ? user.allowedSchedules : [],
               }
-            : { roles: [defaultRole], market: 'global', preferredCurrency: '', priceMarkupPercent: '' }
+            : { roles: [defaultRole], market: 'global', preferredCurrency: '', priceMarkupPercent: '', allowedSchedules: [] }
         }
         initialMode={initialMode}
         onSubmit={handleSubmit}

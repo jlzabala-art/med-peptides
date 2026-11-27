@@ -26,6 +26,7 @@ import PublicProviderCTA from './public/PublicProviderCTA';
 import AtlasAppSwitcher from './public/AtlasAppSwitcher';
 import ActiveClinicalPill from './ActiveClinicalPill';
 import B2BUniversalMenu from './B2BUniversalMenu';
+import RoleScopedNavBar from './RoleScopedNavBar';
 import BrandLogo from '../common/BrandLogo';
 import DatasheetQuickSearchModal from './DatasheetQuickSearchModal';
 import GcpUserBadge from './GcpUserBadge';
@@ -1024,6 +1025,10 @@ export default function PublicUnifiedHeader({
         onCurrencyChange={handleCurrencyChange}
         hideCurrency={effectiveHideCurrencySelector}
       />
+
+      {surfacePolicy.canSeeRoleMenu && !purePublic && !whiteLabel && (
+        <RoleScopedNavBar lang={effectiveLang} />
+      )}
 
       {surfacePolicy.canSeeB2BDrawer && !purePublic && !whiteLabel && (
         <B2BUniversalMenu isSpanish={isSpanish} />

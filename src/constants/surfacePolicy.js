@@ -39,18 +39,24 @@ export function getSurfacePolicy({
   isAdmin = false,
   isSimulating = false,
   simulatedRole = null,
+  hasShareGrant = false,
 } = {}) {
   const normalized = normalizeRole(
     isSimulating && simulatedRole ? simulatedRole : (isAdmin ? 'admin' : effectiveRole)
   );
 
-  // Strict rule: ONLY true Admins (not simulating a non-admin role) see global menus.
-  const isEffectiveAdmin = normalized === 'admin';
+  // Strict rule:
+  // - Admin (not simulating another role) -> full global menus
+  // - Authenticated non-admin (not via guest share link) -> concise role-scoped menu
+  // - Guest or signed share link (/s/[token]) -> zero navigation menus
+  const isEffectiveAdmin = normalized === 'admin' && !hasShareGrant;
   const canSeeGlobalMenus = isEffectiveAdmin;
+  const canSeeRoleMenu = !isEffectiveAdmin && !hasShareGrant && normalized !== 'guest';
 
   return Object.freeze({
     effectiveRole: normalized,
     canSeeGlobalMenus,
+    canSeeRoleMenu,
     canSeeAppSwitcher: canSeeGlobalMenus,
     canSeeB2BDrawer: canSeeGlobalMenus,
     canSeeFormatSwitcher: canSeeGlobalMenus,
