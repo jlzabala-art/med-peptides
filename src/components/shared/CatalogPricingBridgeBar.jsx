@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { LayoutGrid, Table2 } from 'lucide-react';
 
 const UNIFIED_CATALOG_TRACKS = [
-  { id: 'peptides', labelEn: 'Peptides', labelEs: 'Péptidos', collectionHref: '/collection/peptides', pricingHref: '/pricing/peptides' },
-  { id: 'fillers', labelEn: 'Boosters & Fillers', labelEs: 'Boosters y Fillers', collectionHref: '/collection/fillers', pricingHref: '/pricing/fillers' },
-  { id: 'pellets', labelEn: 'Pellets HRT', labelEs: 'Pellets HRT', collectionHref: '/collection/hormones', pricingHref: '/pricing/pellets' },
-  { id: '24genomics', labelEn: '24Genetics', labelEs: '24Genetics', collectionHref: '/collection/24genomics', pricingHref: '/pricing/24genetics' },
-  { id: 'colway', labelEn: 'Colway', labelEs: 'Colway', collectionHref: '/collection/colway', pricingHref: '/pricing/colway' },
-  { id: 'bloodo', labelEn: 'Bloodo™ DBS', labelEs: 'Bloodo™ DBS', collectionHref: '/collection/bloodo', pricingHref: '/pricing/bloodo' },
-  { id: 'hormones', labelEn: 'Hormones', labelEs: 'Hormonas', collectionHref: '/collection/hormones', pricingHref: '/pricing/bhrt' }
+  { id: 'peptides', labelEn: 'Peptides', labelEs: 'Péptidos', collectionHref: '/pricing/peptides?view=cards', pricingHref: '/pricing/peptides' },
+  { id: 'fillers', labelEn: 'Boosters & Fillers', labelEs: 'Boosters y Fillers', collectionHref: '/pricing/fillers', pricingHref: '/pricing/fillers' },
+  { id: 'pellets', labelEn: 'Pellets HRT', labelEs: 'Pellets HRT', collectionHref: '/pricing/pellets', pricingHref: '/pricing/pellets' },
+  { id: '24genomics', labelEn: '24Genetics', labelEs: '24Genetics', collectionHref: '/pricing/24genetics', pricingHref: '/pricing/24genetics' },
+  { id: 'colway', labelEn: 'Colway', labelEs: 'Colway', collectionHref: '/pricing/colway', pricingHref: '/pricing/colway' },
+  { id: 'bloodo', labelEn: 'Bloodo™ DBS', labelEs: 'Bloodo™ DBS', collectionHref: '/pricing/bloodo', pricingHref: '/pricing/bloodo' },
+  { id: 'hormones', labelEn: 'Hormones', labelEs: 'Hormonas', collectionHref: '/pricing/bhrt', pricingHref: '/pricing/bhrt' }
 ];
 
 function normalizeTrackId(slug = '') {
@@ -35,13 +35,14 @@ function normalizeTrackId(slug = '') {
 export default function CatalogPricingBridgeBar({
   activeMode = 'catalog', // 'catalog' | 'pricing'
   slug = '',
-  lang = 'en'
+  lang = 'en',
+  onViewModeChange = null
 }) {
   const isEs = lang === 'es';
   const currentId = normalizeTrackId(slug);
   const currentTrack = UNIFIED_CATALOG_TRACKS.find((t) => t.id === currentId) || UNIFIED_CATALOG_TRACKS[0];
 
-  const catalogUrl = currentTrack?.collectionHref || '/collection/peptides';
+  const catalogUrl = currentTrack?.collectionHref || '/pricing/peptides?view=cards';
   const pricingUrl = currentTrack?.pricingHref || '/pricing/peptides';
 
   return (
@@ -132,46 +133,97 @@ export default function CatalogPricingBridgeBar({
             flexShrink: 0
           }}
         >
-          <Link
-            href={catalogUrl}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              fontSize: '0.72rem',
-              fontWeight: activeMode === 'catalog' ? 750 : 600,
-              background: activeMode === 'catalog' ? '#ffffff' : 'transparent',
-              color: activeMode === 'catalog' ? '#003666' : '#475569',
-              boxShadow: activeMode === 'catalog' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
-              textDecoration: 'none',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <LayoutGrid size={13} />
-            <span>{isEs ? 'Tarjetas' : 'Catalog'}</span>
-          </Link>
-          <Link
-            href={pricingUrl}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              fontSize: '0.72rem',
-              fontWeight: activeMode === 'pricing' ? 750 : 600,
-              background: activeMode === 'pricing' ? '#ffffff' : 'transparent',
-              color: activeMode === 'pricing' ? '#003666' : '#475569',
-              boxShadow: activeMode === 'pricing' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
-              textDecoration: 'none',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <Table2 size={13} />
-            <span>{isEs ? 'Tarifa B2B' : 'B2B Table'}</span>
-          </Link>
+          {typeof onViewModeChange === 'function' ? (
+            <>
+              <button
+                type="button"
+                onClick={() => onViewModeChange('cards')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.72rem',
+                  fontWeight: activeMode === 'catalog' ? 750 : 600,
+                  background: activeMode === 'catalog' ? '#ffffff' : 'transparent',
+                  color: activeMode === 'catalog' ? '#003666' : '#475569',
+                  boxShadow: activeMode === 'catalog' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <LayoutGrid size={13} />
+                <span>{isEs ? 'Tarjetas' : 'Cards'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onViewModeChange('table')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.72rem',
+                  fontWeight: activeMode === 'pricing' ? 750 : 600,
+                  background: activeMode === 'pricing' ? '#ffffff' : 'transparent',
+                  color: activeMode === 'pricing' ? '#003666' : '#475569',
+                  boxShadow: activeMode === 'pricing' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <Table2 size={13} />
+                <span>{isEs ? 'Tarifa B2B' : 'B2B Table'}</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href={catalogUrl}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  fontSize: '0.72rem',
+                  fontWeight: activeMode === 'catalog' ? 750 : 600,
+                  background: activeMode === 'catalog' ? '#ffffff' : 'transparent',
+                  color: activeMode === 'catalog' ? '#003666' : '#475569',
+                  boxShadow: activeMode === 'catalog' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <LayoutGrid size={13} />
+                <span>{isEs ? 'Tarjetas' : 'Catalog'}</span>
+              </Link>
+              <Link
+                href={pricingUrl}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  fontSize: '0.72rem',
+                  fontWeight: activeMode === 'pricing' ? 750 : 600,
+                  background: activeMode === 'pricing' ? '#ffffff' : 'transparent',
+                  color: activeMode === 'pricing' ? '#003666' : '#475569',
+                  boxShadow: activeMode === 'pricing' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <Table2 size={13} />
+                <span>{isEs ? 'Tarifa B2B' : 'B2B Table'}</span>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

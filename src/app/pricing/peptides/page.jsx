@@ -66,6 +66,8 @@ export default async function PeptidesPricingPage({ searchParams }) {
   const initialDest = ['EU', 'US', 'AE'].includes(rawDest) ? rawDest : 'EU';
   const rawSpecialty = String(resolvedSearch?.specialty || '').toLowerCase();
   const initialSpecialty = MEDICAL_SPECIALTIES[rawSpecialty] ? rawSpecialty : 'all';
+  const rawView = String(resolvedSearch?.view || '').toLowerCase();
+  const initialViewMode = (rawView === 'cards' || rawView === 'catalog') ? 'cards' : 'table';
   const trackingCode = resolvedSearch?.tc || resolvedSearch?.track || resolvedSearch?.sid || null;
 
   const isDistributor = String(rawRef || '').toLowerCase().includes('distrib') || resolvedSearch?.margin === '15';
@@ -119,6 +121,7 @@ export default async function PeptidesPricingPage({ searchParams }) {
         initialCurrency={initialCurrency}
         initialDest={initialDest}
         initialSpecialty={initialSpecialty}
+        initialViewMode={initialViewMode}
         trackingCode={trackingCode}
       />
     </>

@@ -55,10 +55,23 @@ export default function PeptidesPriceListClient({
   initialCurrency = 'USD',
   initialDest = 'EU',
   initialSpecialty = 'all',
+  initialViewMode = 'table',
   trackingCode = null
 }) {
   // Modal / Drawer UI state
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [viewMode, setViewMode] = useState(initialViewMode === 'cards' ? 'cards' : 'table');
+
+  const handleViewModeChange = useCallback((nextMode) => {
+    const normalized = nextMode === 'cards' ? 'cards' : 'table';
+    setViewMode(normalized);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (normalized === 'cards') url.searchParams.set('view', 'cards');
+      else url.searchParams.delete('view');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
 
   // Laptop power-user keyboard shortcuts: '[' or Cmd/Ctrl+B toggles sidebar; 'Escape' closes drawers
   useEffect(() => {
@@ -606,8 +619,13 @@ export default function PeptidesPriceListClient({
         ]}
       />
 
-      {/* ── Unified Clinical Format Switcher (1-Click Navigation Across All 5 Suite Screens) ── */}
-      <CatalogPricingBridgeBar activeMode="pricing" slug="peptides" lang={lang} />
+      {/* ── Unified Clinical Format Switcher (1-Click Navigation & Inline Table/Cards Toggle) ── */}
+      <CatalogPricingBridgeBar
+        activeMode={viewMode === 'cards' ? 'catalog' : 'pricing'}
+        slug="peptides"
+        lang={lang}
+        onViewModeChange={handleViewModeChange}
+      />
 
       <main className="atlas-page-shell peptides-main-container">
         {/* Page Header (Consolidated Hero & Action Toolbar) */}
@@ -808,10 +826,10 @@ export default function PeptidesPriceListClient({
               isEs={isEs}
             />
 
-            {/* Peptide DataTable */}
-            <div className="gcp-table-block" style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', overflowX: 'clip', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+            {/* Peptide DataTable or Unified Visual Cards Grid */}
+            <div className="gcp-table-block" style={{ background: viewMode === 'cards' ? 'transparent' : '#ffffff', borderRadius: '10px', border: viewMode === 'cards' ? 'none' : '1px solid #e2e8f0', overflowX: 'clip', boxShadow: viewMode === 'cards' ? 'none' : '0 1px 3px rgba(0,0,0,0.03)' }}>
               {filteredProducts.length === 0 ? (
-                <div style={{ padding: '3rem 1.5rem' }}>
+                <div style={{ padding: '3rem 1.5rem', background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
                   <EmptyState
                     icon={FileText}
                     title={isEs ? 'No se encontraron formulaciones de péptidos' : 'No peptide formulations found'}
@@ -823,9 +841,46 @@ export default function PeptidesPriceListClient({
                         setSelectedCategory('all');
                         setSelectedStrength('all');
                         setSelectedFdaStatus('all');
+                        setSelectedSpecialty('all');
                       }
                     }}
                   />
+                </div>
+              ) : viewMode === 'cards' ? (
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '12px',
+                    width: '100%'
+                  }}
+                >
+                  {filteredProducts.map((row) => (
+                    <PeptideMobileCard
+                      key={row.id}
+                      row={row}
+                      handleAddToCart={handleAddToCart}
+                      updateItemQuantity={updateItemQuantity}
+                      cartItems={cartItems}
+                      formatPrice={formatPrice}
+                      currency={currency}
+                      currencySymbol={currencySymbol}
+                      lang={lang}
+                      onOpenSpecs={setSelectedSpecsProduct}
+                      onOpenAi={(prod) => {
+                        setAiContextProduct(prod);
+                        setIsAtlasAiOpen(true);
+                      }}
+                      onInquire={(prod) => {
+                        setInquiryProductContext(prod);
+                        setIsInquiryDrawerOpen(true);
+                      }}
+                      onFilterByPeptide={(name) => {
+                        setSearchQuery(name);
+                        window.scrollTo({ top: 380, behavior: 'smooth' });
+                      }}
+                    />
+                  ))}
                 </div>
               ) : (
                 <DataTable

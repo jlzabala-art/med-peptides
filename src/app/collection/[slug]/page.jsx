@@ -706,8 +706,38 @@ export default async function NextCollectionPage({ params, searchParams }) {
     redirect('/proto');
   }
 
-  if (slug === 'pellets' || slug === 'hormone-pellets' || slug === 'subcutaneous-pellets') {
-    redirect('/pricing/pellets');
+  // Canonical consolidation: brand collections with dedicated GCP B2B pricing pages
+  // redirect cleanly to /pricing/* while preserving all query parameters.
+  const CANONICAL_PRICING_REDIRECTS = {
+    peptides: '/pricing/peptides?view=cards',
+    pellets: '/pricing/pellets',
+    'hormone-pellets': '/pricing/pellets',
+    'subcutaneous-pellets': '/pricing/pellets',
+    colway: '/pricing/colway',
+    bloodo: '/pricing/bloodo',
+    hormones: '/pricing/bhrt',
+    bhrt: '/pricing/bhrt',
+    trt: '/pricing/bhrt',
+    norma: '/pricing/bhrt',
+    pharmapolis: '/pricing/bhrt',
+    fillers: '/pricing/fillers',
+    'dermal-fillers': '/pricing/fillers',
+    injectables: '/pricing/fillers',
+    'aesthetic-injectables': '/pricing/fillers',
+    '24genomics': '/pricing/24genetics',
+    '24genetics': '/pricing/24genetics',
+  };
+
+  if (CANONICAL_PRICING_REDIRECTS[slug]) {
+    const [basePath, defaultQuery] = CANONICAL_PRICING_REDIRECTS[slug].split('?');
+    const forward = new URLSearchParams(defaultQuery || '');
+    for (const [k, v] of Object.entries(resolvedSearch || {})) {
+      if (v != null && v !== '') {
+        forward.set(k === 'cur' ? 'currency' : k, Array.isArray(v) ? v[0] : String(v));
+      }
+    }
+    const qs = forward.toString();
+    redirect(qs ? `${basePath}?${qs}` : basePath);
   }
 
   const ref = resolvedSearch?.ref || resolvedSearch?.referral || null;
