@@ -1,9 +1,9 @@
 /**
  * pricingTaxonomy.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Scalable 2-level Clinical Pricing Taxonomy (Theme Group -> Schedules).
- * Adding a new schedule/country/lab requires only adding 1 entry to a group
- * below, keeping top-level navigation clean even at 40+ price schedules.
+ * Scalable 2-level Clinical Pricing Taxonomy (Theme Group -> Canonical Schedules).
+ * Golden Rule: "1 Brand / Line = 1 Screen". Markets (Global/UAE/Qatar) and
+ * subcategories (Hair, Specialties) live inside the canonical screen via query params.
  */
 
 export const PRICING_GROUPS = Object.freeze([
@@ -17,11 +17,9 @@ export const PRICING_GROUPS = Object.freeze([
     iconKey: 'peptides',
     items: [
       { id: 'peptides', href: '/pricing/peptides', labelEn: 'Peptide Vials & Kits', labelEs: 'Viales y Péptidos', badge: 'cGMP' },
-      { id: 'pens', href: '/pricing/pens', labelEn: 'Peptide Pen Dosing Guide', labelEs: 'Guía Plumas U-100', badge: '27 Pens' },
-      { id: 'dnlab-pens', href: '/pricing/pens', labelEn: 'Peptide Pens Schedule', labelEs: 'Tarifa Plumas Péptidos', badge: 'U-100' },
+      { id: 'pens', href: '/pricing/pens', labelEn: 'Peptide Pens (U-100)', labelEs: 'Plumas U-100', badge: '27 Pens' },
       { id: 'pellets', href: '/pricing/pellets', labelEn: 'Subcutaneous Hormone Pellets', labelEs: 'Pellets Hormonales', badge: 'EU GMP' },
-      { id: 'pharmapolis-hrt', href: '/pricing/bhrt', labelEn: 'Bioidentical HRT (BHRT)', labelEs: 'HRT Bioidéntica (BHRT)', badge: 'EU GMP' },
-      { id: 'nplab-hormones', href: '/pricing/hormones', labelEn: 'Endocrinology & Hormones', labelEs: 'Endocrinología y Hormonas', badge: 'BHRT' },
+      { id: 'bhrt', href: '/pricing/bhrt', labelEn: 'Bioidentical HRT & Hormones', labelEs: 'BHRT y Hormonas', badge: 'EU GMP' },
     ],
   },
   {
@@ -33,8 +31,7 @@ export const PRICING_GROUPS = Object.freeze([
     shortEs: 'Genética',
     iconKey: 'genomics',
     items: [
-      { id: '24genetics', href: '/pricing/24genetics', labelEn: '24Genetics Global Panels', labelEs: '24Genetics Global', badge: 'CE-IVD' },
-      { id: '24genomics-qatar', href: '/pricing/24genomics-qatar', labelEn: '24Genetics Qatar', labelEs: '24Genetics Qatar', badge: 'QA' },
+      { id: '24genetics', href: '/pricing/24genetics', labelEn: '24Genetics DNA Panels', labelEs: '24Genetics ADN', badge: 'CE-IVD' },
     ],
   },
   {
@@ -46,9 +43,8 @@ export const PRICING_GROUPS = Object.freeze([
     shortEs: 'Derma & Capilar',
     iconKey: 'derma',
     items: [
-      { id: 'colway', href: '/pricing/colway', labelEn: 'Colway UAE Derma', labelEs: 'Colway UAE', badge: 'UAE' },
-      { id: 'colway-hair', href: '/pricing/colway-hair', labelEn: 'Colway Hair & Trichology', labelEs: 'Colway Capilar', badge: 'TRICHO' },
-      { id: 'colway-qatar', href: '/pricing/colway-qatar', labelEn: 'Colway Qatar', labelEs: 'Colway Qatar', badge: 'QA' },
+      { id: 'colway', href: '/pricing/colway', labelEn: 'Colway Derma & Hair', labelEs: 'Colway Derma y Capilar', badge: 'UAE / QA' },
+      { id: 'fillers', href: '/pricing/fillers', labelEn: 'Boosters & Fillers', labelEs: 'Boosters y Fillers', badge: 'CE' },
       { id: 'larimedical', href: '/pricing?tab=larimedical', labelEn: 'Larimide & Larimedical', labelEs: 'Larimide y Larimedical', badge: '145 SKUs' },
     ],
   },
@@ -56,7 +52,18 @@ export const PRICING_GROUPS = Object.freeze([
 
 export function findPricingGroupByFormat(activeFormat) {
   if (!activeFormat) return null;
-  return PRICING_GROUPS.find((g) => g.items.some((item) => item.id === activeFormat)) || null;
+  const norm = String(activeFormat).toLowerCase();
+  const aliasMap = {
+    'dnlab-pens': 'pens',
+    'pharmapolis-hrt': 'bhrt',
+    'nplab-hormones': 'bhrt',
+    hormones: 'bhrt',
+    '24genomics-qatar': '24genetics',
+    'colway-hair': 'colway',
+    'colway-qatar': 'colway',
+  };
+  const resolved = aliasMap[norm] || norm;
+  return PRICING_GROUPS.find((g) => g.items.some((item) => item.id === resolved)) || null;
 }
 
 export function findPricingGroupById(groupId) {

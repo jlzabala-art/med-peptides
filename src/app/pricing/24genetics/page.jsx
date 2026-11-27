@@ -1,6 +1,6 @@
 import React from 'react';
 import { adminDb } from '@/lib/firebaseAdmin';
-import GenomicsPriceListClient from './GenomicsPriceListClient';
+import GenomicsUnifiedClient from './GenomicsUnifiedClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import { isAdminServerSession } from '@/lib/serverAdminAuth';
 import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
@@ -309,13 +309,17 @@ export default async function GenomicsPricingPage({ searchParams }) {
     ],
   });
 
+  const rawMarket = String(resolvedSearch?.market || resolvedSearch?.region || '').toLowerCase();
+  const initialMarket = (rawMarket === 'qatar' || rawMarket === 'qa') ? 'qatar' : 'global';
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <GenomicsPriceListClient
+      <GenomicsUnifiedClient
         initialProducts={sanitizedProducts}
         initialCurrency={initialCurrency}
         initialLang={initialLang}
+        initialMarket={initialMarket}
       />
     </>
   );

@@ -105,16 +105,20 @@ export default function ClinicalFormatSwitcher({
       shortLabel: isEs ? 'Todos' : 'All',
       badge: null,
     },
-    ...PRICING_GROUPS.map((grp) => ({
-      id: grp.id,
-      isGroup: true,
-      group: grp,
-      href: buildHref(`/pricing?group=${grp.hubMacroId}`),
-      icon: groupIconMap[grp.iconKey] || Layers,
-      label: isEs ? grp.labelEs : grp.labelEn,
-      shortLabel: isEs ? grp.shortEs : grp.shortEn,
-      badge: String(grp.items.length),
-    })),
+    ...PRICING_GROUPS.map((grp) => {
+      const isSingleItem = grp.items.length === 1;
+      const singleItem = isSingleItem ? grp.items[0] : null;
+      return {
+        id: isSingleItem ? singleItem.id : grp.id,
+        isGroup: !isSingleItem,
+        group: grp,
+        href: buildHref(isSingleItem ? singleItem.href : `/pricing?group=${grp.hubMacroId}`),
+        icon: groupIconMap[grp.iconKey] || Layers,
+        label: isEs ? grp.labelEs : grp.labelEn,
+        shortLabel: isEs ? grp.shortEs : grp.shortEn,
+        badge: isSingleItem ? (singleItem.badge || null) : String(grp.items.length),
+      };
+    }),
     {
       id: 'protocols',
       href: buildHref('/proto'),

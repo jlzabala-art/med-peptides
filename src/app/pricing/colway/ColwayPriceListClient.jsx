@@ -1,15 +1,42 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import ModularPriceSchedule from '@/components/pricing/shared/ModularPriceSchedule';
+import PricingMarketSwitcherBar from '@/components/pricing/shared/PricingMarketSwitcherBar';
 import './ColwayPriceList.css';
+
+const QatarColwayPriceListClient = dynamic(
+  () => import('../colway-qatar/QatarColwayPriceListClient'),
+  { ssr: false }
+);
 
 export default function ColwayPriceListClient({
   initialProducts = [],
   initialCategory = 'all',
   isHairLineFocus = false,
   initialCurrency = null,
+  initialMarket = 'uae',
 }) {
+  const [market, setMarket] = useState(initialMarket === 'qatar' ? 'qatar' : 'uae');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = (new URLSearchParams(window.location.search).get('market') || '').toLowerCase();
+    if (raw === 'qatar' || raw === 'qa') setMarket('qatar');
+  }, []);
+
+  const handleMarketChange = useCallback((nextMarket) => {
+    const normalized = nextMarket === 'qatar' ? 'qatar' : 'uae';
+    setMarket(normalized);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (normalized === 'qatar') url.searchParams.set('market', 'qatar');
+      else url.searchParams.delete('market');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
   const config = isHairLineFocus
     ? {
         sectionLabel: 'B2B Wholesale',
@@ -58,16 +85,40 @@ export default function ColwayPriceListClient({
         persistInlineEdits: true,
       };
 
-  return (
-    <ModularPriceSchedule
-      initialProducts={initialProducts}
-      initialCategory={initialCategory}
-      config={{
-        ...config,
-        defaultCurrency: initialCurrency && config.availableCurrencies.includes(initialCurrency)
-          ? initialCurrency
-          : config.defaultCurrency,
-      }}
+  const marketSwitcher = (
+    <PricingMarketSwitcherBar
+      label="Colway Market"
+      activeMarket={market}
+      onChange={handleMarketChange}
+      options={[
+        { id: 'uae', label: 'UAE · Derma & Trichology', badge: 'AED / USD' },
+        { id: 'qatar', label: 'Qatar · Hair Distribution', badge: 'QA' },
+      ]}
     />
+  );
+
+  if (market === 'qatar') {
+    return (
+      <>
+        {marketSwitcher}
+        <QatarColwayPriceListClient />
+      </>
+    );
+  }
+
+  return (
+    <>
+      {marketSwitcher}
+      <ModularPriceSchedule
+        initialProducts={initialProducts}
+        initialCategory={initialCategory}
+        config={{
+          ...config,
+          defaultCurrency: initialCurrency && config.availableCurrencies.includes(initialCurrency)
+            ? initialCurrency
+            : config.defaultCurrency,
+        }}
+      />
+    </>
   );
 }
