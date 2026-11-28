@@ -13,13 +13,14 @@ export default function Sidebar({ items = [], title = 'Atlas Health', className 
   const pathname = usePathname() || '';
 
   return (
-    <aside className={`ui-sidebar ${className}`}>
-      <div className="ui-sidebar__header">
-        <h2 className="ui-sidebar__title">{title}</h2>
+    <aside className={`gcp-sb-card ${className}`.trim()}>
+      <div className="gcp-sb-card-header">
+        <h2 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--gcp-sb-text, #202124)' }}>
+          {title}
+        </h2>
       </div>
-      <nav className="ui-sidebar__nav" aria-label="Main Navigation">
+      <nav className="gcp-sb-card-body gcp-sb-items" aria-label="Main Navigation">
         {items.map((item) => {
-          // Next.js equivalent of `end={item.path === '/'}`:
           const isRoot = item.path === '/';
           const isActive = isRoot ? pathname === '/' : pathname.startsWith(item.path);
 
@@ -27,10 +28,12 @@ export default function Sidebar({ items = [], title = 'Atlas Health', className 
             <Link
               key={item.id}
               href={item.path}
-              className={`ui-sidebar__link ${isActive ? 'ui-sidebar__link--active' : ''}`}
+              className={`gcp-sb-item ${isActive ? 'is-active' : ''}`}
             >
-              {item.icon && <span className="ui-sidebar__icon">{item.icon}</span>}
-              <span className="ui-sidebar__label">{item.label}</span>
+              <span className="gcp-sb-item-main">
+                {item.icon && <span className="gcp-sb-item-icon">{item.icon}</span>}
+                <span className="gcp-sb-item-label">{item.label}</span>
+              </span>
             </Link>
           );
         })}

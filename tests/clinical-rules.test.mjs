@@ -212,11 +212,17 @@ test('Sidebar Layout FOUC Prevention: sidebars use static CSS imports instead of
   assert.equal(drPortal.includes('<style jsx'), false, 'DoctorPublicPortalClient must not use <style jsx>');
   assert.ok(drPortal.includes('./DoctorPublicPortal.css'), 'DoctorPublicPortalClient must import static DoctorPublicPortal.css');
 
-  const portalSidebar = read('src/components/ui/PortalSidebar.jsx');
-  assert.equal(portalSidebar.includes('<style jsx'), false, 'PortalSidebar must not use <style jsx>');
+  const gcpFilterRail = read('src/components/ui/GcpFilterRail.jsx');
+  assert.equal(gcpFilterRail.includes('<style jsx'), false, 'GcpFilterRail must not use <style jsx>');
+
+  const gcpInspector = read('src/components/ui/GcpInspectorSidebar.jsx');
+  assert.equal(gcpInspector.includes('<style jsx'), false, 'GcpInspectorSidebar must not use <style jsx>');
 
   const ctxSidebar = read('src/components/shared/public/ContextualSidebar.jsx');
   assert.equal(ctxSidebar.includes('<style jsx'), false, 'ContextualSidebar must not use <style jsx>');
+
+  const masterCss = read('src/styles/master.css');
+  assert.ok(masterCss.includes('./gcp-sidebar.css'), 'master.css must import static gcp-sidebar.css');
 });
 
 test('Clinical Domain Classifier: isolates nasal sprays & BHRT hormones from TrichoSol fallback', async () => {

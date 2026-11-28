@@ -1,26 +1,27 @@
- 
 import React from 'react';
 
 /**
- * Shared sidebar for filtering navigation. 
- * Expected to be used within the `.col-layout` grid.
+ * Shared sidebar for filtering navigation in public collections.
+ * Uses unified Google Cloud Console rail styles (src/styles/gcp-sidebar.css).
  */
-export default function CollectionSidebar({ children }) {
+export default function CollectionSidebar({ children, className = '' }) {
   return (
-    <aside className="col-sidebar">
-      {children}
+    <aside className={`gcp-sb-rail ${className}`.trim()}>
+      <div className="gcp-sb-card">
+        <div className="gcp-sb-card-body">{children}</div>
+      </div>
     </aside>
   );
 }
 
 /**
- * Helper component for sections inside the sidebar.
+ * Helper component for collapsible/labeled sections inside CollectionSidebar.
  */
 export function SidebarSection({ title, children }) {
   return (
-    <div className="col-sidebar-section">
-      {title && <h3 className="col-sidebar-title">{title}</h3>}
-      {children}
+    <div className="gcp-sb-section">
+      {title && <h3 className="gcp-sb-section-title gcp-sb-section-title--static">{title}</h3>}
+      <div style={{ padding: '0 0.5rem' }}>{children}</div>
     </div>
   );
 }

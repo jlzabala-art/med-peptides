@@ -31,7 +31,9 @@ export default function AppSidebar({
   isMobile,
   footer,
   isOpen,
-  onClose
+  onClose,
+  defaultExpandAllGroups = null,
+  lockExpanded = null,
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -75,10 +77,13 @@ export default function AppSidebar({
     }
   }, [isMobile, isOpen]);
 
-  // Auto-expand groups: in doctor portal, expand all groups so options are immediately clear; elsewhere single-open
+  // Auto-expand groups when explicit prop (or clinical /doctor workspace) requests full clarity
+  const effectiveExpandAll = defaultExpandAllGroups ?? pathname.startsWith('/doctor');
+  const effectiveLockExpanded = lockExpanded ?? pathname.startsWith('/doctor');
+
   useEffect(() => {
     if (!pathname) return;
-    if (pathname.startsWith('/doctor') && !isMobile) {
+    if (effectiveExpandAll && !isMobile) {
       const allIds = filteredGroups.map(g => g.id);
       setExpandedGroups(allIds);
       return;
@@ -104,13 +109,12 @@ export default function AppSidebar({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, isMobile]);
+  }, [pathname, isMobile, effectiveExpandAll]);
 
   // Local visual expand/collapse with persistence and compact-laptop intelligence
   const [expanded, setExpanded] = React.useState(() => {
     if (typeof window !== 'undefined') {
-      // In doctor mode, keep sidebar ALWAYS expanded by default for maximum usability and clarity
-      if (window.location.pathname.startsWith('/doctor')) {
+      if (effectiveLockExpanded) {
         return true;
       }
       const saved = localStorage.getItem('atlas_sidebar_expanded');
@@ -121,12 +125,12 @@ export default function AppSidebar({
     return true;
   });
 
-  // Whenever entering /doctor, ensure the sidebar is expanded
+  // Ensure sidebar stays expanded when lockExpanded is active
   useEffect(() => {
-    if (pathname && pathname.startsWith('/doctor')) {
+    if (effectiveLockExpanded) {
       setExpanded(true);
     }
-  }, [pathname]);
+  }, [effectiveLockExpanded]);
 
   const handleToggleExpanded = () => {
     setExpanded((prev) => {

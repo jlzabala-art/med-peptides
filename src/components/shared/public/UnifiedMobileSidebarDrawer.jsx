@@ -1,21 +1,20 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { X, List } from 'lucide-react';
+import { X, List } from '@/lib/icons';
 
 /**
  * UnifiedMobileSidebarDrawer
  * ─────────────────────────────────────────────────────────────────────────────
- * Standard off-canvas mobile drawer shell for all public sidebars & filters
- * (/p/*, /proto/*, /c/*, /collection/*, /lab/*, /dr/*).
- * Ensures identical backdrop, sticky header, ≥44px close button, and Escape key handling.
+ * Standard GCP off-canvas mobile drawer shell shared by public, clinical,
+ * protocol, pricing, and filter sidebars (<= 1024px).
  */
 export default function UnifiedMobileSidebarDrawer({
   isOpen = false,
   onClose,
-  title = 'Sections & Navigation',
+  title = 'Navigation & Filters',
   icon = null,
-  accentColor = '#003666',
+  headerContent = null,
   children,
 }) {
   useEffect(() => {
@@ -23,8 +22,13 @@ export default function UnifiedMobileSidebarDrawer({
     const handleKey = (e) => {
       if (e.key === 'Escape') onClose?.();
     };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKey);
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -34,84 +38,48 @@ export default function UnifiedMobileSidebarDrawer({
       role="dialog"
       aria-modal="true"
       aria-label={title}
+      className="gcp-sb-drawer-backdrop"
       onClick={() => onClose?.()}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(15, 23, 42, 0.58)',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-        zIndex: 1000,
-        display: 'flex',
-        justifyContent: 'flex-start',
-      }}
     >
       <div
+        className="gcp-sb-drawer-panel"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          width: '86%',
-          maxWidth: '360px',
-          height: '100%',
-          background: 'var(--atlas-surface, #ffffff)',
-          boxShadow: '4px 0 28px rgba(15, 23, 42, 0.18)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflowY: 'auto',
-        }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0.85rem 1rem',
-            borderBottom: '1px solid var(--atlas-border, #e2e8f0)',
-            position: 'sticky',
-            top: 0,
-            background: 'var(--atlas-surface, #ffffff)',
-            zIndex: 10,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-            {icon || <List size={16} color={accentColor} />}
-            <h4
-              style={{
-                fontSize: '0.9rem',
-                fontWeight: 800,
-                color: '#0f172a',
-                margin: 0,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {title}
-            </h4>
-          </div>
+        <div className="gcp-sb-drawer-header">
+          {headerContent ? (
+            headerContent
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <span style={{ color: '#5f6368', display: 'inline-flex', flexShrink: 0 }}>
+                {icon || <List size={16} />}
+              </span>
+              <h4
+                style={{
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  color: '#202124',
+                  margin: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {title}
+              </h4>
+            </div>
+          )}
 
           <button
             type="button"
             onClick={() => onClose?.()}
             aria-label="Close navigation drawer"
-            style={{
-              background: '#f1f5f9',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              minWidth: '44px',
-              minHeight: '44px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#475569',
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
+            className="gcp-sb-drawer-close"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div style={{ padding: '1rem', flex: 1 }}>{children}</div>
+        <div className="gcp-sb-drawer-body">{children}</div>
       </div>
     </div>
   );

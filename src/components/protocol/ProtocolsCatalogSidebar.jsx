@@ -25,6 +25,7 @@ import {
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import { GOAL_TRANSLATIONS } from '@/utils/protocolTranslations';
+import UnifiedMobileSidebarDrawer from '@/components/shared/public/UnifiedMobileSidebarDrawer';
 
 /**
  * ProtocolsCatalogSidebar
@@ -433,41 +434,25 @@ export default function ProtocolsCatalogSidebar({
         {sidebarBody}
       </aside>
 
-      {/* Mobile Slide-Over Drawer (< 1024px) */}
-      {isMobileDrawerOpen && (
-        <div className="proto-mobile-drawer-backdrop" onClick={onCloseMobileDrawer}>
-          <div className="proto-mobile-drawer-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="proto-mobile-drawer-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Filter size={16} color="#003666" />
-                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Filtros & Herramientas del Directorio' : 'Directory Filters & Tools'}
-                </span>
-              </div>
-              <button
-                type="button"
-                className="proto-mobile-drawer-close"
-                onClick={onCloseMobileDrawer}
-                aria-label="Close filters"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="proto-mobile-drawer-body">
-              {sidebarBody}
-            </div>
-            <div className="proto-mobile-drawer-footer">
-              <button
-                type="button"
-                className="proto-mobile-drawer-apply-btn"
-                onClick={onCloseMobileDrawer}
-              >
-                {isEs ? 'Aplicar Filtros' : 'Apply Filters'}
-              </button>
-            </div>
-          </div>
+      {/* Unified GCP Mobile Off-Canvas Drawer (< 1024px) */}
+      <UnifiedMobileSidebarDrawer
+        isOpen={isMobileDrawerOpen}
+        onClose={onCloseMobileDrawer}
+        title={isEs ? 'Filtros & Herramientas del Directorio' : 'Directory Filters & Tools'}
+        icon={<Filter size={16} />}
+      >
+        {sidebarBody}
+        <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #dadce0' }}>
+          <button
+            type="button"
+            className="gcp-btn-primary"
+            style={{ width: '100%', justifyContent: 'center' }}
+            onClick={onCloseMobileDrawer}
+          >
+            {isEs ? 'Aplicar Filtros' : 'Apply Filters'}
+          </button>
         </div>
-      )}
+      </UnifiedMobileSidebarDrawer>
     </>
   );
 }

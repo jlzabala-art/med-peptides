@@ -6,6 +6,7 @@
 /* 1. Design tokens (CSS custom properties — single source of truth) */
 @import './tokens.css';
 @import './gcp-theme.css';
+@import './gcp-sidebar.css';
 
 /* 2. Base resets, typography, buttons, forms */
 @import './base.css';

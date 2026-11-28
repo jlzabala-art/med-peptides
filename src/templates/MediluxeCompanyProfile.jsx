@@ -19,7 +19,6 @@ import {
   FlaskConical,
   Globe,
   Layers,
-  Lock,
   Mail,
   MapPin,
   Phone,
@@ -33,6 +32,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import MetricCard from '@/components/ui/MetricCard';
 import CopyableId from '@/components/ui/CopyableId';
 import DataTable from '@/components/ui/DataTable';
+import GcpInspectorSidebar from '@/components/ui/GcpInspectorSidebar';
 import GccRealisticVectorMap from '../components/corporate/GccRealisticVectorMap';
 import '../styles/mediluxe-gcp.css';
 
@@ -580,37 +580,27 @@ export default function MediluxeCompanyProfile() {
     []
   );
 
-  const renderEntityProperties = () => (
-    <div className="ml-gcp-kv-list">
-      <div className="ml-gcp-kv-row">
-        <span className="ml-gcp-kv-label">Legal Entity</span>
-        <CopyableId value="Mediluxe Medical Supplies L.L.C." maxLength={22} />
-      </div>
-      <div className="ml-gcp-kv-row">
-        <span className="ml-gcp-kv-label">Established</span>
-        <span className="ml-gcp-kv-value">2011 (14+ Years)</span>
-      </div>
-      <div className="ml-gcp-kv-row">
-        <span className="ml-gcp-kv-label">Headquarters</span>
-        <span className="ml-gcp-kv-value">Abu Dhabi, UAE</span>
-      </div>
-      <div className="ml-gcp-kv-row">
-        <span className="ml-gcp-kv-label">2024 Expansion</span>
-        <span className="ml-gcp-kv-value">Dubai Healthcare Hub</span>
-      </div>
-      <div className="ml-gcp-kv-row">
-        <span className="ml-gcp-kv-label">Quality Standard</span>
-        <span className="ml-gcp-kv-value">GMP &amp; ISO Cleanroom</span>
-      </div>
-      <div className="ml-gcp-kv-row">
-        <span className="ml-gcp-kv-label">Cold-Chain</span>
-        <StatusBadge status="active" customLabel="2-8°C Validated" />
-      </div>
-      <div className="ml-gcp-kv-row">
-        <span className="ml-gcp-kv-label">Data Privacy</span>
-        <StatusBadge status="info" customLabel="HIPAA / GDPR" />
-      </div>
-    </div>
+  const entityProperties = useMemo(
+    () => [
+      { label: 'Legal Entity', value: 'Mediluxe Medical Supplies L.L.C.', copyable: true, maxLength: 22 },
+      { label: 'Established', value: '2011 (14+ Years)' },
+      { label: 'Headquarters', value: 'Abu Dhabi, UAE' },
+      { label: '2024 Expansion', value: 'Dubai Healthcare Hub' },
+      { label: 'Quality Standard', value: 'GMP & ISO Cleanroom' },
+      { label: 'Cold-Chain', status: 'active', statusLabel: '2-8°C Validated' },
+      { label: 'Data Privacy', status: 'info', statusLabel: 'HIPAA / GDPR' },
+    ],
+    []
+  );
+
+  const connectedLinks = useMemo(
+    () => [
+      { label: 'Public Formulation Catalog', href: '/catalog' },
+      { label: 'Clinical Protocol Library', href: '/proto' },
+      { label: 'B2B Price Schedules', href: '/pricing' },
+      { label: 'Regulatory & Quality Docs', href: '/regulatory' },
+    ],
+    []
   );
 
   return (
@@ -736,31 +726,6 @@ export default function MediluxeCompanyProfile() {
             color="#1e8e3e"
           />
         </div>
-
-        {/* Mobile Collapsible Entity Properties Summary */}
-        <details className="ml-gcp-mobile-summary gcp-card no-print">
-          <summary
-            style={{
-              padding: '0.85rem 1rem',
-              fontSize: '0.84rem',
-              fontWeight: 600,
-              color: '#202124',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-              <Building2 size={16} />
-              <span>Entity Properties &amp; Compliance Summary</span>
-            </span>
-            <StatusBadge status="active" customLabel="Abu Dhabi HQ · Est. 2011" />
-          </summary>
-          <div style={{ padding: '0 1rem 1rem', borderTop: '1px solid #f1f3f4' }}>
-            {renderEntityProperties()}
-          </div>
-        </details>
 
         {/* Two-Column Console Workspace */}
         <div className="ml-gcp-layout">
@@ -1143,53 +1108,27 @@ export default function MediluxeCompanyProfile() {
             )}
           </main>
 
-          {/* ── Right Sticky GCP Details Pane ── */}
-          <aside className="ml-gcp-details-pane no-print" aria-label="Entity Properties">
-            <div className="ml-gcp-section">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', paddingBottom: '0.55rem', borderBottom: '1px solid #e8eaed' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#5f6368' }}>
-                  Entity Properties
-                </span>
-                <Lock size={13} style={{ color: '#80868b' }} />
+          {/* ── Right Sticky Unified GCP Inspector Pane ── */}
+          <GcpInspectorSidebar
+            title="Entity Properties"
+            mobileSummaryTitle="Entity Properties & Compliance Summary"
+            mobileSummaryBadge="Abu Dhabi HQ · Est. 2011"
+            properties={entityProperties}
+            linksTitle="Connected Resources"
+            links={connectedLinks}
+            extraCards={
+              <div className="gcp-sb-card" style={{ background: '#f8f9fa', padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 600, color: '#202124', marginBottom: '0.35rem' }}>
+                  <ThermometerSnowflake size={15} style={{ color: '#1a73e8' }} />
+                  <span>GCC Cold-Chain Dispatch</span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.76rem', color: '#5f6368', lineHeight: 1.5 }}>
+                  Abu Dhabi central vault &amp; Dubai 2024 expansion supporting 2–8°C biologicals across UAE,
+                  Qatar, Kuwait, and Saudi Arabia.
+                </p>
               </div>
-              {renderEntityProperties()}
-            </div>
-
-            <div className="ml-gcp-section">
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#5f6368', marginBottom: '0.75rem' }}>
-                Connected Resources
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <Link href="/catalog" className="gcp-btn-secondary ml-gcp-btn-neutral" style={{ justifyContent: 'space-between', textDecoration: 'none' }}>
-                  <span>Public Formulation Catalog</span>
-                  <ArrowRight size={14} />
-                </Link>
-                <Link href="/proto" className="gcp-btn-secondary ml-gcp-btn-neutral" style={{ justifyContent: 'space-between', textDecoration: 'none' }}>
-                  <span>Clinical Protocol Library</span>
-                  <ArrowRight size={14} />
-                </Link>
-                <Link href="/pricing" className="gcp-btn-secondary ml-gcp-btn-neutral" style={{ justifyContent: 'space-between', textDecoration: 'none' }}>
-                  <span>B2B Price Schedules</span>
-                  <ArrowRight size={14} />
-                </Link>
-                <Link href="/regulatory" className="gcp-btn-secondary ml-gcp-btn-neutral" style={{ justifyContent: 'space-between', textDecoration: 'none' }}>
-                  <span>Regulatory &amp; Quality Docs</span>
-                  <ArrowRight size={14} />
-                </Link>
-              </div>
-            </div>
-
-            <div className="ml-gcp-section" style={{ background: '#f8f9fa' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 600, color: '#202124', marginBottom: '0.35rem' }}>
-                <ThermometerSnowflake size={15} style={{ color: '#1a73e8' }} />
-                <span>GCC Cold-Chain Dispatch</span>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.76rem', color: '#5f6368', lineHeight: 1.5 }}>
-                Abu Dhabi central vault &amp; Dubai 2024 expansion supporting 2–8°C biologicals across UAE,
-                Qatar, Kuwait, and Saudi Arabia.
-              </p>
-            </div>
-          </aside>
+            }
+          />
         </div>
 
         {/* Print-Only Complete Corporate One-Pager Summary */}

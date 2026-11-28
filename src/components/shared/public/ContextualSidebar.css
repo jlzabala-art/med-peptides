@@ -1,4 +1,4 @@
-/* Extracted from <style jsx> in ContextualSidebar.jsx to prevent sidebar FOUC */
+/* Unified Google Cloud UX responsive rules for ContextualSidebar (<= 1024px) */
 
 .contextual-sidebar-desktop {
   display: block;
@@ -8,7 +8,7 @@
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .contextual-sidebar-desktop {
     display: none;
   }

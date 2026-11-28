@@ -3,26 +3,26 @@
  * ──────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --sb-current-width: 260px;
-  --sb-w-full:        260px;
-  --sb-w-mini:         64px;
-  --sb-easing:         cubic-bezier(0.4, 0, 0.2, 1);
-  --sb-duration:       250ms;
+  --sb-current-width: var(--gcp-sb-nav-w, 256px);
+  --sb-w-full:        var(--gcp-sb-nav-w, 256px);
+  --sb-w-mini:        var(--gcp-sb-nav-mini-w, 64px);
+  --sb-easing:        cubic-bezier(0.4, 0, 0.2, 1);
+  --sb-duration:      220ms;
 
-  /* Colours */
-  --sb-bg:             #f9fafb;
-  --sb-header-bg:      #f9fafb;
-  --sb-active-bg:      rgba(15, 23, 42, 0.05);
-  --sb-active-color:   #0f172a;
-  --sb-hover-bg:       rgba(15, 23, 42, 0.03);
-  --sb-group-divider:  rgba(15, 23, 42, 0.06);
-  --sb-text:           #0f172a;
-  --sb-muted:          #64748b;
-  --sb-icon:           #64748b;
-  --sb-icon-active:    #0f172a;
+  /* Google Cloud Console Unified Sidebar Palette */
+  --sb-bg:             var(--gcp-sb-canvas, #f8f9fa);
+  --sb-header-bg:      var(--gcp-sb-canvas, #f8f9fa);
+  --sb-active-bg:      var(--gcp-sb-accent-soft, #e8f0fe);
+  --sb-active-color:   var(--gcp-sb-accent, #1a73e8);
+  --sb-hover-bg:       var(--gcp-sb-hover, #f1f3f4);
+  --sb-group-divider:  var(--gcp-sb-border, #dadce0);
+  --sb-text:           var(--gcp-sb-text, #202124);
+  --sb-muted:          var(--gcp-sb-text-secondary, #5f6368);
+  --sb-icon:           var(--gcp-sb-text-secondary, #5f6368);
+  --sb-icon-active:    var(--gcp-sb-accent, #1a73e8);
 
   /* Grid & Dimensions */
-  --sb-item-radius:    6px;
+  --sb-item-radius:    var(--gcp-sb-radius-item, 6px);
   --sb-item-height:    36px;
   --sb-padding-x:      16px;
 }

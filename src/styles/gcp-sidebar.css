@@ -1,0 +1,392 @@
+/* ==========================================================================
+   ATLAS HEALTH — UNIFIED GOOGLE CLOUD CONSOLE (GCP) SIDEBAR SYSTEM
+   Shared tokens, rails, inspector panels, active states, and mobile drawers
+   across AppSidebar, GcpFilterRail, GcpInspectorSidebar, and UnifiedMobileSidebarDrawer.
+   ========================================================================== */
+
+:root {
+  --gcp-sb-nav-w: 256px;
+  --gcp-sb-nav-mini-w: 64px;
+  --gcp-sb-rail-w: 268px;
+  --gcp-sb-inspector-w: 300px;
+
+  --gcp-sb-surface: #ffffff;
+  --gcp-sb-canvas: #f8f9fa;
+  --gcp-sb-border: #dadce0;
+  --gcp-sb-divider: #e8eaed;
+
+  --gcp-sb-text: #202124;
+  --gcp-sb-text-secondary: #5f6368;
+  --gcp-sb-text-muted: #80868b;
+
+  --gcp-sb-accent: var(--gcp-blue, #1a73e8);
+  --gcp-sb-accent-soft: #e8f0fe;
+  --gcp-sb-hover: #f1f3f4;
+
+  --gcp-sb-radius-panel: 8px;
+  --gcp-sb-radius-item: 6px;
+}
+
+/* ── Panel Container ──────────────────────────────────────────────────────── */
+.gcp-sb-card {
+  background-color: var(--gcp-sb-surface);
+  border: 1px solid var(--gcp-sb-border);
+  border-radius: var(--gcp-sb-radius-panel);
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.06);
+  overflow: hidden;
+}
+
+.gcp-sb-card-header {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--gcp-sb-divider);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.gcp-sb-card-body {
+  padding: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── Canonical Desktop Left Rail & Right Inspector ────────────────────────── */
+.gcp-sb-rail {
+  width: var(--gcp-sb-rail-w);
+  flex-shrink: 0;
+  position: sticky;
+  top: 84px;
+  align-self: flex-start;
+  max-height: calc(100vh - 104px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.gcp-sb-inspector {
+  width: var(--gcp-sb-inspector-w);
+  flex-shrink: 0;
+  position: sticky;
+  top: 84px;
+  align-self: flex-start;
+  max-height: calc(100vh - 104px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.gcp-sb-rail::-webkit-scrollbar,
+.gcp-sb-inspector::-webkit-scrollbar {
+  width: 4px;
+}
+
+.gcp-sb-rail::-webkit-scrollbar-thumb,
+.gcp-sb-inspector::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+/* ── Section Headings & Dividers ──────────────────────────────────────────── */
+.gcp-sb-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.gcp-sb-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.25rem 0.875rem;
+  margin: 0;
+  border: none;
+  background: transparent;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gcp-sb-text-secondary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.gcp-sb-section-title--static {
+  cursor: default;
+}
+
+.gcp-sb-divider {
+  height: 1px;
+  background: var(--gcp-sb-divider);
+  margin: 0.35rem 0.875rem;
+}
+
+/* ── Canonical Left-Bar Navigation Item ───────────────────────────────────── */
+.gcp-sb-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-right: 0.5rem;
+}
+
+.gcp-sb-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 0 var(--gcp-sb-radius-item) var(--gcp-sb-radius-item) 0;
+  background: transparent;
+  color: #3c4043;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.gcp-sb-item:hover {
+  background-color: var(--gcp-sb-hover);
+  color: var(--gcp-sb-text);
+}
+
+.gcp-sb-item.is-active {
+  border-left-color: var(--gcp-sb-accent);
+  background-color: var(--gcp-sb-accent-soft);
+  color: var(--gcp-sb-accent);
+  font-weight: 600;
+}
+
+.gcp-sb-item:focus-visible {
+  outline: 2px solid var(--gcp-sb-accent);
+  outline-offset: -2px;
+}
+
+.gcp-sb-item-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.gcp-sb-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.gcp-sb-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gcp-sb-count {
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  background: #e8eaed;
+  color: #3c4043;
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.gcp-sb-item.is-active .gcp-sb-count {
+  background: var(--gcp-sb-accent);
+  color: #ffffff;
+}
+
+/* ── Entity Properties Key-Value List (Inspector Archetype) ───────────────── */
+.gcp-sb-kv-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0 1rem;
+}
+
+.gcp-sb-kv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid #f1f3f4;
+  font-size: 0.8rem;
+}
+
+.gcp-sb-kv-row:last-child {
+  border-bottom: none;
+}
+
+.gcp-sb-kv-label {
+  color: var(--gcp-sb-text-secondary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.gcp-sb-kv-value {
+  color: var(--gcp-sb-text);
+  font-weight: 600;
+  text-align: right;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Sticky Action Stack ──────────────────────────────────────────────────── */
+.gcp-sb-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 0.85rem;
+  border-top: 1px solid var(--gcp-sb-divider);
+}
+
+/* ── Mobile Unified Summary & Trigger (<= 1024px) ─────────────────────────── */
+.gcp-sb-mobile-trigger {
+  display: none;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--gcp-sb-surface);
+  border: 1px solid var(--gcp-sb-border);
+  border-radius: var(--gcp-sb-radius-panel);
+  color: var(--gcp-sb-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+}
+
+.gcp-sb-mobile-summary {
+  display: none;
+  margin-bottom: 0.85rem;
+}
+
+.gcp-sb-mobile-summary > summary {
+  list-style: none;
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--gcp-sb-text);
+}
+
+.gcp-sb-mobile-summary > summary::-webkit-details-marker {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .gcp-sb-rail,
+  .gcp-sb-inspector {
+    display: none !important;
+  }
+
+  .gcp-sb-mobile-trigger {
+    display: flex;
+  }
+
+  .gcp-sb-mobile-summary {
+    display: block;
+    order: -1;
+  }
+}
+
+/* ── Unified Off-Canvas Mobile Drawer Shell ───────────────────────────────── */
+.gcp-sb-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  background: rgba(32, 33, 36, 0.52);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: flex-start;
+}
+
+.gcp-sb-drawer-panel {
+  width: 320px;
+  max-width: 88vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: var(--gcp-sb-surface);
+  border-right: 1px solid var(--gcp-sb-border);
+  box-shadow: 0 8px 32px rgba(32, 33, 36, 0.24);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.gcp-sb-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: var(--gcp-sb-surface);
+  border-bottom: 1px solid var(--gcp-sb-border);
+  flex-shrink: 0;
+}
+
+.gcp-sb-drawer-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid var(--gcp-sb-border);
+  background: var(--gcp-sb-canvas);
+  color: var(--gcp-sb-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gcp-sb-drawer-close:hover {
+  background: var(--gcp-sb-hover);
+  color: var(--gcp-sb-text);
+}
+
+.gcp-sb-drawer-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+@media print {
+  .gcp-sb-rail,
+  .gcp-sb-inspector,
+  .gcp-sb-mobile-trigger,
+  .gcp-sb-mobile-summary,
+  .gcp-sb-drawer-backdrop {
+    display: none !important;
+  }
+}

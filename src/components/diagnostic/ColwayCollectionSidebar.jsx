@@ -191,23 +191,15 @@ export default function ColwayCollectionSidebar({
       order: 1
     }}>
       {/* ── 1. CATEGORIAS & FORMULACIONES (Google Cloud Console Navigation Tree) ── */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1.15rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-      }}>
+      <div className="gcp-sb-card" style={{ padding: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
-          <h5 style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <h5 className="gcp-sb-section-title gcp-sb-section-title--static" style={{ padding: 0 }}>
             {isEs ? 'Categorías & Departamentos' : 'Departments & Categories'}
           </h5>
-          <span style={{ fontSize: '0.68rem', color: '#0d9488', fontWeight: 700, background: '#f0fdfa', border: '1px solid #a7f3d0', padding: '1px 7px', borderRadius: '4px' }}>
-            Colway®
-          </span>
+          <span className="gcp-sb-count">Colway®</span>
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        <nav className="gcp-sb-items" style={{ paddingRight: 0 }}>
           {categories.map((cat) => {
             const isActive = activeSection === 'catalog' && selectedCategory === cat.id;
             const CatIcon = cat.icon || Layers;
@@ -221,54 +213,15 @@ export default function ColwayCollectionSidebar({
                   if (onSelectCategory) onSelectCategory(cat.id);
                   scrollToSectionTop();
                 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  border: isActive ? '1px solid #a7f3d0' : '1px solid transparent',
-                  background: isActive ? '#f0fdfa' : 'transparent',
-                  color: isActive ? '#0d9488' : '#334155',
-                  fontSize: '0.80rem',
-                  fontWeight: isActive ? 750 : 550,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = '#f8fafc';
-                    e.currentTarget.style.color = '#0f172a';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#334155';
-                  }
-                }}
+                className={`gcp-sb-item ${isActive ? 'is-active' : ''}`}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0 }}>
-                  <CatIcon size={14} color={isActive ? '#0d9488' : '#64748b'} />
-                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {cat.label}
+                <span className="gcp-sb-item-main">
+                  <span className="gcp-sb-item-icon">
+                    <CatIcon size={14} />
                   </span>
-                </div>
-                {cat.count != null && (
-                  <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    padding: '1px 6px',
-                    borderRadius: '9999px',
-                    background: isActive ? '#0d9488' : '#f1f5f9',
-                    color: isActive ? '#ffffff' : '#64748b',
-                    marginLeft: '6px',
-                    flexShrink: 0
-                  }}>
-                    {cat.count}
-                  </span>
-                )}
+                  <span className="gcp-sb-item-label">{cat.label}</span>
+                </span>
+                {cat.count != null && <span className="gcp-sb-count">{cat.count}</span>}
               </button>
             );
           })}
@@ -276,13 +229,7 @@ export default function ColwayCollectionSidebar({
       </div>
 
       {/* ── 2. THE 3 SCIENTIFIC PILLARS (Progressive Disclosure) ── */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1.15rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-      }}>
+      <div className="gcp-sb-card" style={{ padding: '1rem' }}>
         <div
           onClick={() => setIsPillarsOpen(!isPillarsOpen)}
           style={{
@@ -350,20 +297,14 @@ export default function ColwayCollectionSidebar({
       </div>
 
       {/* ── 3. ACREDITACION & REGISTROS INTERNACIONALES (EU, UAE & Qatar) ── */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1.25rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-      }}>
+      <div className="gcp-sb-card" style={{ padding: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.75rem' }}>
           <div style={{
             width: '34px',
             height: '34px',
             borderRadius: '8px',
-            background: 'rgba(13, 148, 136, 0.1)',
-            color: '#0d9488',
+            background: '#e8f0fe',
+            color: '#1a73e8',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -372,33 +313,33 @@ export default function ColwayCollectionSidebar({
             <Award size={18} />
           </div>
           <div>
-            <h5 style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+            <h5 style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124', margin: 0 }}>
               Colway® Biotechnology
             </h5>
-            <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
-              Gdańsk, Poland · European Pioneers
+            <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>
+              Gdansk, Poland · European Pioneers
             </span>
           </div>
         </div>
 
-        <p style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.5, margin: '0 0 0.85rem 0' }}>
+        <p style={{ fontSize: '0.76rem', color: '#5f6368', lineHeight: 1.5, margin: '0 0 0.85rem 0' }}>
           {isEs
             ? 'Formulaciones bajo normativa europea ISO 22716 y CPNP (1223/2009). Registros oficiales aprobados en Unión Europea, EAU (MoHAP / Dubai Montaji) y Qatar (MoPH).'
             : 'European formulation under ISO 22716 GMP & CPNP (1223/2009). Official sanitary registrations active in European Union, UAE (MoHAP / Dubai Montaji) & Qatar (MoPH).'}
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', borderRadius: '6px', background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#16a34a' }}>🇪🇺 European Union (All 8 Items)</span>
-            <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#15803d' }}>EU CPNP Reg.</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 8px', borderRadius: '6px', background: '#f8f9fa', border: '1px solid #dadce0' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#202124' }}>EU · European Union (All 8 Items)</span>
+            <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#137333' }}>EU CPNP Reg.</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', borderRadius: '6px', background: '#f0f9ff', border: '1px solid #bae6fd' }}>
-            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0284c7' }}>🇦🇪 UAE (Shampoo, Cond., Wash Gel, Lip)</span>
-            <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#0369a1' }}>MoHAP / Montaji</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 8px', borderRadius: '6px', background: '#f8f9fa', border: '1px solid #dadce0' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#202124' }}>UAE · Shampoo, Cond., Wash, Lip</span>
+            <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#1a73e8' }}>MoHAP / Montaji</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', borderRadius: '6px', background: '#fdf2f8', border: '1px solid #fbcfe8' }}>
-            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#be185d' }}>🇶🇦 Qatar (Shampoo & Conditioner)</span>
-            <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#9d174d' }}>MoPH Reg.</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 8px', borderRadius: '6px', background: '#f8f9fa', border: '1px solid #dadce0' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#202124' }}>QAT · Qatar (Shampoo &amp; Cond.)</span>
+            <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#5f6368' }}>MoPH Reg.</span>
           </div>
         </div>
       </div>

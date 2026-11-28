@@ -1,22 +1,8 @@
-"use client";
+'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import {
-  ShieldCheck,
-  Award,
-  FlaskConical,
-  Zap,
-  Sparkles,
-  Copy,
-  Check,
-  ChevronRight,
-  Mail,
-  SlidersHorizontal,
-  ChevronDown
-} from '@/lib/icons';
-import { toast } from 'react-hot-toast';
-import { triggerHaptic } from '../../utils/haptics';
+import React, { useMemo } from 'react';
+import { Award, ShieldCheck, Zap, FlaskConical, Mail } from '@/lib/icons';
+import GcpFilterRail from '@/components/ui/GcpFilterRail';
 
 export default function UltraPersonCollectionSidebar({
   lang = 'en',
@@ -25,340 +11,93 @@ export default function UltraPersonCollectionSidebar({
   onSelectCategory = () => {},
   totalCount = 0,
   onOpenInquiry = null,
-  onOpenAi = null
+  onOpenAi = null,
 }) {
   const isEs = lang === 'es';
-  const [copied, setCopied] = useState(false);
-  const [isIntegrationOpen, setIsIntegrationOpen] = useState(true);
-
   const canonicalUrl = 'https://www.atlashealth-services.com/collection/ultraperson';
 
-  const handleCopyLink = async () => {
-    triggerHaptic('selection');
-    try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(canonicalUrl);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = canonicalUrl;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-      }
-      setCopied(true);
-      toast.success(isEs ? 'Enlace oficial UltraPerson™ copiado ✓' : 'Canonical UltraPerson link copied to clipboard ✓');
-      setTimeout(() => setCopied(false), 2500);
-    } catch {
-      toast.error('Failed to copy link');
-    }
+  const credentials = [
+    {
+      icon: ShieldCheck,
+      label: isEs ? 'Cápsula HPMC Vegana' : 'Vegan HPMC Delayed-Release',
+      detail: isEs ? 'Liberación entérica controlada' : '100% plant-derived enteric capsule',
+    },
+    {
+      icon: Award,
+      label: '500 mg / Day',
+      detail: isEs ? 'Activos clínicos estandarizados' : 'Standardized pharmaceutical-grade cofactors',
+    },
+    {
+      icon: Zap,
+      label: isEs ? 'Sinergia Peptídica' : 'Peptide Protocol Synergy',
+      detail: isEs ? 'Alineación circadiana y metabólica' : 'Circadian & mitochondrial pairing',
+    },
+  ];
+
+  const sections = useMemo(() => {
+    if (!categories || categories.length === 0) return [];
+    return [
+      {
+        id: 'ultraperson-cats',
+        title: isEs ? 'Categorías Clínicas' : 'Clinical Categories',
+        totalLabel: `${totalCount} Total`,
+        defaultOpen: true,
+        items: categories.map((cat) => ({
+          id: cat.id,
+          label: cat.label,
+          count: cat.count > 0 ? cat.count : undefined,
+          active: selectedCategory === cat.id,
+          onClick: () => onSelectCategory(cat.id),
+        })),
+      },
+    ];
+  }, [categories, isEs, onSelectCategory, selectedCategory, totalCount]);
+
+  const steps = [
+    { num: '01', title: isEs ? 'Evaluación Biomarcadores' : 'Biomarker Evaluation', desc: isEs ? 'Base con Bloodo o ETERNA' : 'Baseline test with Bloodo or ETERNA' },
+    { num: '02', title: isEs ? 'Selección de Fórmula' : 'Formula Selection', desc: isEs ? 'Cofactores diurno/nocturno' : 'Targeted circadian or metabolic cofactors' },
+    { num: '03', title: isEs ? 'Pauta 90 Días' : '90-Day Protocol', desc: isEs ? 'Administración continua oral' : 'Standardized daily oral administration' },
+    { num: '04', title: isEs ? 'Reevaluación Analítica' : 'Outcome Reassessment', desc: isEs ? 'Control longitudinal en Atlas' : 'Longitudinal telemetric tracking' },
+  ];
+
+  const actions = {
+    copyUrl: canonicalUrl,
+    copyLabel: isEs ? 'Copiar Enlace Colección' : 'Copy Collection Link',
+    copiedLabel: isEs ? 'Enlace Copiado' : 'Link Copied',
+    primaryCta: {
+      label: isEs ? 'Laboratorio Formulación Magistral' : 'Request Custom Formulation',
+      href: '/compounding',
+      icon: FlaskConical,
+    },
+    ...(onOpenInquiry
+      ? {
+          secondaryCta: {
+            label: isEs ? 'Consulta Clínica Directa' : 'Clinical Nutraceuticals Inquiry',
+            onClick: onOpenInquiry,
+            icon: Mail,
+          },
+        }
+      : {}),
+    ...(onOpenAi
+      ? {
+          onOpenAi,
+          aiLabel: isEs ? 'Consultar con Atlas AI' : 'Consult Atlas AI Copilot',
+        }
+      : {}),
   };
 
   return (
-    <aside className="gcp-collection-sidebar" style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '1.25rem',
-      position: 'sticky',
-      top: '90px'
-    }}>
-      {/* ── 1. Quality & Accreditation Header Card ── */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1.25rem',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            background: 'rgba(124, 58, 237, 0.1)',
-            color: '#7c3aed',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0
-          }}>
-            <FlaskConical size={16} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0f172a' }}>
-              UltraPerson™ Clinical Formulas
-            </div>
-            <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-              Atlas Compounding Network · EU GMP
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.72rem', color: '#475569' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <ShieldCheck size={14} color="#16a34a" />
-            <span>{isEs ? 'Cápsula HPMC 100% Vegana' : 'Vegan HPMC Delayed-Release'}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Award size={14} color="#7c3aed" />
-            <span>{isEs ? 'Dosis estandarizada 500 mg/día' : 'Standardized 500 mg Actives/Day'}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Zap size={14} color="#0284c7" />
-            <span>{isEs ? 'Sinergia directa con péptidos' : 'Peptide Protocol Synergy'}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── 2. Interactive Categories Filter Card (Google Cloud Standard) ── */}
-      {categories && categories.length > 0 && (
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '14px',
-          border: '1px solid #e2e8f0',
-          padding: '1.25rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <SlidersHorizontal size={13} color="#7c3aed" />
-              <span>{isEs ? 'Categorías Clínicas' : 'Clinical Categories'}</span>
-            </span>
-            <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
-              {totalCount} Total
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {categories.map((cat) => {
-              const isSelected = selectedCategory === cat.id;
-              const accent = '#7c3aed';
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => onSelectCategory(cat.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '8px 10px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: isSelected ? `${accent}12` : 'transparent',
-                    color: isSelected ? accent : '#334155',
-                    fontSize: '0.78rem',
-                    fontWeight: isSelected ? 750 : 600,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.12s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = '#f8fafc';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  <span>{cat.label}</span>
-                  {cat.count > 0 && (
-                    <span
-                      style={{
-                        fontSize: '0.66rem',
-                        padding: '1px 6px',
-                        borderRadius: '9999px',
-                        background: isSelected ? accent : '#f1f5f9',
-                        color: isSelected ? '#ffffff' : '#64748b',
-                        fontWeight: 700
-                      }}
-                    >
-                      {cat.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── 3. Clinical Workflow Steps (Collapsible Accordion Card) ── */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1rem 1.25rem',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-      }}>
-        <div 
-          onClick={() => setIsIntegrationOpen(!isIntegrationOpen)}
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between', 
-            cursor: 'pointer',
-            userSelect: 'none'
-          }}
-        >
-          <h5 style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            {isEs ? 'Pauta de Integración' : 'Clinical Integration'}
-          </h5>
-          <ChevronDown 
-            size={14} 
-            color="#64748b" 
-            style={{ 
-              transform: isIntegrationOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease' 
-            }} 
-          />
-        </div>
-
-        {isIntegrationOpen && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
-            {[
-              { step: '01', title: isEs ? 'Evaluación Biomarcadores' : 'Biomarker Evaluation', desc: isEs ? 'Base con Bloodo o ETERNA' : 'Baseline test with Bloodo or ETERNA' },
-              { step: '02', title: isEs ? 'Selección de Fórmula' : 'Formula Selection', desc: isEs ? 'Cofactores según eje diurno/nocturno' : 'Targeted circadian or metabolic cofactors' },
-              { step: '03', title: isEs ? 'Pauta 90 Días' : '90-Day Protocol', desc: isEs ? 'Administración continua oral' : 'Standardized daily oral administration' },
-              { step: '04', title: isEs ? 'Reevaluación Analítica' : 'Outcome Reassessment', desc: isEs ? 'Control longitudinal en Atlas' : 'Longitudinal telemetric tracking' }
-            ].map((item, i) => (
-              <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <span style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 800,
-                  color: '#7c3aed',
-                  background: '#f5f3ff',
-                  borderRadius: '4px',
-                  padding: '2px 5px',
-                  lineHeight: 1
-                }}>
-                  {item.step}
-                </span>
-                <div>
-                  <div style={{ fontSize: '0.73rem', fontWeight: 700, color: '#0f172a' }}>{item.title}</div>
-                  <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{item.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── 4. Quick Actions (Formulation Inquiries & AI Consultation) ── */}
-      <div style={{
-        background: '#f8fafc',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px'
-      }}>
-        <Link
-          href="/compounding"
-          style={{
-            width: '100%',
-            padding: '9px 12px',
-            borderRadius: '8px',
-            background: '#0f172a',
-            color: '#ffffff',
-            border: 'none',
-            fontSize: '0.78rem',
-            fontWeight: 750,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
-            transition: 'background 0.15s ease',
-            textDecoration: 'none',
-            boxSizing: 'border-box'
-          }}
-        >
-          <FlaskConical size={14} color="#38bdf8" />
-          <span>{isEs ? 'Laboratorio de Formulación Magistral' : 'Request Custom Formulation'}</span>
-          <ChevronRight size={13} color="#94a3b8" />
-        </Link>
-
-        {onOpenInquiry && (
-          <button
-            type="button"
-            onClick={onOpenInquiry}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              background: '#ffffff',
-              color: '#334155',
-              border: '1px solid #cbd5e1',
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              transition: 'background 0.15s ease'
-            }}
-          >
-            <Mail size={13} color="#64748b" />
-            <span>{isEs ? 'Consulta Clínica Directa' : 'Clinical Nutraceuticals Inquiry'}</span>
-          </button>
-        )}
-
-        {onOpenAi && (
-          <button
-            type="button"
-            onClick={onOpenAi}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              background: '#ffffff',
-              color: '#0284c7',
-              border: '1px solid #bae6fd',
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#f0f9ff'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}
-          >
-            <Sparkles size={13} color="#0284c7" />
-            <span>{isEs ? 'Consultar con Atlas AI' : 'Consult Atlas AI Copilot'}</span>
-          </button>
-        )}
-
-        <button
-          type="button"
-          onClick={handleCopyLink}
-          style={{
-            width: '100%',
-            padding: '8px 12px',
-            borderRadius: '8px',
-            background: '#ffffff',
-            color: '#475569',
-            border: '1px solid #cbd5e1',
-            fontSize: '0.74rem',
-            fontWeight: 650,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px'
-          }}
-        >
-          {copied ? <Check size={13} color="#16a34a" /> : <Copy size={13} />}
-          <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace Colección' : 'Copy Collection Link')}</span>
-        </button>
-      </div>
+    <aside style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', position: 'sticky', top: '84px' }}>
+      <GcpFilterRail
+        asRailContainer={false}
+        title="UltraPerson™ Clinical Formulas"
+        subtitle="Atlas Compounding Network · EU GMP"
+        credentials={credentials}
+        sections={sections}
+        stepsTitle={isEs ? 'Pauta de Integración' : 'Clinical Integration'}
+        steps={steps}
+        actions={actions}
+      />
     </aside>
   );
 }

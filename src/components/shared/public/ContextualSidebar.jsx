@@ -1,27 +1,24 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Menu, X, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronDown, ChevronRight, Menu, Sparkles } from '@/lib/icons';
+import UnifiedMobileSidebarDrawer from './UnifiedMobileSidebarDrawer';
 import './ContextualSidebar.css';
 
 /**
  * ContextualSidebar
  * ─────────────────────────────────────────────────────────────────────────────
- * Unified, mobile-responsive sidebar for public entity detail, collection,
- * and catalog views (/collection/*, /p/*, /proto/*, /pricing/*).
- *
- * Enforces 3 standard zones:
- *  1. Context Header (title, subtitle, optional status/count badge)
- *  2. Sections / Navigation (collapsible groups or nav links)
- *  3. Sticky Action Footer (primary CTA, secondary CTA, unified Ask Atlas AI)
+ * Unified, GCP-compliant sidebar built on gcp-sidebar.css & UnifiedMobileSidebarDrawer
+ * for public entity, collection, and catalog views.
  */
 export default function ContextualSidebar({
   title = '',
   subtitle = '',
   badge = null,
-  sections = [], // [{ id, title, defaultOpen?, items: [{ id, label, count?, active?, onClick, href? }] }]
-  primaryAction = null, // { label, onClick, icon? }
-  secondaryAction = null, // { label, onClick, icon? }
+  sections = [],
+  primaryAction = null,
+  secondaryAction = null,
   showAtlasAiButton = true,
   atlasAiLabel = 'Ask Atlas AI',
   onOpenAtlasAi = null,
@@ -45,157 +42,91 @@ export default function ContextualSidebar({
   };
 
   const sidebarBody = (
-    <div
-      style={{
-        background: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '14px',
-        padding: '1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)',
-      }}
-    >
-      {/* 1. Context Header */}
+    <div className="gcp-sb-card">
       {(title || subtitle || badge) && (
-        <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
+        <div className="gcp-sb-card-header">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
             {title && (
-              <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
+              <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: 'var(--gcp-sb-text, #202124)' }}>
                 {title}
               </h3>
             )}
-            {badge && (
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  padding: '2px 8px',
-                  borderRadius: '999px',
-                  background: '#eff6ff',
-                  color: '#1d4ed8',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {badge}
-              </span>
-            )}
+            {badge && <span className="gcp-sb-count">{badge}</span>}
           </div>
           {subtitle && (
-            <p style={{ margin: '0.25rem 0 0', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>
+            <p style={{ margin: 0, fontSize: '0.76rem', color: 'var(--gcp-sb-text-secondary, #5f6368)', lineHeight: 1.45 }}>
               {subtitle}
             </p>
           )}
         </div>
       )}
 
-      {/* 2. Collapsible Navigation / Filter Sections */}
-      {sections.map((sec) => {
-        const isOpen = collapsed[sec.id] === undefined ? sec.defaultOpen !== false : !collapsed[sec.id];
-        return (
-          <div key={sec.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <button
-              type="button"
-              onClick={() => toggleSection(sec.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                background: 'transparent',
-                border: 'none',
-                padding: '0.25rem 0',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#475569',
-                cursor: 'pointer',
-              }}
-            >
-              <span>{sec.title}</span>
-              {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            </button>
+      <div className="gcp-sb-card-body">
+        {sections.map((sec, secIdx) => {
+          const isOpen = collapsed[sec.id] === undefined ? sec.defaultOpen !== false : !collapsed[sec.id];
+          return (
+            <React.Fragment key={sec.id}>
+              {secIdx > 0 && <div className="gcp-sb-divider" />}
+              <div className="gcp-sb-section">
+                <button
+                  type="button"
+                  onClick={() => toggleSection(sec.id)}
+                  className="gcp-sb-section-title"
+                  aria-expanded={isOpen}
+                >
+                  <span>{sec.title}</span>
+                  {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                </button>
 
-            {isOpen && Array.isArray(sec.items) && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                {sec.items.map((item) => {
-                  const baseStyle = {
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '8px',
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '0.45rem 0.65rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: item.active ? '#eff6ff' : 'transparent',
-                    color: item.active ? '#1d4ed8' : '#334155',
-                    fontWeight: item.active ? 600 : 500,
-                    fontSize: '0.82rem',
-                    cursor: 'pointer',
-                    textDecoration: 'none',
-                  };
+                {isOpen && Array.isArray(sec.items) && (
+                  <div className="gcp-sb-items">
+                    {sec.items.map((item) => {
+                      const cls = `gcp-sb-item ${item.active ? 'is-active' : ''}`;
+                      if (item.href) {
+                        return (
+                          <Link
+                            key={item.id}
+                            href={item.href}
+                            onClick={() => setMobileOpen(false)}
+                            className={cls}
+                          >
+                            <span className="gcp-sb-item-main">
+                              <span className="gcp-sb-item-label">{item.label}</span>
+                            </span>
+                            {item.count !== undefined && <span className="gcp-sb-count">{item.count}</span>}
+                          </Link>
+                        );
+                      }
 
-                  if (item.href) {
-                    return (
-                      <a
-                        key={item.id}
-                        href={item.href}
-                        onClick={() => setMobileOpen(false)}
-                        style={baseStyle}
-                      >
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {item.label}
-                        </span>
-                        {item.count !== undefined && (
-                          <span style={{ fontSize: '0.72rem', color: '#64748b' }}>{item.count}</span>
-                        )}
-                      </a>
-                    );
-                  }
-
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        item.onClick?.();
-                        setMobileOpen(false);
-                      }}
-                      style={baseStyle}
-                    >
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {item.label}
-                      </span>
-                      {item.count !== undefined && (
-                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>{item.count}</span>
-                      )}
-                    </button>
-                  );
-                })}
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            item.onClick?.();
+                            setMobileOpen(false);
+                          }}
+                          className={cls}
+                        >
+                          <span className="gcp-sb-item-main">
+                            <span className="gcp-sb-item-label">{item.label}</span>
+                          </span>
+                          {item.count !== undefined && <span className="gcp-sb-count">{item.count}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        );
-      })}
+            </React.Fragment>
+          );
+        })}
+      </div>
 
-      {/* Optional custom slot */}
       {children}
 
-      {/* 3. Sticky Action Footer */}
       {(primaryAction || secondaryAction || showAtlasAiButton) && (
-        <div
-          style={{
-            borderTop: '1px solid #f1f5f9',
-            paddingTop: '0.75rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.5rem',
-          }}
-        >
+        <div className="gcp-sb-actions">
           {primaryAction && (
             <button
               type="button"
@@ -204,7 +135,7 @@ export default function ContextualSidebar({
                 setMobileOpen(false);
               }}
               className="gcp-btn-primary"
-              style={{ width: '100%', minHeight: '40px', borderRadius: '10px', fontSize: '0.84rem' }}
+              style={{ width: '100%', justifyContent: 'center' }}
             >
               {primaryAction.icon}
               <span>{primaryAction.label}</span>
@@ -219,7 +150,7 @@ export default function ContextualSidebar({
                 setMobileOpen(false);
               }}
               className="gcp-btn-secondary"
-              style={{ width: '100%', minHeight: '38px', borderRadius: '10px', fontSize: '0.82rem', color: '#5f6368', background: '#ffffff' }}
+              style={{ width: '100%', justifyContent: 'center', color: '#3c4043' }}
             >
               {secondaryAction.icon}
               <span>{secondaryAction.label}</span>
@@ -231,7 +162,7 @@ export default function ContextualSidebar({
               type="button"
               onClick={handleOpenAi}
               className="gcp-btn-secondary"
-              style={{ width: '100%', minHeight: '38px', borderRadius: '10px', fontSize: '0.82rem', color: '#5f6368', background: '#ffffff' }}
+              style={{ width: '100%', justifyContent: 'center', color: '#3c4043' }}
             >
               <Sparkles size={14} />
               <span>{atlasAiLabel}</span>
@@ -244,79 +175,28 @@ export default function ContextualSidebar({
 
   return (
     <>
-      {/* Desktop Sticky Sidebar */}
       <div className="contextual-sidebar-desktop">{sidebarBody}</div>
 
-      {/* Mobile Compact Trigger + Drawer */}
       <div className="contextual-sidebar-mobile">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            width: '100%',
-            minHeight: '44px',
-            padding: '0.6rem 1rem',
-            borderRadius: '10px',
-            border: '1px solid #cbd5e1',
-            background: '#ffffff',
-            color: '#0f172a',
-            fontWeight: 600,
-            fontSize: '0.85rem',
-            cursor: 'pointer',
-          }}
+          className="gcp-sb-mobile-trigger"
         >
-          <Menu size={16} />
-          <span>{mobileTriggerLabel}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <Menu size={16} />
+            <span>{mobileTriggerLabel}</span>
+          </span>
         </button>
 
-        {mobileOpen && (
-          <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 9990,
-              background: 'rgba(15, 23, 42, 0.5)',
-              display: 'flex',
-              justifyContent: 'flex-start',
-            }}
-            onClick={() => setMobileOpen(false)}
-          >
-            <div
-              style={{
-                width: 'min(320px, 86vw)',
-                height: '100%',
-                background: '#f8fafc',
-                padding: '1rem',
-                overflowY: 'auto',
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setMobileOpen(false)}
-                  style={{
-                    border: 'none',
-                    background: '#e2e8f0',
-                    borderRadius: '999px',
-                    width: '32px',
-                    height: '32px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              {sidebarBody}
-            </div>
-          </div>
-        )}
+        <UnifiedMobileSidebarDrawer
+          isOpen={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          title={mobileTriggerLabel}
+          icon={<Menu size={16} />}
+        >
+          {sidebarBody}
+        </UnifiedMobileSidebarDrawer>
       </div>
     </>
   );
