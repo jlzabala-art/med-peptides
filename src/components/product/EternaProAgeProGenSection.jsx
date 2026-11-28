@@ -25,8 +25,7 @@ import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import StatusBadge from '@/components/ui/StatusBadge';
 import CopyableId from '@/components/ui/CopyableId';
 import EmptyState from '@/components/ui/EmptyState';
-import { collection, query, where, limit, getDocs } from 'firebase/firestore';
-import { db } from '@/firebase';
+import { getProAgeLabResults } from '@/repositories/labResultsRepository';
 
 /**
  * Canonical 6 Eterna ProAge™ Clients (Synced with Firestore `lab_results` & `patients` + Zoho Bigin CRM)
@@ -214,28 +213,21 @@ export default function EternaProAgeProGenSection({ lang = 'en', onOpenInquiry =
   const [scopeMode, setScopeMode] = useState('filtered'); // 'filtered' | 'global'
   const [proAgeClients, setProAgeClients] = useState(ETERNA_PROAGE_INITIAL_COHORT);
 
-  // Live Firestore read with limit(50) per Golden Rule #1 & #2
+  // Live Firestore read with limit(50) via labResultsRepository (Golden Rule #1 & #2)
   useEffect(() => {
     let mounted = true;
     async function loadFromFirestore() {
       try {
-        if (!db) return;
-        const q = query(
-          collection(db, 'lab_results'),
-          where('testVariant', '==', 'ProAge'),
-          limit(50)
-        );
-        const snap = await getDocs(q);
-        if (!mounted || snap.empty) return;
+        const docs = await getProAgeLabResults(50);
+        if (!mounted || docs.length === 0) return;
         const byCode = new Map();
         ETERNA_PROAGE_INITIAL_COHORT.forEach(item => byCode.set(item.code, item));
-        snap.forEach(docSnap => {
-          const d = docSnap.data();
-          const code = d.code || d.protocolNumber || docSnap.id;
+        docs.forEach(d => {
+          const code = d.code || d.protocolNumber || d.id;
           const base = byCode.get(code) || {};
           byCode.set(code, {
             ...base,
-            id: docSnap.id,
+            id: d.id,
             code,
             sampleDate: d.sampleDate || d.collectionDate || base.sampleDate || '2026-02-23',
             patientName: d.patientName || d.patient?.name || base.patientName || 'Verified Patient',

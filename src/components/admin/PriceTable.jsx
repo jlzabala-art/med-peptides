@@ -2,8 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { updateProductPriceField } from '@/repositories/productRepository';
 
 import EditablePriceCell from './EditablePriceCell';
 import BulkPriceAdjust from './BulkPriceAdjust';
@@ -24,8 +23,7 @@ export default function PriceTable({ products, onRefresh }) {
 
   const handleCellUpdate = async (productId, field, value) => {
     try {
-      const productRef = doc(db, 'products', productId);
-      await updateDoc(productRef, { [`pricing.${field}.perUnit`]: parseFloat(value) });
+      await updateProductPriceField(productId, field, value);
       // optimistic UI update
       setLocalProducts((prev) =>
         prev.map((p) =>

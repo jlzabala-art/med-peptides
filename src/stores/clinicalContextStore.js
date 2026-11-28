@@ -11,6 +11,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
+import { useActiveClinicalStore } from './useActiveClinicalStore';
 
 const TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
 
@@ -31,16 +32,28 @@ export const useClinicalContextStore = create(
       _doctorSetAt: null,
       _managerSetAt: null,
 
-      // ─── Setters ────────────────────────────────────────────────────────
-      setActivePatient: (patient) => set({
-        activePatient: patient ? { id: patient.id || patient.objectID, name: patient.name || patient.displayName, email: patient.email, age: patient.age, gender: patient.gender, clinic: patient.clinic, status: patient.status } : null,
-        _patientSetAt: patient ? Date.now() : null,
-      }),
+      // ─── Setters (cross-synced with useActiveClinicalStore) ───────────────
+      setActivePatient: (patient) => {
+        const normalized = patient ? { id: patient.id || patient.objectID, name: patient.name || patient.displayName, email: patient.email, age: patient.age, gender: patient.gender, clinic: patient.clinic, status: patient.status } : null;
+        set({
+          activePatient: normalized,
+          _patientSetAt: normalized ? Date.now() : null,
+        });
+        useActiveClinicalStore.getState().setActiveClinicalResource({
+          patientName: normalized?.name || '',
+        });
+      },
 
-      setActiveDoctor: (doctor) => set({
-        activeDoctor: doctor ? { id: doctor.id || doctor.objectID, name: doctor.name || doctor.displayName, email: doctor.email, specialty: doctor.specialty } : null,
-        _doctorSetAt: doctor ? Date.now() : null,
-      }),
+      setActiveDoctor: (doctor) => {
+        const normalized = doctor ? { id: doctor.id || doctor.objectID, name: doctor.name || doctor.displayName, email: doctor.email, specialty: doctor.specialty } : null;
+        set({
+          activeDoctor: normalized,
+          _doctorSetAt: normalized ? Date.now() : null,
+        });
+        useActiveClinicalStore.getState().setActiveClinicalResource({
+          doctorName: normalized?.name || '',
+        });
+      },
 
       setActiveManager: (manager) => set({
         activeManager: manager ? { id: manager.id || manager.objectID, name: manager.name || manager.displayName, email: manager.email } : null,
@@ -48,13 +61,22 @@ export const useClinicalContextStore = create(
       }),
 
       // ─── Clear ──────────────────────────────────────────────────────────
-      clearActivePatient: () => set({ activePatient: null, _patientSetAt: null }),
-      clearActiveDoctor: () => set({ activeDoctor: null, _doctorSetAt: null }),
+      clearActivePatient: () => {
+        set({ activePatient: null, _patientSetAt: null });
+        useActiveClinicalStore.getState().setActiveClinicalResource({ patientName: '' });
+      },
+      clearActiveDoctor: () => {
+        set({ activeDoctor: null, _doctorSetAt: null });
+        useActiveClinicalStore.getState().setActiveClinicalResource({ doctorName: '' });
+      },
       clearActiveManager: () => set({ activeManager: null, _managerSetAt: null }),
-      clearAll: () => set({
-        activePatient: null, activeDoctor: null, activeManager: null,
-        _patientSetAt: null, _doctorSetAt: null, _managerSetAt: null,
-      }),
+      clearAll: () => {
+        set({
+          activePatient: null, activeDoctor: null, activeManager: null,
+          _patientSetAt: null, _doctorSetAt: null, _managerSetAt: null,
+        });
+        useActiveClinicalStore.getState().clearActiveClinicalResource();
+      },
 
       // ─── TTL validation (called on mount) ───────────────────────────────
       validateTTL: () => {

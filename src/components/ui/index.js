@@ -42,6 +42,7 @@ export { default as GcpButton } from './GcpButton';
 export { default as GlobalSearchBar } from './GlobalSearchBar';
 export { default as DataTableSkeleton } from './skeletons/DataTableSkeleton';
 export { default as GridSkeleton } from './skeletons/GridSkeleton';
+export { default as GcpSideDrawer } from './GcpSideDrawer';
 export { default as StandardDrawer } from './StandardDrawer';
 export { default as HighDensityDrawer } from './HighDensityDrawer';
 export { default as LinkableId } from './LinkableId';

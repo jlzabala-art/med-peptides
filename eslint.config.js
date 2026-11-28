@@ -92,6 +92,27 @@ export default defineConfig([
     },
   },
   {
+    files: [
+      'src/components/ui/**/*.{js,jsx}',
+      'src/components/product/ProductDetailShell.jsx',
+      'src/components/product/layouts/LabEquipmentDetail.jsx',
+      'src/components/pricing/shared/**/*.{js,jsx}',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'firebase/firestore',
+              message: '🚫 Golden Rule #2: Direct firebase/firestore imports are forbidden in canonical UI primitives. Use src/repositories/.'
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
     files: ['src/app/**/*.{js,jsx}', 'src/utils/**', 'src/context/**', 'src/templates/**'],
     rules: {
       'react-refresh/only-export-components': 'off',

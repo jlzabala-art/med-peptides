@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
+import GcpSideDrawer from './GcpSideDrawer';
 import { 
   X, 
   Check, 
@@ -440,54 +440,28 @@ export default function UnifiedFiltersDrawer({
 
   if (!isOpen || !mounted) return null;
 
-  const drawerContent = (
-    <>
-      {/* Backdrop — Full-screen overlay */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.55)',
-          backdropFilter: 'blur(6px)',
-          zIndex: 99998,
-          animation: 'fadeIn 0.15s ease-out'
-        }}
-      />
-
-      {/* Drawer Container (Desktop: Right Slide-out 480px; Mobile: Full-width) */}
+  return (
+    <GcpSideDrawer
+      isOpen={isOpen}
+      onClose={onClose}
+      width={isMobile ? '100vw' : '480px'}
+      zIndex={99999}
+      hideHeader={true}
+      disableBodyScroll={true}
+      expandable={false}
+      bodyPadding="0"
+      ariaLabel="Filter & Refine"
+    >
       <div
         style={{
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          maxWidth: isMobile ? '100vw' : '480px',
-          height: '100dvh',
-          maxHeight: '100dvh',
-          backgroundColor: '#ffffff',
-          boxShadow: '-10px 0 35px rgba(0,0,0,0.25)',
-          zIndex: 99999,
           display: 'flex',
           flexDirection: 'column',
+          height: '100%',
           overflow: 'hidden',
-          overscrollBehavior: 'contain',
+          backgroundColor: '#ffffff',
           fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-          animation: isMobile ? 'sheetSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)' : 'drawerSlideLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
-        <style>{`
-          @keyframes drawerSlideLeft {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-          }
-          @keyframes sheetSlideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-          }
-        `}</style>
-
         {/* 1. Header */}
         <div style={{
           padding: '1.25rem 1.5rem',
@@ -779,8 +753,6 @@ export default function UnifiedFiltersDrawer({
           </div>
         </div>
       </div>
-    </>
+    </GcpSideDrawer>
   );
-
-  return createPortal(drawerContent, document.body);
 }

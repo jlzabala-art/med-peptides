@@ -26,6 +26,7 @@ import { toast } from 'react-hot-toast';
 import ProductQuickViewDrawer from '../shared/ProductQuickViewDrawer';
 import CopyableId from '../ui/CopyableId';
 import StatusBadge from '../ui/StatusBadge';
+import GcpSideDrawer from '../ui/GcpSideDrawer';
 
 export default function GCPSplitDrawer({ item, type, onClose }) {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'audit' | 'dossier'
@@ -54,53 +55,16 @@ export default function GCPSplitDrawer({ item, type, onClose }) {
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(15, 23, 42, 0.4)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
-          zIndex: 99980
-        }}
-        onClick={onClose}
-      />
-
-      {/* Drawer Panel */}
-      <div
-        role="dialog"
-        aria-label="Panel de Detalle Contextual"
-        style={{
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          maxWidth: '540px',
-          background: '#ffffff',
-          boxShadow: '-10px 0 30px rgba(0,0,0,0.15)',
-          zIndex: 99985,
-          display: 'flex',
-          flexDirection: 'column',
-          borderLeft: '1px solid #e2e8f0',
-          animation: 'slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
-        }}
-      >
-        <style>{`
-          @keyframes slideInRight {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-          }
-          @media print {
-            body * { visibility: hidden; }
-            .gcp-dossier-print-area, .gcp-dossier-print-area * { visibility: visible; }
-            .gcp-dossier-print-area { position: absolute; left: 0; top: 0; width: 100%; }
-          }
-        `}</style>
-
-        {/* Drawer Header */}
-        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <GcpSideDrawer
+        isOpen={Boolean(item)}
+        onClose={onClose}
+        width="540px"
+        zIndex={99985}
+        bodyPadding="0"
+        disableBodyScroll={true}
+        expandable={false}
+        ariaLabel="Panel de Detalle Contextual"
+        headerContent={
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: type === 'doctor' ? '#059669' : type === 'patient' ? '#7c3aed' : '#d97706', marginBottom: '4px' }}>
               {type === 'doctor' && <Stethoscope size={13} />}
@@ -108,32 +72,14 @@ export default function GCPSplitDrawer({ item, type, onClose }) {
               {type === 'product' && <FlaskConical size={13} />}
               <span>{type === 'doctor' ? 'Expediente Médico' : type === 'patient' ? 'Dossier de Paciente' : 'Especificación Analítica'}</span>
             </div>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
               {item.name || item.title}
             </h2>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              background: '#ffffff',
-              border: '1px solid #cbd5e1',
-              borderRadius: '8px',
-              padding: '6px',
-              color: '#64748b',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <X size={18} />
-          </button>
-        </div>
-
+        }
+      >
         {/* Drawer Navigation Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', padding: '0 1.5rem', background: '#ffffff' }}>
+        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', padding: '0 1.5rem', background: '#ffffff', flexShrink: 0 }}>
           {[
             { id: 'overview', label: 'Resumen' },
             { id: 'audit', label: 'Trazabilidad & Audit Stream' },
@@ -575,7 +521,7 @@ export default function GCPSplitDrawer({ item, type, onClose }) {
           )}
 
         </div>
-      </div>
+      </GcpSideDrawer>
 
       <ProductQuickViewDrawer
         isOpen={Boolean(quickProduct)}

@@ -1,24 +1,11 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { X, Maximize2, Minimize2 } from '@/lib/icons';
+import React from 'react';
+import GcpSideDrawer from './GcpSideDrawer';
 
 /**
  * StandardDrawer
- *
- * Universal adaptive drawer component tailored for Laptop (Side-over slide) 
- * and Mobile (Bottom Sheet modal).
- *
- * @param {boolean} isOpen - Whether the drawer is visible
- * @param {function} onClose - Function to call when closing
- * @param {string} title - Header title
- * @param {string} subtitle - Optional header subtitle
- * @param {node} children - Drawer content
- * @param {node} footer - Optional footer actions
- * @param {string} width - Drawer width (default '560px')
- * @param {boolean} expandable - Allow expanding width on desktop/laptop
- * @param {boolean} disableBodyScroll - If true, inner content handles its own scroll container
+ * Backward-compatible thin alias delegating to canonical GcpSideDrawer.
  */
 export default function StandardDrawer({
   isOpen,
@@ -37,366 +24,32 @@ export default function StandardDrawer({
   disableBodyScroll = false,
   zIndex = 9999,
   preserveSidebar = false,
+  status = null,
+  statusLabel = '',
+  copyId = '',
 }) {
-  const bodyRef = React.useRef(null);
-  const panelRef = React.useRef(null);
-  const previousFocusRef = React.useRef(null);
-  const [mounted, setMounted] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
-
-  // Reset expansion when drawer closes or changes
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (!isOpen) setIsExpanded(false);
-  }, [isOpen]);
-
-  // Prevent body scroll when open, reset scroll to top, and manage focus restoration
-  useEffect(() => {
-    if (isOpen) {
-      previousFocusRef.current = document.activeElement;
-      document.body.style.overflow = 'hidden';
-      if (bodyRef.current) {
-        bodyRef.current.scrollTop = 0;
-      }
-    } else {
-      document.body.style.overflow = '';
-      if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
-        try {
-          previousFocusRef.current.focus();
-        } catch {
-          // ignore focus restoration errors if element unmounted
-        }
-        previousFocusRef.current = null;
-      }
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen, title]);
-
-  // Handle Escape key and Tab focus trap within drawer
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (!isOpen) return;
-      if (e.key === 'Escape') {
-        onClose();
-        return;
-      }
-      if (e.key === 'Tab' && panelRef.current) {
-        const focusable = panelRef.current.querySelectorAll(
-          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  if (!isOpen || !mounted) return null;
-
-  const resolvedWidth = fullWorkspace
-    ? undefined
-    : isExpanded
-      ? 'min(1360px, 95vw)'
-      : width;
-
-  const drawerContent = (
-    <div
-      className={`standard-drawer-backdrop ${preserveSidebar ? 'preserve-sidebar' : ''}`}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100vw',
-        minHeight: '100vh',
-        height: '100dvh',
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'stretch',
-        backgroundColor: 'rgba(15, 23, 42, 0.45)',
-        backdropFilter: 'blur(2px)',
-        WebkitBackdropFilter: 'blur(2px)',
-        zIndex: zIndex,
-        touchAction: 'none',
-      }}
+  return (
+    <GcpSideDrawer
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      subtitle={subtitle}
+      headerContent={headerContent}
+      footer={footer}
+      actions={actions}
+      width={width}
+      bodyPadding={bodyPadding}
+      fullWorkspace={fullWorkspace}
+      expandable={expandable}
+      hideHeader={hideHeader}
+      disableBodyScroll={disableBodyScroll}
+      zIndex={zIndex}
+      preserveSidebar={preserveSidebar}
+      status={status}
+      statusLabel={statusLabel}
+      copyId={copyId}
     >
-      {/* Backdrop click layer */}
-      <div style={{ position: 'absolute', inset: 0 }} onClick={onClose} />
-
-      {/* Drawer Panel */}
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={typeof title === 'string' ? title : 'Panel'}
-        className={`standard-drawer-panel ${fullWorkspace ? 'drawer-full-workspace' : ''}`}
-        style={{
-          position: 'relative',
-          marginLeft: 'auto',
-          width: fullWorkspace ? undefined : resolvedWidth,
-          maxWidth: '100%',
-          backgroundColor: 'var(--background, #fff)',
-          boxShadow: '-4px 0 28px rgba(0, 0, 0, 0.12)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          overscrollBehavior: 'contain',
-        }}
-      >
-        {/* Mobile Grabber Handle (for Bottom Sheet) */}
-        <div className="drawer-mobile-handle" />
-
-        {/* Header */}
-        {!hideHeader && (
-          <div
-            style={{
-              padding: '1.15rem 1.5rem 1rem 1.5rem',
-              borderBottom: '1px solid var(--border-color, #e5e7eb)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              backgroundColor: 'var(--background, #fff)',
-              zIndex: 2,
-            }}
-          >
-            <div style={{ flex: 1, minWidth: 0, paddingRight: '0.75rem' }}>
-              {headerContent ? (
-                headerContent
-              ) : (
-                <>
-                  <h2
-                    style={{
-                      margin: 0,
-                      fontSize: '1.15rem',
-                      fontWeight: 700,
-                      color: 'var(--color-text, #0f172a)',
-                      lineHeight: '1.3',
-                      letterSpacing: '-0.01em',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                    title={typeof title === 'string' ? title : undefined}
-                  >
-                    {title}
-                  </h2>
-                  {subtitle && (
-                    <div
-                      style={{
-                        margin: '0.2rem 0 0 0',
-                        fontSize: '0.8rem',
-                        color: 'var(--color-text-tertiary, #64748b)',
-                        lineHeight: '1.4',
-                        whiteSpace: 'normal',
-                        wordBreak: 'break-word',
-                      }}
-                    >
-                      {subtitle}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-              {actions && (
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>{actions}</div>
-              )}
-
-              {/* Laptop width expand/contract toggle */}
-              {expandable && !fullWorkspace && (
-                <button
-                  type="button"
-                  className="drawer-expand-btn"
-                  onClick={() => setIsExpanded(prev => !prev)}
-                  aria-label={isExpanded ? "Collapse panel width" : "Expand panel width"}
-                  title={isExpanded ? "Collapse to side drawer" : "Expand width (Wide view)"}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: '0.45rem',
-                    color: 'var(--color-text-secondary, #64748b)',
-                    borderRadius: '6px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-hover, #f1f5f9)')}
-                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-                </button>
-              )}
-
-              {/* Close Button */}
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close drawer"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '0.45rem',
-                  color: 'var(--color-text-secondary, #64748b)',
-                  borderRadius: '6px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-hover, #fee2e2)', e.currentTarget.style.color = '#ef4444')}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent', e.currentTarget.style.color = 'var(--color-text-secondary, #64748b)')}
-              >
-                <X size={18} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Body */}
-        <div
-          ref={bodyRef}
-          className="drawer-condensed-layout"
-          style={{
-            flex: 1,
-            overflowY: disableBodyScroll ? 'hidden' : 'auto',
-            overscrollBehavior: 'contain',
-            padding: disableBodyScroll ? 0 : bodyPadding,
-            backgroundColor: 'var(--color-bg-app, #f8fafc)',
-            display: disableBodyScroll ? 'flex' : 'block',
-            flexDirection: disableBodyScroll ? 'column' : 'initial',
-          }}
-        >
-          {children}
-        </div>
-
-        {/* Sticky Footer */}
-        {footer && (
-          <div
-            className="standard-drawer-footer"
-            style={{
-              padding: '0.85rem 1.5rem',
-              borderTop: '1px solid var(--border-color, #e2e8f0)',
-              backgroundColor: 'var(--bg-secondary, #ffffff)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: '0.75rem',
-              zIndex: 10,
-              flexShrink: 0,
-            }}
-          >
-            {footer}
-          </div>
-        )}
-      </div>
-
-      <style>{`
-        @keyframes drawerFadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes drawerSlideIn {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-
-        /* ── Laptop / Desktop layout: Side-Over Drawer (GCP Standard) ── */
-        .standard-drawer-backdrop {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          width: 100vw;
-          height: 100vh;
-          height: 100dvh;
-          display: flex;
-          justifyContent: flex-end;
-          align-items: stretch;
-          background-color: rgba(15, 23, 42, 0.45);
-          backdrop-filter: blur(2px);
-          animation: drawerFadeIn 0.2s ease-out;
-          touch-action: none;
-        }
-        @media (min-width: 1024px) {
-          .standard-drawer-backdrop.preserve-sidebar {
-            left: var(--sidebar-current-width, var(--sb-w-full, 260px)) !important;
-            width: calc(100vw - var(--sidebar-current-width, var(--sb-w-full, 260px))) !important;
-          }
-        }
-        @media (max-width: 1023px) {
-          .standard-drawer-backdrop.preserve-sidebar {
-            left: 0 !important;
-            width: 100vw !important;
-          }
-        }
-        .drawer-full-workspace {
-          width: calc(100vw - 260px);
-        }
-        .standard-drawer-panel {
-          height: 100vh;
-          height: 100dvh;
-          max-height: 100dvh;
-          transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-          animation: drawerSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .drawer-mobile-handle {
-          display: none;
-        }
-
-        /* ── Mobile layout: Consistent Full Viewport Side-Sheet (GCP Mobile Standard) ── */
-        @media (max-width: 768px) {
-          .standard-drawer-backdrop {
-            align-items: stretch !important;
-            justify-content: flex-end !important;
-          }
-          .drawer-expand-btn {
-            display: none !important;
-          }
-          .drawer-mobile-handle {
-            display: none !important;
-          }
-          .drawer-full-workspace {
-            width: 100vw !important;
-          }
-          .standard-drawer-panel {
-            width: 100vw !important;
-            max-width: 100vw !important;
-            height: 100vh !important;
-            height: 100dvh !important;
-            max-height: 100dvh !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            animation: drawerSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
-          }
-          .standard-drawer-footer {
-            padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 16px)) !important;
-          }
-        }
-      `}</style>
-    </div>
+      {children}
+    </GcpSideDrawer>
   );
-
-  return typeof document !== 'undefined' ? createPortal(drawerContent, document.body) : drawerContent;
 }

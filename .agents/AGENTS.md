@@ -728,3 +728,17 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   3. `AtlasLeftRailLayout` (`src/components/shared/layouts/AtlasLeftRailLayout.jsx`) & `PublicDatasheetTableOfContents.css`: rail izquierdo contextual de 4 zonas (*Header+Status* / *Context Tree* / *Properties Summary* / *Pinned Actions*) con modo **Mini-Rail (`64px`) en portátil compacto (`1024px–1279px`)** persistido en `localStorage` (`atlas_left_rail_mode`).
 - **Un único drawer móvil (`< 1024px`)**: Toda vista abre su sidebar desde la **izquierda** mediante `UnifiedMobileSidebarDrawer` (`100dvh`, `z-index: 10050`, `env(safe-area-inset-bottom)`, tecla `Escape`, cierre `44×44px`), disparado por el evento global `atlas:toggle-left-sidebar`.
 
+## 76. Shell Único de Monografías `/p/[slug]` (`ProductDetailShell`) y Plugins de Dominio (Golden Rule)
+- **Clasificación centralizada de producto (`src/lib/products/productTypeResolver.js`)**: Toda decisión de dominio en `/p/[slug]` (péptidos, pellets, Norma, TeleTest, ETERNA, cosmética, inyectables, APIs y `lab_equipment` como Syntegon Telstar) pasa por `resolveProductDomain()`, prohibiéndose duplicar heurísticas de categorías/slugs entre `generateMetadata` y `PublicProductRoute`.
+- **Contenedor único `ProductDetailShell` (`src/components/product/ProductDetailShell.jsx`)**: Todo nuevo layout de monografía (incluido `LabEquipmentDetail.jsx`) debe renderizar dentro de `ProductDetailShell` + `AtlasLeftRailLayout` para heredar automáticamente cabecera pública, breadcrumb, rail izquierdo de 4 zonas, Mini-Rail portátil, contexto Atlas AI y cajones de RFQ/compartición.
+
+## 77. Arquetipo Dual de Drawers GCP (`GcpSideDrawer` + `UnifiedMobileSidebarDrawer`) (Golden Rule)
+- **CSS SSOT en `src/styles/gcp-drawer.css`**: Todos los cajones laterales derechos (`StandardDrawer`, `HighDensityDrawer`, `GCPSplitDrawer`, `HelpDrawer`, `UnifiedFiltersDrawer`, `UniversalShareDrawer`) delegan su portal, backdrop, foco por teclado (`Escape` + `Tab`), cabecera pegajosa y sheet móvil en `GcpSideDrawer` (`src/components/ui/GcpSideDrawer.jsx`), sin etiquetas `<style>` en línea.
+- **Lateralidad estricta**: Los drawers contextuales y formularios temporales abren siempre desde la derecha (`GcpSideDrawer`), mientras la navegación/filtros móviles abren desde la izquierda (`UnifiedMobileSidebarDrawer`).
+
+## 78. Estandarización de APIs (`withApiHandler`), Estado Zustand Único y Ratchet Firestore-in-UI (Golden Rule)
+- **Wrapper único de rutas API (`src/lib/api/withApiHandler.js`)**: Las rutas de `src/app/api/` deben adoptar `withApiHandler({ auth, requireDb, bodySchema, querySchema })` para garantizar control de rol en servidor, validación Zod, trazabilidad `requestId` y respuestas JSON uniformes.
+- **Estado UI en Zustand sin Contextos duplicados**: La gestión global de cajones (`useUIStore.openDrawer/closeDrawer`) y tema (`useThemeStore`) vive en Zustand con wrappers de compatibilidad sin estado propio; los stores de contexto clínico (`clinicalContextStore` y `useActiveClinicalStore`) se mantienen sincronizados bidireccionalmente.
+- **Ratchet Firestore-in-UI (`scripts/audit-golden-rules.mjs` + `eslint.config.js`)**: Está prohibido introducir nuevos imports directos de `firebase/firestore` en `src/components/` y `src/templates/` (límite auditado ≤ `124`, y `0` en primitivas canónicas UI/Product/Pricing). Todo acceso nuevo se realiza vía `src/repositories/` o rutas API.
+
+

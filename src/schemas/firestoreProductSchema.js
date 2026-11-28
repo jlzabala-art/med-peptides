@@ -58,6 +58,9 @@ export const VARIANT_TYPES = Object.freeze([
   'diagnostic',
   'iv_drip',
   'service',
+  'lab_equipment',
+  'equipment_accessory',
+  'spare_part',
 ]);
 
 /**
@@ -193,6 +196,9 @@ export const VALID_TYPES = Object.freeze([
   'dual',
   'service',
   'logistics_service',
+  'lab_equipment',
+  'equipment_accessory',
+  'spare_part',
 ]);
 
 /**
@@ -221,7 +227,7 @@ export function deriveProductTypes(variants = [], fallbackType = 'finished_produ
   const availableTypes = uniqueTypes.length > 0 ? uniqueTypes : [fallbackType || 'finished_product'];
 
   // Priority order for assigning primaryType (for SEO and general catalog overview):
-  const priorityOrder = ['finished_product', 'iv_drip', 'raw_material', 'diagnostic', 'service', 'clinical_supplies'];
+  const priorityOrder = ['finished_product', 'iv_drip', 'lab_equipment', 'raw_material', 'diagnostic', 'service', 'clinical_supplies', 'equipment_accessory', 'spare_part'];
   const primaryType = priorityOrder.find(t => availableTypes.includes(t)) || availableTypes[0];
 
   return {
@@ -311,6 +317,8 @@ export const PRODUCT_FIELD_CONTRACT = Object.freeze({
 
   // ── Content ──
   displayName:   { type: 'string',    required: false, default: '' },
+  brand:         { type: 'string',    required: false, default: '' },
+  collectionSlug:{ type: 'string',    required: false, default: '' },
   canonicalKey:  { type: 'string',    required: false, default: '' },
   canonicalName: { type: 'string',    required: false, default: '' },
   description:   { type: 'string',    required: false, default: '' },
@@ -353,6 +361,9 @@ export const PRODUCT_FIELD_CONTRACT = Object.freeze({
   pharmaDetails:      { type: 'object',  required: false, default: null },
   galenicSpecs:       { type: 'object',  required: false, default: null },
   clinicalMonitoring: { type: 'object',  required: false, default: null },
+
+  // ── Laboratory & GMP Equipment Specifications ──
+  equipmentSpecs:     { type: 'object',  required: false, default: null },
 
   // ── Flags ──
   isActive:           { type: 'boolean', required: false, default: true },
@@ -505,6 +516,9 @@ export function emptyProduct(overrides = {}) {
     isActive:      true,
     isProfessional: false,
     requiresPrescription: false,
+    brand:         '',
+    collectionSlug: '',
+    equipmentSpecs: null,
     _schemaVersion: CURRENT_SCHEMA_VER,
     createdAt:     now,
     updatedAt:     now,

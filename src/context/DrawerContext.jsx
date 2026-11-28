@@ -1,65 +1,19 @@
-"use client";
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+'use client';
 
-const DrawerContext = createContext(null);
+/**
+ * DrawerContext.jsx — Thin compatibility wrapper over Zustand useUIStore (Pillar 5).
+ * DrawerProvider is no longer required at root (kept as no-op for callers).
+ */
+import { useUIStore } from '../stores/uiStore';
 
-const fallbackDrawerContext = {
-  drawers: [],
-  openDrawer: (type, id, _data) => {
-    if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
-      console.warn(`[useDrawer] openDrawer(${type}, ${id}) called outside DrawerProvider.`);
-    }
-  },
-  closeDrawer: () => {},
-  closeAllDrawers: () => {}
-};
-
-export const useDrawer = () => {
-  const context = useContext(DrawerContext);
-  if (!context) {
-    return fallbackDrawerContext;
-  }
-  return context;
-};
+export function useDrawer() {
+  const drawers = useUIStore((s) => s.drawers);
+  const openDrawer = useUIStore((s) => s.openDrawer);
+  const closeDrawer = useUIStore((s) => s.closeDrawer);
+  const closeAllDrawers = useUIStore((s) => s.closeAllDrawers);
+  return { drawers, openDrawer, closeDrawer, closeAllDrawers };
+}
 
 export function DrawerProvider({ children }) {
-  const [drawers, setDrawers] = useState([]);
-
-  /**
-   * type: 'patient' | 'prescription' | 'order' | 'product'
-   * id: the document ID
-   * data: pre-fetched data (optional)
-   */
-  const openDrawer = useCallback((type, id, data = null) => {
-    setDrawers(prev => {
-      // Prevent opening the exact same resource multiple times
-      if (prev.some(d => d.type === type && d.resourceId === id)) {
-        return prev;
-      }
-      
-      const drawerId = `${type}_${id}_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-      return [...prev, { id: drawerId, type, resourceId: id, data }];
-    });
-  }, []);
-
-  const closeDrawer = useCallback((drawerId) => {
-    setDrawers(prev => prev.filter(d => d.id !== drawerId));
-  }, []);
-
-  const closeAllDrawers = useCallback(() => {
-    setDrawers([]);
-  }, []);
-
-  const value = useMemo(() => ({
-    drawers,
-    openDrawer,
-    closeDrawer,
-    closeAllDrawers
-  }), [drawers, openDrawer, closeDrawer, closeAllDrawers]);
-
-  return (
-    <DrawerContext.Provider value={value}>
-      {children}
-    </DrawerContext.Provider>
-  );
+  return children;
 }

@@ -5,6 +5,8 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  getDocs,
+  limit,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -65,5 +67,21 @@ export async function flagLabResult(resultId) {
   } catch (err) {
     logger.error('[labResultsRepository] flagLabResult failed', { resultId, error: err.message });
     throw err;
+  }
+}
+
+export async function getProAgeLabResults(maxResults = 50) {
+  if (!db) return [];
+  try {
+    const q = query(
+      collection(db, 'lab_results'),
+      where('testVariant', '==', 'ProAge'),
+      limit(maxResults)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    logger.warn('[labResultsRepository] getProAgeLabResults failed', { error: err.message });
+    return [];
   }
 }

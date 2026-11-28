@@ -5,8 +5,7 @@ import Bot from "lucide-react/dist/esm/icons/bot";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import Activity from "lucide-react/dist/esm/icons/activity";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { prescriptionRepository } from '@/repositories/prescriptionRepository';
 import notifier from '../../services/NotificationService';
 
 export default function PatientAdherenceWidget({ doctorId }) {
@@ -18,15 +17,12 @@ export default function PatientAdherenceWidget({ doctorId }) {
     const fetchAdherence = async () => {
       setLoading(true);
       try {
-        let q = query(collection(db, 'prescriptions'), limit(30));
-        if (doctorId) {
-          q = query(collection(db, 'prescriptions'), where('doctorId', '==', doctorId), limit(30));
-        }
-        const snap = await getDocs(q);
+        const docs = doctorId
+          ? await prescriptionRepository.getRecentPrescriptionsByDoctor(doctorId, 30)
+          : (await prescriptionRepository.getPrescriptionsPage({ pageSize: 30 }))?.prescriptions || [];
         if (isMounted) {
           const atRisk = [];
-          snap.docs.forEach(doc => {
-            const d = doc.data();
+          docs.forEach(d => {
             const adherence = d.adherenceScore ?? d.adherence ?? 100;
             const daysLeft = d.refillDaysLeft ?? 14;
             const isLate = daysLeft <= 0;
@@ -34,7 +30,7 @@ export default function PatientAdherenceWidget({ doctorId }) {
 
             if (isLate || isLowScore) {
               atRisk.push({
-                id: doc.id,
+                id: d.id,
                 name: d.patientName || 'Patient',
                 protocol: Array.isArray(d.items) 
                   ? d.items.map(i => i.productName || i.name).join(' + ') 

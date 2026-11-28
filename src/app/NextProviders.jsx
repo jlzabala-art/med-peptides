@@ -13,13 +13,10 @@ import { AuthProvider } from '../context/AuthContext';
 import { TenantProvider } from '../context/TenantContext';
 import { ShopProvider } from '../context/ShopProvider';
 import { CartProvider } from '../context/CartProvider';
-import { ThemeProvider } from '../context/ThemeContext';
 import { NotificationProvider } from '../context/NotificationContext';
 import { PreferencesProvider } from '../context/PreferencesContext';
-import { HeaderProvider } from '../context/HeaderContext';
 import { CopilotProvider } from '../context/CopilotContext';
 import { ModalProvider } from '../hooks/ui/useModalStack';
-import { DrawerProvider } from '../context/DrawerContext';
 import { JobQueueProvider } from '../context/JobQueueContext';
 import { StorefrontModeProvider } from '../context/StorefrontModeContext';
 import GlobalDrawerManager from '../components/shared/GlobalDrawerManager';
@@ -78,12 +75,8 @@ export default function NextProviders({ children, serverUser }) {
             <StorefrontModeProvider>
               <ShopProvider>
                 <CartProvider>
-                  <ThemeProvider>
-                    <DrawerProvider>
-                      {children}
-                      <GlobalDrawerManager />
-                    </DrawerProvider>
-                  </ThemeProvider>
+                  {children}
+                  <GlobalDrawerManager />
                 </CartProvider>
               </ShopProvider>
             </StorefrontModeProvider>
@@ -100,26 +93,20 @@ export default function NextProviders({ children, serverUser }) {
             <StorefrontModeProvider>
               <ShopProvider>
                 <CartProvider>
-                  <ThemeProvider>
-                      <NotificationProvider>
-                        <PreferencesProvider>
-                          <CopilotProvider>
-                            <HeaderProvider>
-                              <ModalProvider>
-                                <JobQueueProvider>
-                                  <DrawerProvider>
-                                    {children}
-                                    <GlobalDrawerManager />
-                                    <Omnibar />
-                                    <NetworkStatusBanner />
-                                  </DrawerProvider>
-                                </JobQueueProvider>
-                              </ModalProvider>
-                            </HeaderProvider>
-                          </CopilotProvider>
-                        </PreferencesProvider>
-                      </NotificationProvider>
-                  </ThemeProvider>
+                  <NotificationProvider>
+                    <PreferencesProvider>
+                      <CopilotProvider>
+                        <ModalProvider>
+                          <JobQueueProvider>
+                            {children}
+                            <GlobalDrawerManager />
+                            <Omnibar />
+                            <NetworkStatusBanner />
+                          </JobQueueProvider>
+                        </ModalProvider>
+                      </CopilotProvider>
+                    </PreferencesProvider>
+                  </NotificationProvider>
                 </CartProvider>
               </ShopProvider>
             </StorefrontModeProvider>

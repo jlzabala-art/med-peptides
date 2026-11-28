@@ -324,6 +324,22 @@ export const BASELINE_PRICE_SCHEDULES = [
     status: 'active',
     sharesCount: 0,
     recipients: []
+  },
+  {
+    id: 'telstar-freeze-dryers',
+    label: 'Telstar Freeze Dryers',
+    icon: Package,
+    badge: '14 Models · 2027',
+    supplier: 'Syntegon Telstar Technologies, S.L.U.',
+    description: 'LyoQuest (-55/-85/Arctic/Teflon), LyoAlfa & LyoBeta pilot/GMP freeze dryers (FCA Terrassa)',
+    pricingNote: '2027 List EUR (-30% Dist. Net) · Optional Chambers/SCADA',
+    route: '/pricing/telstar-freeze-dryers',
+    skuCount: 14,
+    currency: 'EUR',
+    fetchGroup: 'equipment',
+    status: 'active',
+    sharesCount: 0,
+    recipients: []
   }
 ];
 
@@ -336,6 +352,7 @@ export const MACRO_CATEGORIES = [
   { id: 'cosmetics', label: 'Cosmetics & Collagen', groupIds: ['colway', 'colway-hair', 'colway-qatar', 'larimedical'] },
   { id: 'injectables', label: 'Medical Injectables', groupIds: ['aesthetic-injectables'] },
   { id: 'diagnostics', label: 'DBS Diagnostics', groupIds: ['bloodo', 'teletest'] },
+  { id: 'equipment', label: 'Lab Equipment', groupIds: ['telstar-freeze-dryers'] },
 ];
 
 // 4-Layer Caching (Golden Rule #2)
@@ -599,6 +616,15 @@ export async function fetchGroupProductsWithCache(groupId, fetchGroup, { forceRe
     try {
       const mod = await import('@/data/pharmapolisPelletsRegistry');
       products = mod.getAllPharmapolisPellets() || [];
+    } catch (_) {
+      products = [];
+    }
+  }
+
+  if (products.length === 0 && (groupId === 'telstar-freeze-dryers' || fetchGroup === 'equipment')) {
+    try {
+      const mod = await import('@/data/telstarLyophilizersRegistry');
+      products = mod.getAllTelstarEquipment() || [];
     } catch (_) {
       products = [];
     }

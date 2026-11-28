@@ -21,8 +21,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 
 
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { getAiAgents } from '@/repositories/configRepository';
 
 
 // ── Agents visible to the doctor (clinical subset) ─────────────────────────
@@ -90,19 +89,20 @@ export default function PhysicianLayout({
   );
   const [agentsExpanded, setAgentsExpanded] = useState(true);
 
-  // Load real agent statuses from Firestore
+  // Load real agent statuses via configRepository
   useEffect(() => {
-    getDoc(doc(db, 'ai_config', 'agents')).then(snap => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      setAgentStatuses(prev => {
-        const next = { ...prev };
-        for (const a of DOCTOR_AGENTS) {
-          if (data[a.key]?.status) next[a.key] = data[a.key].status;
-        }
-        return next;
-      });
-    }).catch(() => {});
+    getAiAgents()
+      .then((data) => {
+        if (!data) return;
+        setAgentStatuses((prev) => {
+          const next = { ...prev };
+          for (const a of DOCTOR_AGENTS) {
+            if (data[a.key]?.status) next[a.key] = data[a.key].status;
+          }
+          return next;
+        });
+      })
+      .catch(() => {});
   }, []);
 
   const activeTabMeta = tabs.find(t => t.id === activeTab) || tabs[0];

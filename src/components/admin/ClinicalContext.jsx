@@ -1,7 +1,7 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { collection, getDocs, query, limit } from 'firebase/firestore';
-import { db } from '../../firebase';
+import patientRepository from '@/repositories/patientRepository';
+import { getAllProtocols } from '@/repositories/protocolRepository';
 
 const ClinicalContext = createContext({});
 
@@ -15,19 +15,20 @@ export function ClinicalProvider({ children }) {
     async function loadClinicalData() {
       try {
         setLoading(true);
-        // Pre-fetch basic clinical data to be shared across tabs
-        const patientsSnap = await getDocs(query(collection(db, 'patients'), limit(100)));
-        const protocolsSnap = await getDocs(query(collection(db, 'protocols'), limit(100)));
-        
-        setPatients(patientsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        setProtocols(protocolsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const [patientsPage, protocolList] = await Promise.all([
+          patientRepository.getPatientsPage({ pageSize: 100 }),
+          getAllProtocols(),
+        ]);
+
+        setPatients(Array.isArray(patientsPage?.patients) ? patientsPage.patients : []);
+        setProtocols(Array.isArray(protocolList) ? protocolList : []);
       } catch (err) {
-        console.error("Failed to load clinical data", err);
+        console.error('Failed to load clinical data', err);
       } finally {
         setLoading(false);
       }
     }
-    
+
     loadClinicalData();
   }, []);
 

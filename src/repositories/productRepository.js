@@ -820,6 +820,21 @@ export async function updateProduct(productId, data, opts = {}) {
   return { id: productId, data: validated };
 }
 
+export async function updateProductPriceField(productId, field, value) {
+  if (!productId || !field) throw new Error('productId and field are required');
+  const numericVal = parseFloat(value);
+  if (!Number.isFinite(numericVal) || numericVal < 0) {
+    throw new Error('Invalid price value');
+  }
+  const docRef = doc(productsCol(), productId);
+  await updateDoc(docRef, {
+    [`pricing.${field}.perUnit`]: numericVal,
+    updatedAt: serverTimestamp(),
+  });
+  invalidateProductsCache();
+  return numericVal;
+}
+
 /**
  * Delete a product and all its sub-collection variants from Firestore.
  *
@@ -1112,6 +1127,7 @@ export const productRepository = {
   // Writes (Phase 6B — guard-protected)
   createProduct,
   updateProduct,
+  updateProductPriceField,
   deleteProduct,
   createVariant,
   updateVariant,

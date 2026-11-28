@@ -14,13 +14,15 @@ import EternaGenomicsDetail from '../../../components/product/layouts/EternaGeno
 import TeletestDiagnosticDetail from '../../../components/product/layouts/TeletestDiagnosticDetail';
 import NormaPharmaceuticalDetail from '../../../components/product/layouts/NormaPharmaceuticalDetail';
 import HormonePelletDetail from '../../../components/product/layouts/HormonePelletDetail';
+import LabEquipmentDetail from '../../../components/product/layouts/LabEquipmentDetail';
+import { resolveProductDomain } from '@/lib/products/productTypeResolver';
 import { getClinicalSupplementBySlug } from '../../../data/clinicalSupplementsRegistry';
 import { getTeletestProductBySlug } from '../../../data/teletestRegistry';
 import { getLotuslandPeptideBySlug } from '../../../data/lotuslandPeptidesRegistry';
 import { getMcgProductBySlug } from '../../../data/mcgInciRegistry';
 import { getNormaProductBySlug } from '../../../data/normaHellasRegistry';
-import { getPharmapolisPelletBySlug, isPharmapolisPelletSlug } from '../../../data/pharmapolisPelletsRegistry';
-import { isKnownInjectableSlug } from '../../../data/aestheticInjectablesEnrichment';
+import { getPharmapolisPelletBySlug } from '../../../data/pharmapolisPelletsRegistry';
+import { getTelstarEquipmentBySlug } from '../../../data/telstarLyophilizersRegistry';
 
 export const revalidate = 3600; // ISR: regenerate at most every 60 min
 export const dynamicParams = true; // Allow slugs not in generateStaticParams
@@ -213,6 +215,26 @@ async function getPublicProduct(slug, supplierFilter = null) {
       return normaResult;
     }
 
+    const telstarProduct = getTelstarEquipmentBySlug(target);
+    if (telstarProduct) {
+      const sanitized = sanitizePublicProduct(telstarProduct, telstarProduct.variants || []);
+      const processedHierarchy = processProductVariants(sanitized.variants || telstarProduct.variants || []);
+      const telstarResult = {
+        ...telstarProduct,
+        ...sanitized,
+        equipmentSpecs: telstarProduct.equipmentSpecs,
+        isSingleSupplierLocked: true,
+        availableSuppliers: [{ id: 'supplier-syntegon-telstar', name: 'Telstar — A Syntegon Company', isPen: false, isSpray: false }],
+        activeSupplierId: 'supplier-syntegon-telstar',
+        processedHierarchy,
+      };
+      PUBLIC_PRODUCT_RAM_CACHE.set(cacheKey, {
+        data: telstarResult,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      });
+      return telstarResult;
+    }
+
     return null;
   }
 
@@ -228,10 +250,11 @@ async function getPublicProduct(slug, supplierFilter = null) {
     return null;
   }
 
-  // 🛡️ Clinical Guardrail: Public Monograph & Reconstitution is strictly for Peptides
-  const rawType = (raw.type || raw.product_type || '').toLowerCase();
-  const rawCategory = (raw.category || raw.therapeutic_category || '').toLowerCase();
-  const isNonPeptide = rawType === 'device' || rawType === 'supply' || rawCategory.includes('device') || rawCategory.includes('syringe');
+  // 🛡️ Clinical Guardrail: Public Monograph & Reconstitution is strictly for Peptides & Allowed Specialized Domains
+  const rawType = (raw.type || raw.product_type || raw.primaryType || '').toLowerCase();
+  const rawCategory = (raw.category || raw.categoryId || raw.therapeutic_category || '').toLowerCase();
+  const isTelstarEquipment = rawType === 'lab_equipment' || rawCategory === 'equipment' || target.startsWith('telstar-');
+  const isNonPeptide = !isTelstarEquipment && (rawType === 'device' || rawType === 'supply' || rawCategory.includes('device') || rawCategory.includes('syringe'));
   if (isNonPeptide) return null;
 
   // Load variant data: use embedded variants first for 0ms subcollection overhead
@@ -384,6 +407,10 @@ export async function generateStaticParams() {
     { slug: 'estradiol-25mg-pellet' },
     { slug: 'testosterone-50mg-pellet' },
     { slug: 'testosterone-100mg-pellet' },
+    { slug: 'telstar-lyoquest-55' },
+    { slug: 'telstar-lyoquest-85' },
+    { slug: 'telstar-lyobeta-mini-1p' },
+    { slug: 'telstar-lyobeta-3ps' },
   ];
 }
 
@@ -423,46 +450,13 @@ export async function generateMetadata({ params, searchParams }) {
     recipient: null
   });
 
-  const cat = (product.category || product.type || '').toLowerCase();
-  const isCosmetic = cat === 'cosmetic' || cat === 'cosmetics' || cat === 'topical' || cat === 'hair cosmetics' || cat === 'cosmeceutical' || product.is_cosmetic === true;
-  const isAesthetic = cat === 'aesthetic' || cat === 'aesthetic_injectable' || cat === 'aesthetic injectables' || cat === 'dermal_filler' || cat === 'skin_booster' || cat === 'biostimulator' || cat === 'hybrid_biostimulator' || cat === 'polynucleotide' || cat === 'body_contouring' || cat === 'injectable' || (product.primaryType || '').toLowerCase() === 'aesthetic_injectable' || (product.category_taxonomy || '').toLowerCase() === 'aesthetic injectables' || product.is_aesthetic === true || product.is_aesthetic_injectable === true || isKnownInjectableSlug(slug);
-  const isEterna = slug.toLowerCase().includes('eterna') || 
-    (product.supplierId || '').toLowerCase().includes('eternadx') || 
-    (product.canonicalKey || '').toLowerCase().includes('eterna') || 
-    (product.name || '').toLowerCase().includes('eterna');
-
-  let typeSuffix = 'Clinical Monograph';
-  if (isCosmetic) {
-    typeSuffix = 'Premium Cosmetic Care';
-  } else if (isAesthetic) {
-    typeSuffix = 'Clinical Aesthetics Monograph';
-  } else if (isEterna) {
-    typeSuffix = 'Precision Genomics & Epigenetics';
-  } else if (slug.toLowerCase().startsWith('teletest-') || (product.supplierId || '').toLowerCase().includes('teletest') || (product.brand || '').toLowerCase().includes('teletest')) {
-    typeSuffix = 'Clinical Genomics & Diagnostics';
-  }
-
-  const isTeletest = slug.toLowerCase().startsWith('teletest-') ||
-    (product.supplierId || '').toLowerCase().includes('teletest') ||
-    (product.canonicalKey || '').toLowerCase().includes('teletest') ||
-    (product.name || '').toLowerCase().includes('teletest') ||
-    (product.brand || '').toLowerCase().includes('teletest');
-
-  const isNorma = (product.brand || '').toLowerCase().includes('norma') ||
-    (product.supplierId || '').toLowerCase().includes('norma') ||
-    (product.canonicalKey || '').toLowerCase().includes('norma') ||
-    slug.toLowerCase().includes('norma') ||
-    slug.toLowerCase() === 'testosterone-enanthate-norma-250mg' ||
-    slug.toLowerCase() === 'testosterone-enanthate';
-
-  const isPellet = isPharmapolisPelletSlug(slug) ||
-    (product.category || '').toLowerCase().includes('pellet') ||
-    product.is_pellet === true ||
-    product.isPellet === true ||
-    (product.subcategory || '').toLowerCase().includes('pellet');
+  const domainInfo = resolveProductDomain(product, slug);
+  const { isCosmetics: isCosmetic, isAesthetic, isEterna, isTeletest, isNorma, isPellet, isLabEquipment, typeSuffix } = domainInfo;
 
   const pageTitle = viewMode === 'patient'
     ? (isEs ? `${name} — Guía del Paciente y Reconstitución | Atlas Health` : `${name} — Patient Guide & Reconstitution | Atlas Health`)
+    : isLabEquipment
+    ? `${name} | Telstar — A Syntegon Company • 2027 Laboratory & GMP Freeze Dryers`
     : isPellet
     ? `${name} | Atlas Health Services • EU GMP Subcutaneous Pellets`
     : isNorma
@@ -729,42 +723,45 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const associatedProtocols = await getAssociatedProtocols(safeProduct.id, slug, safeProduct.canonicalName || safeProduct.name);
   const jsonLd = generateProductJsonLd(safeProduct, BASE_URL);
 
-  const catLower = (rawSafeProduct.category || '').toLowerCase();
-  const typeLower = (rawSafeProduct.type || rawSafeProduct.productType || '').toLowerCase();
-  const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || catLower === 'dermal_filler' || catLower === 'skin_booster' || catLower === 'biostimulator' || catLower === 'hybrid_biostimulator' || catLower === 'polynucleotide' || catLower === 'body_contouring' || (rawSafeProduct.category_taxonomy || '').toLowerCase() === 'aesthetic injectables' || (rawSafeProduct.primaryType || '').toLowerCase() === 'aesthetic_injectable' || typeLower === 'aesthetic_injectable' || rawSafeProduct.is_aesthetic_injectable === true || isKnownInjectableSlug(slug);
-  const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || catLower === 'trichology_hair_care' || catLower === 'nutricosmetics' || rawSafeProduct.is_cosmetic === true || slug.toLowerCase().startsWith('colway-') || slug.toLowerCase().startsWith('mcg-');
-  const isRawApi = typeLower === 'raw_api' || typeLower === 'raw_material' || catLower === 'raw_material' || catLower === 'compounding_material' || rawSafeProduct.is_raw_api === true;
-  const isEterna = slug.toLowerCase().includes('eterna') || 
-    (rawSafeProduct.supplierId || '').toLowerCase().includes('eterna') || 
-    (rawSafeProduct.canonicalKey || '').toLowerCase().includes('eterna') || 
-    (rawSafeProduct.name || '').toLowerCase().includes('eterna');
-  const isTeletest = slug.toLowerCase().startsWith('teletest-') ||
-    (rawSafeProduct.supplierId || '').toLowerCase().includes('teletest') ||
-    (rawSafeProduct.canonicalKey || '').toLowerCase().includes('teletest') ||
-    (rawSafeProduct.name || '').toLowerCase().includes('teletest') ||
-    (rawSafeProduct.brand || '').toLowerCase().includes('teletest');
-
-  const isNorma = (rawSafeProduct.brand || '').toLowerCase().includes('norma') ||
-    (rawSafeProduct.supplierId || '').toLowerCase().includes('norma') ||
-    (rawSafeProduct.canonicalKey || '').toLowerCase().includes('norma') ||
-    slug.toLowerCase().includes('norma') ||
-    slug.toLowerCase() === 'testosterone-enanthate-norma-250mg' ||
-    slug.toLowerCase() === 'testosterone-enanthate';
+  const {
+    isLabEquipment,
+    isPellet,
+    isNorma,
+    isTeletest,
+    isEterna,
+    isAesthetic,
+    isCosmetics,
+    isRawApi,
+    sectionLabel,
+    sectionUrl,
+  } = resolveProductDomain(rawSafeProduct, slug);
 
   const productName = safeProduct.canonicalName || safeProduct.name || slug;
-  const sectionLabel = isNorma ? 'Human Pharmaceuticals & TRT' : isTeletest ? 'TeleTest Analytika®' : isEterna ? 'Genomics & Longevity' : isCosmetics ? ((safeProduct.brand || '').toLowerCase().includes('mcg') ? 'MCG Trichology' : 'Cosmetics') : isAesthetic ? 'Aesthetics' : isRawApi ? 'Compounding APIs' : 'Catalog';
-  const sectionUrl = isNorma ? '/catalog' : isTeletest ? '/collection/teletest' : isEterna ? '/c/CAT-MU9L9GBN' : isCosmetics ? ((safeProduct.brand || '').toLowerCase().includes('mcg') ? '/collection/mcg' : '/collection/colway') : '/catalog';
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: 'Home', url: '/' },
     { name: sectionLabel, url: sectionUrl },
     { name: productName, url: `/p/${slug}` }
   ], BASE_URL);
 
-  const isPellet = isPharmapolisPelletSlug(slug) ||
-    (safeProduct.category || '').toLowerCase().includes('pellet') ||
-    safeProduct.is_pellet === true ||
-    safeProduct.isPellet === true ||
-    (safeProduct.subcategory || '').toLowerCase().includes('pellet');
+  if (isLabEquipment) {
+    return (
+      <>
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        {breadcrumbJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          />
+        )}
+        <LabEquipmentDetail product={safeProduct} slug={slug} baseUrl={BASE_URL} />
+      </>
+    );
+  }
 
   if (isPellet) {
     return (

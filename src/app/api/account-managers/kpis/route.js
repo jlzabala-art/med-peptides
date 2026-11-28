@@ -1,32 +1,17 @@
-import { NextResponse } from 'next/server';
-import { adminDb } from '../../../../lib/firebaseAdmin';
+import { withApiHandler } from '@/lib/api/withApiHandler';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/account-managers/kpis
- * ─────────────────────────────────────────────────────────────────────────────
  * Authoritative Server-Side KPI Aggregation for Account Managers (Rule of 4 & 8).
- * Computes 8 balanced metrics:
- * 1. Total Managers
- * 2. Active Managers
- * 3. Assigned Territories
- * 4. Pending Invites
- * 5. Assigned Clinics
- * 6. Assigned Doctors
- * 7. Wholesale Accounts
- * 8. Unassigned Accounts (Opportunity / Action needed)
  */
-export async function GET() {
-  try {
-    if (!adminDb) {
-      return NextResponse.json({ error: 'Firestore Admin DB is not initialized.' }, { status: 500 });
-    }
-
-    const usersRef = adminDb.collection('users');
-    const clinicsRef = adminDb.collection('clinics');
-    const wholesalersRef = adminDb.collection('wholesellers');
-    const customersRef = adminDb.collection('customers');
+export const GET = withApiHandler(
+  async ({ db }) => {
+    const usersRef = db.collection('users');
+    const clinicsRef = db.collection('clinics');
+    const wholesalersRef = db.collection('wholesellers');
+    const customersRef = db.collection('customers');
 
     // 1. Fetch users with account_manager role or check account_managers collection
     const [
@@ -105,7 +90,7 @@ export async function GET() {
 
     const unassignedTotal = unassignedClinics + unassignedWholesalers + unassignedDoctors;
 
-    return NextResponse.json({
+    return {
       success: true,
       timestamp: new Date().toISOString(),
       kpis: {
@@ -116,14 +101,9 @@ export async function GET() {
         assignedClinics,
         assignedDoctors,
         wholesaleAccounts: assignedWholesalers,
-        unassignedAccounts: unassignedTotal
-      }
-    });
-  } catch (error) {
-    console.error('[/api/account-managers/kpis] Error computing KPIs:', error);
-    return NextResponse.json({
-      success: false,
-      error: error.message || 'Internal error'
-    }, { status: 500 });
-  }
-}
+        unassignedAccounts: unassignedTotal,
+      },
+    };
+  },
+  { auth: 'public', requireDb: true }
+);

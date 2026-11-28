@@ -4,13 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { 
   Building2, Calendar, DollarSign, FileCheck, ExternalLink, 
   ShoppingCart, CheckCircle2, XCircle, AlertTriangle, Loader2,
-  Truck, CreditCard, ShieldCheck, Download, Package, ArrowRight
-} from 'lucide-react';
-import { fetchSupplierQuotationById, updateSupplierQuotation } from '../../../services/quotationRepository';
+  Truck, CreditCard, ShieldCheck, Download, Package, ArrowRight, Eye, TrendingDown, Layers
+} from '@/lib/icons';
+import { fetchSupplierQuotationById, fetchSupplierQuotationRevisions, updateSupplierQuotation } from '../../../services/quotationRepository';
 import StandardDrawer from '../../ui/StandardDrawer';
 import StatusBadge from '../../ui/StatusBadge';
 import DataTable from '../../ui/DataTable';
 import CopyableId from '../../ui/CopyableId';
+import DocumentPreviewModal from '../../ui/DocumentPreviewModal';
 import MarginProfitabilityHUD from '../../ui/MarginProfitabilityHUD';
 import { WarehouseOriginBadge, ColdChainBadge } from '../../ui/WarehouseOriginBadge';
 import notifier from '../../../services/NotificationService';
@@ -30,21 +31,34 @@ export default function SupplierQuotationDetailDrawer({
   zIndex = 10050 
 }) {
   const [quotation, setQuotation] = useState(null);
+  const [revisions, setRevisions] = useState([]);
+  const [activeQuotationId, setActiveQuotationId] = useState(quotationId);
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isConverting, setIsConverting] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [marginPercent, setMarginPercent] = useState(6.0);
 
   useEffect(() => {
+    setActiveQuotationId(quotationId);
+  }, [quotationId]);
+
+  useEffect(() => {
     async function fetchQuotation() {
-      if (!quotationId || !isOpen) return;
+      if (!activeQuotationId || !isOpen) return;
       setLoading(true);
       try {
-        const data = await fetchSupplierQuotationById(quotationId);
+        const data = await fetchSupplierQuotationById(activeQuotationId);
         if (data) {
           setQuotation(data);
+          if (data.quoteGroupId) {
+            const sibs = await fetchSupplierQuotationRevisions(data.quoteGroupId);
+            setRevisions(sibs);
+          } else {
+            setRevisions([]);
+          }
         } else {
-          notifier.error(`Quotation ${quotationId} not found`);
+          notifier.error(`Quotation ${activeQuotationId} not found`);
         }
       } catch (err) {
         console.error("Error fetching quotation:", err);
@@ -54,7 +68,7 @@ export default function SupplierQuotationDetailDrawer({
       }
     }
     fetchQuotation();
-  }, [quotationId, isOpen]);
+  }, [activeQuotationId, isOpen]);
 
   const handleConvertToPO = async () => {
     if (!quotation) return;
@@ -181,8 +195,66 @@ export default function SupplierQuotationDetailDrawer({
             </div>
           </div>
 
-          {/* Probative Document & Audit Trail */}
-          {quotation.sourceFile?.fileUrl && (
+          {/* Probative Document, Revision Lineage & Preview */}
+          {(quotation.improvementSummary || revisions.length > 1) && (
+            <div style={{
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #86efac',
+              borderRadius: '10px',
+              padding: '0.9rem 1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.65rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#166534', fontWeight: 700, fontSize: '0.84rem' }}>
+                  <TrendingDown size={16} />
+                  <span>
+                    {quotation.improvementSummary
+                      ? quotation.improvementSummary.note
+                      : `Quotation Revision History (${revisions.length} versions)`}
+                  </span>
+                </div>
+                {quotation.improvementSummary && (
+                  <span style={{ fontSize: '0.74rem', fontWeight: 800, padding: '2px 8px', borderRadius: '999px', backgroundColor: '#dcfce7', color: '#15803d', border: '1px solid #86efac' }}>
+                    {quotation.improvementSummary.improvementPct}% ({quotation.improvementSummary.unitDeltaEur} €/ud)
+                  </span>
+                )}
+              </div>
+
+              {revisions.length > 1 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <Layers size={13} /> Revisions:
+                  </span>
+                  {revisions.map((rev) => {
+                    const isCurrent = rev.id === quotation.id;
+                    return (
+                      <button
+                        key={rev.id}
+                        type="button"
+                        onClick={() => setActiveQuotationId(rev.id)}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '7px',
+                          fontSize: '0.75rem',
+                          fontWeight: isCurrent ? 800 : 600,
+                          border: isCurrent ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                          backgroundColor: isCurrent ? '#e8f0fe' : '#ffffff',
+                          color: isCurrent ? '#1a73e8' : '#334155',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Rev {rev.revisionNumber || 1} · {rev.unitPrice != null ? `${rev.unitPrice} ${rev.currency || 'EUR'}` : ''} ({rev.status === 'superseded' ? 'Superseded' : 'Active'})
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {(quotation.sourceDocument?.storagePath || quotation.sourceFile?.fileUrl) && (
             <div style={{
               backgroundColor: '#f0f9ff',
               border: '1px solid #bae6fd',
@@ -198,33 +270,35 @@ export default function SupplierQuotationDetailDrawer({
                 <ShieldCheck size={18} style={{ color: '#0284c7' }} />
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0369a1' }}>
-                    Original Document Attached (Cloud Storage)
+                    Original Supplier PDF Stored in Cloud Storage
                   </span>
                   <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                    {quotation.sourceFile.fileName || 'Quotation Document'}
+                    {quotation.sourceDocument?.fileName || quotation.sourceFile?.fileName || `${quotation.id}.pdf`}
                   </span>
                 </div>
               </div>
 
-              <a
-                href={quotation.sourceFile.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '4px 10px',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  color: '#ffffff',
-                  backgroundColor: '#0284c7',
-                  borderRadius: '6px',
-                  textDecoration: 'none'
-                }}
-              >
-                <ExternalLink size={12} /> Open Original Scanned File
-              </a>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsPdfPreviewOpen(true)}
+                  className="gcp-btn-primary"
+                  style={{ padding: '5px 12px', fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <Eye size={13} /> Preview Supplier PDF
+                </button>
+                {quotation.sourceFile?.fileUrl && (
+                  <a
+                    href={quotation.sourceFile.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="gcp-btn-secondary"
+                    style={{ padding: '5px 10px', fontSize: '0.74rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <ExternalLink size={12} /> Open Link
+                  </a>
+                )}
+              </div>
             </div>
           )}
 
@@ -543,6 +617,22 @@ export default function SupplierQuotationDetailDrawer({
           </div>
 
         </div>
+      )}
+
+      {quotation && (
+        <DocumentPreviewModal
+          isOpen={isPdfPreviewOpen}
+          onClose={() => setIsPdfPreviewOpen(false)}
+          fileUrl={
+            quotation.sourceDocument?.storagePath
+              ? `/api/supplier-quotations/${encodeURIComponent(quotation.id)}/document`
+              : quotation.sourceFile?.fileUrl || ''
+          }
+          downloadName={quotation.sourceDocument?.fileName || quotation.sourceFile?.fileName || `${quotation.id}.pdf`}
+          title={`Supplier Quote ${quotation.quotationNumber || quotation.id}`}
+          subtitle={`${quotation.supplierName || ''} · Revision ${quotation.revisionNumber || 1}`}
+          printable={true}
+        />
       )}
     </StandardDrawer>
   );

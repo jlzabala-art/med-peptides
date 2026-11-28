@@ -48,6 +48,18 @@ export const PRICING_GROUPS = Object.freeze([
       { id: 'larimedical', href: '/pricing?tab=larimedical', labelEn: 'Larimide & Larimedical', labelEs: 'Larimide y Larimedical', badge: '145 SKUs' },
     ],
   },
+  {
+    id: 'lab-equipment',
+    hubMacroId: 'equipment',
+    labelEn: 'Lab Equipment',
+    labelEs: 'Equipos Lab',
+    shortEn: 'Equipment',
+    shortEs: 'Equipos',
+    iconKey: 'equipment',
+    items: [
+      { id: 'telstar-freeze-dryers', href: '/pricing/telstar-freeze-dryers', labelEn: 'Telstar Freeze Dryers (2027)', labelEs: 'Liofilizadores Telstar (2027)', badge: '14 Models' },
+    ],
+  },
 ]);
 
 export function findPricingGroupByFormat(activeFormat) {

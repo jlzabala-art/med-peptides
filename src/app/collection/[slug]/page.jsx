@@ -145,6 +145,16 @@ const BRAND_METADATA = {
     image: `${BASE_URL}/images/products/colway/colway-dermatology-clinic-hero-v2.jpg`,
     section: 'Aesthetic Injectables & Biostimulators',
     keywords: ['Dermal Fillers', 'Juvederm', 'Teoxane', 'Restylane', 'Sculptra', 'Radiesse', 'Belotero', 'Neauvia', 'PhilArt', 'Aqualyx']
+  },
+  'telstar-lyophilizers': {
+    title: 'Telstar® (Syntegon) Laboratory & Pilot GMP Freeze Dryers • 2027 Portfolio | Atlas Collection',
+    titleEs: 'Liofilizadores Telstar® (Syntegon) Laboratorio y GMP • Catálogo 2027 | Colección Atlas',
+    description: 'Official 2027 Syntegon Telstar Technologies freeze dryers portfolio: LYOQUEST (-55/-85/Arctic/Teflon), LYOALFA floor-standing, and LYOBETA pilot/GMP cabinet lyophilizers with modular chambers, pumps & IQ-OQ services.',
+    descriptionEs: 'Catálogo oficial 2027 de liofilizadores Syntegon Telstar Technologies: series LYOQUEST (-55/-85/Arctic/Teflon), LYOALFA de pie y LYOBETA GMP/piloto con configurador modular.',
+    image: `${BASE_URL}/images/og-catalog.png`,
+    section: 'Laboratory & GMP Lyophilization Equipment',
+    sectionEs: 'Equipos de Liofilización de Laboratorio y GMP',
+    keywords: ['Telstar', 'Syntegon', 'LyoQuest', 'LyoAlfa', 'LyoBeta', 'Freeze Dryer', 'Lyophilizer', 'Lyosuite', 'GMP']
   }
 };
 
@@ -167,6 +177,9 @@ BRAND_METADATA['longevity'] = BRAND_METADATA['longevity-cellular'];
 BRAND_METADATA['neuro'] = BRAND_METADATA['neuro-performance'];
 BRAND_METADATA['cognitive'] = BRAND_METADATA['neuro-performance'];
 BRAND_METADATA['dermal'] = BRAND_METADATA['dermal-aesthetics'];
+BRAND_METADATA['telstar'] = BRAND_METADATA['telstar-lyophilizers'];
+BRAND_METADATA['lyophilizers'] = BRAND_METADATA['telstar-lyophilizers'];
+BRAND_METADATA['freeze-dryers'] = BRAND_METADATA['telstar-lyophilizers'];
 
 export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
@@ -245,6 +258,30 @@ export async function generateMetadata({ params, searchParams }) {
 async function fetchTargetedBrandProducts(brandSlug) {
   const s = brandSlug.toLowerCase();
   const targetBrand = (s === 'ultraman') ? 'ultraperson' : s;
+
+  // Syntegon Telstar Laboratory & Pilot GMP Freeze Dryers (14 base units, 2027 tariff)
+  if (targetBrand === 'telstar-lyophilizers' || targetBrand === 'telstar' || targetBrand === 'lyophilizers' || targetBrand === 'freeze-dryers') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb
+          .collection('products')
+          .where('collectionSlug', '==', 'telstar-lyophilizers')
+          .limit(50)
+          .get();
+        const list = [];
+        snap.forEach((d) => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          list.push({ id: d.id, ...data });
+        });
+        if (list.length > 0) return list.sort((a, b) => (a.listPriceEur || 0) - (b.listPriceEur || 0));
+      }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Telstar Firestore error, falling back to registry:', e?.message);
+    }
+    const { getAllTelstarEquipment } = await import('../../../data/telstarLyophilizersRegistry');
+    return getAllTelstarEquipment();
+  }
 
   // UltraPerson fallback: if Firestore is empty or unreachable, return official clinical registry items
   if (targetBrand === 'ultraperson') {
@@ -760,7 +797,8 @@ export default async function NextCollectionPage({ params, searchParams }) {
     'neuro-performance', 'neuro', 'cognitive',
     'dermal-aesthetics', 'dermal',
     'aesthetic-injectables', 'injectables', 'dermal-fillers', 'fillers',
-    'hormones', 'bhrt', 'trt', 'norma', 'pharmapolis'
+    'hormones', 'bhrt', 'trt', 'norma', 'pharmapolis',
+    'telstar-lyophilizers', 'telstar', 'lyophilizers', 'freeze-dryers'
   ];
 
   let catalog;

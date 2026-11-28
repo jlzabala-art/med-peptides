@@ -192,6 +192,27 @@ console.log(`Missing @/lib/icons exp. : ${missingIconImports.length} (enforced =
 console.log(`Raw <table> (non-PDF)    : ${rawTables.length} (inventory)`);
 console.log(`Client-root page.jsx     : ${clientRootPages.length} (inventory)`);
 
+// 6. Enforced Firestore-in-UI Ratchet (Golden Rule #2)
+const MAX_FIRESTORE_UI_IMPORTS = 124;
+const firestoreUiImports = srcFiles
+  .map((f) => path.relative(ROOT, f))
+  .filter((rel) => (rel.startsWith('src/components/') || rel.startsWith('src/templates/')))
+  .filter((rel) => /from\s+['"]firebase\/firestore['"]/.test(fs.readFileSync(path.join(ROOT, rel), 'utf8')));
+console.log(`Firestore-in-UI imports  : ${firestoreUiImports.length} (ratchet <= ${MAX_FIRESTORE_UI_IMPORTS})`);
+
+// 7. Enforced GcpSideDrawer CSS SSOT (no inline <style> in canonical drawer shells)
+const drawerStyleViolations = [
+  'src/components/ui/GcpSideDrawer.jsx',
+  'src/components/ui/StandardDrawer.jsx',
+  'src/components/ui/HighDensityDrawer.jsx',
+  'src/components/admin/GCPSplitDrawer.jsx',
+  'src/components/ui/UnifiedFiltersDrawer.jsx',
+].filter((rel) => {
+  const full = path.join(ROOT, rel);
+  return fs.existsSync(full) && /<style[\s>]/.test(fs.readFileSync(full, 'utf8'));
+});
+console.log(`Drawer inline <style>    : ${drawerStyleViolations.length} (enforced = 0)`);
+
 let failed = false;
 
 if (dupes.length > 0) {
@@ -232,6 +253,18 @@ if (legacyBrandRefs.length > 0) {
 if (missingIconImports.length > 0) {
   console.error('❌ Missing icon exports in src/lib/icons.js (will break Next.js build):');
   missingIconImports.forEach((x) => console.error('  -', x));
+  failed = true;
+}
+
+if (firestoreUiImports.length > MAX_FIRESTORE_UI_IMPORTS) {
+  console.error(`❌ Firestore-in-UI ratchet exceeded (${firestoreUiImports.length} > ${MAX_FIRESTORE_UI_IMPORTS}):`);
+  firestoreUiImports.forEach((x) => console.error('  -', x));
+  failed = true;
+}
+
+if (drawerStyleViolations.length > 0) {
+  console.error('❌ Inline <style> tag found inside canonical drawer shell (use src/styles/gcp-drawer.css):');
+  drawerStyleViolations.forEach((x) => console.error('  -', x));
   failed = true;
 }
 

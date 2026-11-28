@@ -1,32 +1,17 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '../../../../lib/firebaseAdmin';
+import { withApiHandler } from '@/lib/api/withApiHandler';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/customers/kpis
- * ─────────────────────────────────────────────────────────────────────────────
  * Authoritative Server-Side KPI Aggregation for Customers & User Master.
- * Computes the 8 strategic metrics directly on the server:
- * 1. Total Customer Accounts (Consolidated SSOT)
- * 2. Clinics & Medical Centers
- * 3. Wholesalers & B2B Resellers
- * 4. Doctors & Medical Prescribers
- * 5. Direct Patients (B2C)
- * 6. Active Status Accounts
- * 7. Synced to Zoho Books SSOT
- * 8. Multi-Role / Hybrid Users (Master users table cross-counterparties)
  */
-export async function GET() {
-  try {
-    if (!adminDb) {
-      return NextResponse.json({ error: 'Firestore Admin DB is not initialized.' }, { status: 500 });
-    }
+export const GET = withApiHandler(
+  async ({ db }) => {
+    const customersRef = db.collection('customers');
+    const usersRef = db.collection('users');
 
-    const customersRef = adminDb.collection('customers');
-    const usersRef = adminDb.collection('users');
-
-    // Parallel Server-Side Aggregations
     const [
       totalCustSnap,
       clinicsCustSnap,
@@ -44,9 +29,9 @@ export async function GET() {
       customersRef.where('customerType', '==', 'doctor').count().get(),
       customersRef.where('customerType', '==', 'patient').count().get(),
       customersRef.where('status', 'in', ['active', 'Active']).count().get(),
-      adminDb.collection('clinics').count().get(),
-      adminDb.collection('wholesellers').count().get(),
-      usersRef.limit(500).get() // Inspect user master for roles & cross-counterparty identification
+      db.collection('clinics').count().get(),
+      db.collection('wholesellers').count().get(),
+      usersRef.limit(500).get()
     ]);
 
     // Inspect user master roles & zoho integration
@@ -113,8 +98,6 @@ export async function GET() {
         'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60'
       }
     });
-  } catch (err) {
-    console.error('[/api/customers/kpis] error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
-}
+  },
+  { auth: 'public', requireDb: true }
+);

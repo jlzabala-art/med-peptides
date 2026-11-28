@@ -5,6 +5,7 @@ import PageHeader from '../ui/PageHeader';
 import { Tabs } from '../ui/Tabs';
 import AdminRFQTabClient from './AdminRFQTabClient';
 import AdminBulkOrdersTab from './AdminBulkOrdersTab';
+import AdminSupplierQuotationsTab from './quotations/AdminSupplierQuotationsTab';
 import AdminTabErrorBoundary from './AdminTabErrorBoundary';
 import { ShoppingBag } from '@/lib/icons';
 
@@ -38,6 +39,17 @@ export default function AdminProcurementTab() {
                 <AdminTabErrorBoundary tabId="orders" tabLabel="Purchase Orders">
                   <div style={{ padding: '1.5rem' }}>
                     <AdminBulkOrdersTab isSubTab={true} />
+                  </div>
+                </AdminTabErrorBoundary>
+              )
+            },
+            {
+              id: 'supplier-quotations',
+              label: 'Supplier Quotations',
+              content: (
+                <AdminTabErrorBoundary tabId="supplier-quotations" tabLabel="Supplier Quotations">
+                  <div style={{ padding: '1.5rem' }}>
+                    <AdminSupplierQuotationsTab />
                   </div>
                 </AdminTabErrorBoundary>
               )

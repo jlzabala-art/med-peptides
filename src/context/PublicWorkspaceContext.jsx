@@ -41,6 +41,7 @@ function deriveRouteLabel(pathname) {
   if (pathname === '/pricing/dnlab-pens' || pathname === '/pricing/pens') return { label: 'Peptide Pens Schedule', category: 'Pricing' };
   if (pathname === '/pricing/nplab-hormones' || pathname === '/pricing/hormones') return { label: 'Endocrinology & Hormones', category: 'Pricing' };
   if (pathname === '/pricing/pharmapolis-hrt' || pathname === '/pricing/bhrt') return { label: 'Bioidentical HRT (BHRT)', category: 'Pricing' };
+  if (pathname === '/pricing/telstar-freeze-dryers') return { label: 'Telstar Freeze Dryers (2027)', category: 'Pricing' };
   if (pathname === '/pricing/24genetics') return { label: '24Genetics DNA Panels', category: 'Pricing' };
   if (pathname === '/pricing/24genomics-qatar') return { label: '24Genetics Qatar', category: 'Pricing' };
   if (pathname === '/vials') return { label: 'Peptide Vials Directory', category: 'Catalog' };

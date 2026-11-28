@@ -7,6 +7,7 @@
 @import './tokens.css';
 @import './gcp-theme.css';
 @import './gcp-sidebar.css';
+@import './gcp-drawer.css';
 
 /* 2. Base resets, typography, buttons, forms */
 @import './base.css';

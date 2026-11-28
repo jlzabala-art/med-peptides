@@ -269,6 +269,24 @@ export const extendQuotationValidity = async (quotationId, days = 15) => {
   }
 };
 
+export const fetchSupplierQuotationRevisions = async (quoteGroupId) => {
+  if (!quoteGroupId) return [];
+  try {
+    const q = query(
+      collection(db, 'supplier_quotations'),
+      where('quoteGroupId', '==', quoteGroupId),
+      limit(20)
+    );
+    const snap = await getDocs(q);
+    return snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (Number(b.revisionNumber) || 1) - (Number(a.revisionNumber) || 1));
+  } catch (err) {
+    logger.error('[quotationRepository] fetchSupplierQuotationRevisions failed', { quoteGroupId, error: err.message });
+    return [];
+  }
+};
+
 export const quotationRepository = {
   getQuotationById,
   createQuotation,
@@ -286,6 +304,7 @@ export const quotationRepository = {
   fetchB2BClientQuoteById,
   updateB2BClientQuoteStatus,
   fetchSupplierQuotationById,
+  fetchSupplierQuotationRevisions,
   updateSupplierQuotation,
   extendQuotationValidity,
 };

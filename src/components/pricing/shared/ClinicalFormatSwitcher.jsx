@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { FlaskConical, Syringe, Pill, Layers, Calculator, BookOpen, ShoppingBag, ChevronDown, Dna, Sparkles } from '@/lib/icons';
+import { FlaskConical, Syringe, Pill, Layers, Calculator, BookOpen, ShoppingBag, ChevronDown, Dna, Sparkles, Snowflake } from '@/lib/icons';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useSurfacePolicy } from '@/hooks/useSurfacePolicy';
 import { PRICING_GROUPS, findPricingGroupByFormat } from '@/constants/pricingTaxonomy';
@@ -100,6 +100,7 @@ export default function ClinicalFormatSwitcher({
     peptides: FlaskConical,
     genomics: Dna,
     derma: Sparkles,
+    equipment: Snowflake,
   };
 
   const tabs = [

@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy, limit, updateDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { getDoctorLeads, claimDoctorLead } from '@/repositories/doctorLeadsRepository';
 import { Stethoscope, Mail, Phone, MapPin, CheckCircle, Clock, ArrowRight, User } from '@/lib/icons';
 import DataTable from '../ui/DataTable';
 import StatusBadge from '../ui/StatusBadge';
@@ -17,16 +16,8 @@ export default function DoctorLeadsTab({ doctorId }) {
   const fetchLeads = async () => {
     setLoading(true);
     try {
-      if (db) {
-        const q = query(collection(db, 'doctor_leads'), orderBy('createdAt', 'desc'), limit(50));
-        const snap = await getDocs(q);
-        const list = snap.docs.map(d => ({
-          id: d.id,
-          ...d.data(),
-          createdAtDisplay: d.data().createdAt?.toDate ? d.data().createdAt.toDate().toLocaleDateString() : 'Recent'
-        }));
-        setLeads(list);
-      }
+      const list = await getDoctorLeads(50);
+      setLeads(list);
     } catch (err) {
       console.error('[DoctorLeadsTab] Error fetching leads:', err);
     } finally {
@@ -40,14 +31,9 @@ export default function DoctorLeadsTab({ doctorId }) {
 
   const handleClaimLead = async (lead) => {
     try {
-      if (db) {
-        await updateDoc(doc(db, 'doctor_leads', lead.id), {
-          status: 'contacted',
-          assignedDoctorId: doctorId || 'current_physician'
-        });
-        notifier.success(`Lead for ${lead.fullName} marked as Contacted.`);
-        fetchLeads();
-      }
+      await claimDoctorLead(lead.id, doctorId || 'current_physician');
+      notifier.success(`Lead for ${lead.fullName} marked as Contacted.`);
+      fetchLeads();
     } catch (err) {
       notifier.error('Could not update lead status.');
     }
