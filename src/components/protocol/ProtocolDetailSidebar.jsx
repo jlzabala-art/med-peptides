@@ -80,7 +80,11 @@ export default function ProtocolDetailSidebar({
       setIsMobileDrawerOpen(true);
     };
     window.addEventListener('open-datasheet-toc', handleExternalOpen);
-    return () => window.removeEventListener('open-datasheet-toc', handleExternalOpen);
+    window.addEventListener('atlas:toggle-left-sidebar', handleExternalOpen);
+    return () => {
+      window.removeEventListener('open-datasheet-toc', handleExternalOpen);
+      window.removeEventListener('atlas:toggle-left-sidebar', handleExternalOpen);
+    };
   }, []);
 
   // Real-time ScrollSpy via IntersectionObserver (only when not in controlled single-section mode)

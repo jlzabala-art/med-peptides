@@ -19,12 +19,13 @@ export default function SharedCatalogStyles() {
         @media (min-width: 1024px) {
           .catalog-content-with-sidebar {
             display: grid !important;
-            grid-template-columns: minmax(0, 1fr) 310px !important;
+            grid-template-columns: var(--gcp-sb-rail-w, 268px) minmax(0, 1fr) !important;
             gap: 1.5rem !important;
             align-items: flex-start !important;
           }
           .catalog-desktop-sidebar {
             display: block !important;
+            order: -1 !important;
           }
         }
         @media (max-width: 1023px) {

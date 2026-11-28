@@ -246,7 +246,11 @@ export default function PrescriptionDetailSidebar({
       setIsMobileDrawerOpen(true);
     };
     window.addEventListener('open-rx-sections', handleExternalOpen);
-    return () => window.removeEventListener('open-rx-sections', handleExternalOpen);
+    window.addEventListener('atlas:toggle-left-sidebar', handleExternalOpen);
+    return () => {
+      window.removeEventListener('open-rx-sections', handleExternalOpen);
+      window.removeEventListener('atlas:toggle-left-sidebar', handleExternalOpen);
+    };
   }, []);
 
   // Real-time ScrollSpy via IntersectionObserver

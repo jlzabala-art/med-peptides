@@ -32,7 +32,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import MetricCard from '@/components/ui/MetricCard';
 import CopyableId from '@/components/ui/CopyableId';
 import DataTable from '@/components/ui/DataTable';
-import GcpInspectorSidebar from '@/components/ui/GcpInspectorSidebar';
+import AtlasLeftRailLayout from '@/components/shared/layouts/AtlasLeftRailLayout';
 import GccRealisticVectorMap from '../components/corporate/GccRealisticVectorMap';
 import '../styles/mediluxe-gcp.css';
 
@@ -727,8 +727,50 @@ export default function MediluxeCompanyProfile() {
           />
         </div>
 
-        {/* Two-Column Console Workspace */}
-        <div className="ml-gcp-layout">
+        {/* Canonical Always-Left 4-Zone Contextual Shell (Desktop 268px / Laptop 64px / Mobile Left Drawer) */}
+        <AtlasLeftRailLayout
+          title="MediLuxe L.L.C."
+          status="active"
+          statusLabel="Abu Dhabi HQ"
+          entityId="Est. 2011"
+          navTitle="Dossier Sections"
+          navItems={TABS}
+          activeNavId={activeTab}
+          onSelectNav={handleTabChange}
+          propertiesTitle="Entity Properties"
+          properties={entityProperties}
+          links={connectedLinks}
+          mobileTriggerLabel="Sections & Entity Info"
+          storageKey="atlas_mediluxe_left_rail"
+          primaryAction={{
+            label: 'Download vCard (.vcf)',
+            icon: Download,
+            onClick: downloadVCard,
+          }}
+          secondaryActions={[
+            {
+              label: 'Copy URL',
+              icon: Copy,
+              onClick: () => handleCopy(PROFILE_URL, 'Profile URL'),
+            },
+            {
+              label: 'Print / PDF',
+              icon: Printer,
+              onClick: handlePrint,
+            },
+          ]}
+          extraRailContent={
+            <div style={{ padding: '0.65rem 0.875rem', borderTop: '1px solid var(--gcp-sb-divider, #e8eaed)', background: '#f8f9fa' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.78rem', fontWeight: 600, color: '#202124', marginBottom: '0.25rem' }}>
+                <ThermometerSnowflake size={14} style={{ color: '#1a73e8' }} />
+                <span>GCC Cold-Chain Dispatch</span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45 }}>
+                Abu Dhabi vault &amp; Dubai 2024 expansion supporting 2–8°C biologicals across UAE, Qatar, Kuwait, and KSA.
+              </p>
+            </div>
+          }
+        >
           <main className="ml-gcp-main">
             {/* ═══ TAB 1: OVERVIEW ═══ */}
             {activeTab === 'overview' && (
@@ -1107,29 +1149,7 @@ export default function MediluxeCompanyProfile() {
               </section>
             )}
           </main>
-
-          {/* ── Right Sticky Unified GCP Inspector Pane ── */}
-          <GcpInspectorSidebar
-            title="Entity Properties"
-            mobileSummaryTitle="Entity Properties & Compliance Summary"
-            mobileSummaryBadge="Abu Dhabi HQ · Est. 2011"
-            properties={entityProperties}
-            linksTitle="Connected Resources"
-            links={connectedLinks}
-            extraCards={
-              <div className="gcp-sb-card" style={{ background: '#f8f9fa', padding: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 600, color: '#202124', marginBottom: '0.35rem' }}>
-                  <ThermometerSnowflake size={15} style={{ color: '#1a73e8' }} />
-                  <span>GCC Cold-Chain Dispatch</span>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.76rem', color: '#5f6368', lineHeight: 1.5 }}>
-                  Abu Dhabi central vault &amp; Dubai 2024 expansion supporting 2–8°C biologicals across UAE,
-                  Qatar, Kuwait, and Saudi Arabia.
-                </p>
-              </div>
-            }
-          />
-        </div>
+        </AtlasLeftRailLayout>
 
         {/* Print-Only Complete Corporate One-Pager Summary */}
         <section className="ml-gcp-print-summary ml-gcp-section" aria-hidden="true">

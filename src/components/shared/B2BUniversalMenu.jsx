@@ -218,12 +218,17 @@ export default function B2BUniversalMenu({
               : (isSpanish ? 'Filtros' : 'Filters');
 
         const handleFirstBtnClick = () => {
-          if (isRx && typeof window !== 'undefined') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            return;
-          }
           if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('atlas:toggle-left-sidebar'));
             window.dispatchEvent(new CustomEvent('atlas-open-page-filters'));
+            if (isRx) {
+              window.dispatchEvent(new CustomEvent('open-rx-sections'));
+              return;
+            }
+            if (isGuideOrProto || isMonograph || pathname.startsWith('/lab/') || pathname.startsWith('/mediluxe')) {
+              window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
+              return;
+            }
           }
           if (pathname.startsWith('/pricing/') || pathname.startsWith('/catalog') || pathname.startsWith('/collection/')) {
             return;

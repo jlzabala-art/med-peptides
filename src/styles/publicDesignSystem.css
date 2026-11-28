@@ -1019,9 +1019,15 @@
 @media (min-width: 1024px) {
   .pds-content-with-sidebar {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 290px !important;
+    grid-template-columns: var(--gcp-sb-rail-w, 268px) minmax(0, 1fr) !important;
     gap: 1.5rem !important;
     align-items: flex-start !important;
+  }
+
+  .pds-content-with-sidebar > .pds-sidebar-toc,
+  .pds-content-with-sidebar > .pds-sidebar-desktop,
+  .pds-content-with-sidebar > aside {
+    order: -1 !important;
   }
 
   /* ── Independent Dual-Column Scroll for Sticky Sidebar ── */

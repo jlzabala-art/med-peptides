@@ -156,12 +156,16 @@
   margin-bottom: 1.25rem;
 }
 
-/* ── Two-Column GCP Resource Layout ────────────────────────────────────────── */
+/* ── Two-Column Always-Left GCP Resource Layout ────────────────────────────── */
 .ml-gcp-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 310px;
+  grid-template-columns: var(--gcp-sb-rail-w, 268px) minmax(0, 1fr);
   gap: 1.25rem;
   align-items: start;
+}
+
+.ml-gcp-layout > .gcp-sb-inspector {
+  order: -1;
 }
 
 .ml-gcp-main {

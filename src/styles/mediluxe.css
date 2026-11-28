@@ -372,11 +372,11 @@
   color: #ffffff;
 }
 
-/* ── Main Two-Column Layout ───────────────────────────────────────────────── */
+/* ── Main Two-Column Layout (Always-Left Rail) ───────────────────────────── */
 .mediluxe-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 2.5rem;
+  grid-template-columns: var(--gcp-sb-rail-w, 268px) minmax(0, 1fr);
+  gap: 2rem;
   align-items: start;
 }
 
@@ -384,8 +384,9 @@
   min-width: 0;
 }
 
-/* ── Right Sticky Sidebar (Google Cloud "On this page" TOC) ────────────────── */
+/* ── Sticky Left Sidebar (Google Cloud "On this page" TOC) ─────────────────── */
 .mediluxe-sidebar {
+  order: -1;
   position: sticky;
   top: 90px;
   display: flex;

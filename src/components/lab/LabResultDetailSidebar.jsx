@@ -101,7 +101,11 @@ export default function LabResultDetailSidebar({
       setIsMobileDrawerOpen(true);
     };
     window.addEventListener('open-datasheet-toc', handleExternalOpen);
-    return () => window.removeEventListener('open-datasheet-toc', handleExternalOpen);
+    window.addEventListener('atlas:toggle-left-sidebar', handleExternalOpen);
+    return () => {
+      window.removeEventListener('open-datasheet-toc', handleExternalOpen);
+      window.removeEventListener('atlas:toggle-left-sidebar', handleExternalOpen);
+    };
   }, []);
 
   // Broadcast section progress to GlobalBottomStickyBar
